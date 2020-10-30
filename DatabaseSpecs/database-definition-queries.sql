@@ -80,10 +80,12 @@ CREATE TABLE IF NOT EXISTS WishlistsBooks(
 
 -- UserBooks -- Intersection between Users and Books
 CREATE TABLE IF NOT EXISTS UserBooks(
+    id INT NOT NULL PRIMARY KEY,
     userId INT,
     bookId INT,
-    PRIMARY KEY (userId, bookId),
+    copyQualityId INT,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (CopyQualityId) REFERENCES CopyQualities (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
