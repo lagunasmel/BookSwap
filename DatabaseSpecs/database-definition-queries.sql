@@ -1,29 +1,36 @@
---  CS361 OSU Fall 2020
---  Team: 5++
---  Members: 
---      Phoenix Harris
---      Melissa Lagunas
---      Alexa Langen
---      Ryan McKenzie
---      Nishant Tharani
---      Ben Wichser
---  Project Title: Book Swap
+/*
+CS361 OSU Fall 2020
+Team: 5++
+Members: 
+    Phoenix Harris
+    Melissa Lagunas
+    Alexa Langen
+    Ryan McKenzie
+    Nishant Tharani
+    Ben Wichser
+Project Title: Book Swap
+*/
 
--- The queries in this file initialize all the database entities
+/*
+Queries that initialize the tables.
+*/
 
-CREATE TABLE [IF NOT EXISTS] Books (
+-- Books
+CREATE TABLE IF NOT EXISTS Books (
     id INTEGER NOT NULL PRIMARY KEY,
     title TEXT NOT NULL,
     ISBN INTEGER NOT NULL,
-    cover (BLOB)
+    cover BLOB
 );
     
-CREATE TABLE [IF NOT EXISTS] CopyQualities(
+-- CopyQualities
+CREATE TABLE IF NOT EXISTS CopyQualities(
     id INT NOT NULL PRIMARY KEY,
     qualityDescription VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE [IF NOT EXISTS] Users(
+-- Users
+CREATE TABLE IF NOT EXISTS Users(
     id INT NOT NULL PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -36,12 +43,14 @@ CREATE TABLE [IF NOT EXISTS] Users(
     points INT DEFAULT 0
 );
 
-CREATE TABLE [IF NOT EXISTS] TradeStatuses(
+-- TradeStatuses
+CREATE TABLE IF NOT EXISTS TradeStatuses(
     id INT NOT NULL PRIMARY KEY,
     statusDescription VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE [IF NOT EXISTS] Trades(
+-- Trades
+CREATE TABLE IF NOT EXISTS Trades(
     id INT NOT NULL PRIMARY KEY,
     userRequestedId INT,
     userPostedId INT,
@@ -53,13 +62,15 @@ CREATE TABLE [IF NOT EXISTS] Trades(
     FOREIGN KEY (statusId) REFERENCES TradeStatuses (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE [IF NOT EXISTS] Wishlists(
+-- Wishlists
+CREATE TABLE IF NOT EXISTS Wishlists(
     id INT NOT NULL PRIMARY KEY,
     userId INT,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE [IF NOT EXISTS] WishlistsBooks(
+-- WishlistBooks -- Intersection for Wishlists and Books
+CREATE TABLE IF NOT EXISTS WishlistsBooks(
     wishlistId INT,
     bookId INT,
     PRIMARY KEY (wishlistId, bookId),
@@ -67,7 +78,8 @@ CREATE TABLE [IF NOT EXISTS] WishlistsBooks(
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE [IF NOT EXISTS] UserBooks(
+-- UserBooks -- Intersection between Users and Books
+CREATE TABLE IF NOT EXISTS UserBooks(
     userId INT,
     bookId INT,
     PRIMARY KEY (userId, bookId),
