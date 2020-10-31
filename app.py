@@ -28,5 +28,19 @@ def account():
     return render_template('account.html')
 
 
+@app.route('/mybooks')
+def mybooks():
+    return render_template('mybooks.html')
+
+@app.route('/traderequests')
+def traderequests():
+    return render_template('traderequests.html')
+
+
+@app.route('/incomingbooks')
+def incomingbooks():
+    return render_template('incomingbooks.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
