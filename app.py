@@ -29,4 +29,9 @@ def account():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    """
+    `host` keyword arg added by Ben to make it work on his server.  It seems to 
+    work the same on his local machine.  Maybe others can test too?
+    """
+    app.run(host='0.0.0.0', debug=True)
+
