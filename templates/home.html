@@ -1,8 +1,46 @@
 {% extends "layout.html" %}
 {% block content %}
-    <div class="container">
-            <h1>Homepage</h1>
-    </div>
+
+<!--
+Unsplash images sources:
+
+-->
+
+        <section id="front">
+        <div class="container text-center mt-5">
+            <h2>Welcome to BookSwap!</h2>
+            <div class="row">
+                <div class="col-md-4 p-3">
+                    <img src="{{ url_for('static', filename='images/recycle.png') }}" alt=""
+                         class="img-fluid col-6 mx-auto" >
+                    <p></p>
+                    <h3>PHRASE 1 HERE</h3>
+                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
+                        molestias! Quo expedita omnis aliquam placeat consequuntur deleniti doloribus!</p>
+                </div>
+                <div class="col-md-4 p-3">
+                    <img src="{{ url_for('static', filename='images/book.png') }}" alt=""
+                         class="img-fluid col-6 mx-auto">
+                    <p></p>
+                    <h3>PHRASE 2 HERE</h3>
+                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque molestias! Quo expedita omnis aliquam
+                    placeat consequuntur deleniti doloribus!</p>
+                </div>
+                <div class="col-md-4 p-3">
+                    <img src="{{ url_for('static', filename='images/mail.png') }}" alt="" class="img-fluid col-6 mx-auto">
+                    <p></p>
+                    <h3>PHRASE 3 HERE</h3>
+                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque molestias! Quo expedita omnis aliquam
+                    placeat consequuntur deleniti doloribus!</p>
+                </div>
+            </div>
+            <h5>Ready to get started? Sign up today or login. </h5>
+            <small>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>
+                from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></small>
+        </div>
+
+    </section>
+
 
 
 {% endblock content %}
