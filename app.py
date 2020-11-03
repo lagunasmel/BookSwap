@@ -23,7 +23,28 @@ def signup():
 
 @app.route('/wishlist')
 def wishlist():
-    return render_template('wishlist.html')
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    # Select user based on username, using generic for now
+    c = db.cursor()
+    c.execute("SELECT id FROM Users WHERE username = ?", ("nrubinowicz0", ))
+
+    # Fetch the user's id 
+    userID = c.fetchall()[0]["id"]
+    print(userID)
+
+    # Using the user's id, select their wishlists
+    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID, ))
+    wishlists = [ row["id"] for row in c.fetchall() ]
+    print(wishlists)
+
+    db.close()
+
+    data = {}
+    data["table_content"] = wishlists
+    data["headers"] = "Wishlists"
+    return render_template('wishlist.html', data=data)
 
 
 @app.route('/account')
