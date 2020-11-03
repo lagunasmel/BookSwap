@@ -2,5 +2,11 @@
 {% block content %}
     {% for wish in data.table_content %}
     <h1>Wishlist</h1>
+    <ul>
+        {% for book in data.table_content[wish] %}
+        <li>{{book}}</li>
+        {% endfor %}
+    </ul>
+    
     {% endfor %}
 {% endblock content %}

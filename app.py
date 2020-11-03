@@ -28,33 +28,38 @@ def wishlist():
 
     # Select user based on username, using generic for now
     c = db.cursor()
-    c.execute("SELECT id FROM Users WHERE username = ?", ("nrubinowicz0", ))
+    c.execute("SELECT id FROM Users WHERE username = ?", ("afoan2", ))
 
     # Fetch the user's id 
     userID = c.fetchall()[0]["id"]
-    print(userID)
+
 
     # Using the user's id, select their wishlists
     c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID, ))
     wishlists = [ row["id"] for row in c.fetchall() ]
-    print(wishlists)
 
+    # Build IN query string
     values = ""
     for wish in wishlists:
         values += str(wish) + ", "
 
-    c.execute("SELECT wishlistId, bookId FROM WishlistsBooks WHERE wishlistId IN (?)", (values, ))
+    values = values[:-2]
 
+    # Select book names per wishlist
+    c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
+
+    # Map wishlists to books for user
     wishBooks = {}
     for row in c.fetchall():
         if row[0] in wishBooks:
             wishBooks[row[0]].append(row[1])
         else:
             wishBooks[row[0]] = [row[1]]
+
     db.close()
 
     data = {}
-    data["table_content"] = wishlists
+    data["table_content"] = wishBooks
     data["headers"] = "Wishlists"
     return render_template('wishlist.html', data=data)
 
