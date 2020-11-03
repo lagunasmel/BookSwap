@@ -23,7 +23,45 @@ def signup():
 
 @app.route('/wishlist')
 def wishlist():
-    return render_template('wishlist.html')
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    # Select user based on username, using generic for now
+    c = db.cursor()
+    c.execute("SELECT id FROM Users WHERE username = ?", ("afoan2", ))
+
+    # Fetch the user's id 
+    userID = c.fetchall()[0]["id"]
+
+
+    # Using the user's id, select their wishlists
+    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID, ))
+    wishlists = [ row["id"] for row in c.fetchall() ]
+
+    # Build IN query string
+    values = ""
+    for wish in wishlists:
+        values += str(wish) + ", "
+
+    values = values[:-2]
+
+    # Select book names per wishlist
+    c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
+
+    # Map wishlists to books for user
+    wishBooks = {}
+    for row in c.fetchall():
+        if row[0] in wishBooks:
+            wishBooks[row[0]].append(row[1])
+        else:
+            wishBooks[row[0]] = [row[1]]
+
+    db.close()
+
+    data = {}
+    data["table_content"] = wishBooks
+    data["headers"] = "Wishlists"
+    return render_template('wishlist.html', data=data)
 
 
 @app.route('/account')
