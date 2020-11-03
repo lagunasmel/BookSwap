@@ -39,6 +39,18 @@ def wishlist():
     wishlists = [ row["id"] for row in c.fetchall() ]
     print(wishlists)
 
+    values = ""
+    for wish in wishlists:
+        values += str(wish) + ", "
+
+    c.execute("SELECT wishlistId, bookId FROM WishlistsBooks WHERE wishlistId IN (?)", (values, ))
+
+    wishBooks = {}
+    for row in c.fetchall():
+        if row[0] in wishBooks:
+            wishBooks[row[0]].append(row[1])
+        else:
+            wishBooks[row[0]] = [row[1]]
     db.close()
 
     data = {}
