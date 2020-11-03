@@ -135,19 +135,31 @@ INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress',
 -- Sample Wishlists
 INSERT INTO Wishlists (userId) VALUES
     ((SELECT id from Users WHERE username = 'nrubinowicz0')),
-    ((SELECT id from Users WHERE username = 'kreignould1'))
+    ((SELECT id from Users WHERE username = 'kreignould1')),
+    ((SELECT id from Users WHERE username = 'afoan2'))
     ;
 
 -- Sample Wishlist Books
-    -- First user wants "Yellow River"
+    -- First user has no books in their wishlist
+    -- Second user wants "Yellow River"
 INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES
-    ( (SELECT id FROM Wishlists WHERE userId = (
-            SELECT id FROM Users WHERE username = 'nrubinowicz0')),
-        (SELECT id FROM Books WHERE ISBN = '99999'));
+    (
+        (SELECT id FROM Wishlists WHERE userId = (
+            SELECT id FROM Users WHERE username = 'kreignould1')
+    ),
+        (SELECT id FROM Books WHERE ISBN = '99999')
+    );
 
-    -- Second user wants "Forever A Loan"
+    -- Third user wants "Forever A Loan" and "Six of Crows"
 INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
-    (( SELECT id FROM Wishlists WHERE userId = (
-            SELECT id FROM Users WHERE username = 'kreignould1')),
-        (SELECT id FROM Books WHERE ISBN = '1111111111111'))
+    (
+        ( SELECT id FROM Wishlists WHERE userId = (
+            SELECT id FROM Users WHERE username = 'afoan2')),
+        (SELECT id FROM Books WHERE ISBN = '1111111111111')
+    ),
+    (
+        ( SELECT id FROM Wishlists WHERE userId = (
+                SELECT id FROM Users Where username = 'afoan2')),
+        (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227')
+    )
     ;
