@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS TradeStatuses;
 DROP TABLE IF EXISTS Trades;
 DROP TABLE IF EXISTS Wishlists;
-DROP TABLE IF EXISTS WishlistBooks;
+DROP TABLE IF EXISTS WishlistsBooks;
 DROP TABLE IF EXISTS UserBooks;
 
 /*
@@ -59,17 +59,17 @@ CREATE TABLE IF NOT EXISTS Users(
 
 -- TradeStatuses
 CREATE TABLE IF NOT EXISTS TradeStatuses(
-    id INT NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL PRIMARY KEY,
     statusDescription VARCHAR(255) NOT NULL
 );
 
 -- Trades
 CREATE TABLE IF NOT EXISTS Trades(
-    id INT NOT NULL PRIMARY KEY,
-    userRequestedId INT,
-    userPostedId INT,
-    bookId INT,
-    statusId INT,
+    id INTEGER NOT NULL PRIMARY KEY,
+    userRequestedId INTEGER,
+    userPostedId INTEGER,
+    bookId INTEGER,
+    statusId INTEGER,
     FOREIGN KEY (userRequestedId) REFERENCES Users (id) ON DELETE NO ACTION ON UPDATE CASCADE,
     FOREIGN KEY (userPostedId) REFERENCES Users (id) ON DELETE NO ACTION ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -78,15 +78,15 @@ CREATE TABLE IF NOT EXISTS Trades(
 
 -- Wishlists
 CREATE TABLE IF NOT EXISTS Wishlists(
-    id INT NOT NULL PRIMARY KEY,
-    userId INT,
+    id INTEGER NOT NULL PRIMARY KEY,
+    userId INTEGER,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- WishlistBooks -- Intersection for Wishlists and Books
 CREATE TABLE IF NOT EXISTS WishlistsBooks(
-    wishlistId INT,
-    bookId INT,
+    wishlistId INTEGER,
+    bookId INTEGER,
     PRIMARY KEY (wishlistId, bookId),
     FOREIGN KEY (wishlistId) REFERENCES Wishlists (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -94,10 +94,10 @@ CREATE TABLE IF NOT EXISTS WishlistsBooks(
 
 -- UserBooks -- Intersection between Users and Books
 CREATE TABLE IF NOT EXISTS UserBooks(
-    id INT NOT NULL PRIMARY KEY,
-    userId INT,
-    bookId INT,
-    copyQualityId INT,
+    id INTEGER NOT NULL PRIMARY KEY,
+    userId INTEGER,
+    bookId INTEGER,
+    copyQualityId INTEGER,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (CopyQualityId) REFERENCES CopyQualities (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -108,11 +108,13 @@ CREATE TABLE IF NOT EXISTS UserBooks(
 Inserting sample data
 */
 
+-- Sample Books
 INSERT INTO Books ('title', 'author', 'ISBN') VALUES
     ('Yellow River', 'Freely, I.P.', '99999'),
     ('Forever A Loan', 'Nook, Tom', '1111111111111'),
     ('Six of Crows', 'Bardugo, Leigh', '9781627795227');
 
+-- Sample Copy Qualities
 INSERT INTO CopyQualities ('qualityDescription') VALUES ('Brand New'),
     ('Mint -- Like New'), ('Very Good'), ('Useable'), ('Tattered'), ('Dust');
 
@@ -129,3 +131,35 @@ INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress',
         'Spokane', 'Washington', '99215'),
     ('elongmate4', 'DUwvKPx81Iji', 'El', 'Longmate', '98 Sugar Alley', 
         'Nashville', 'Tennessee', '37215');
+
+-- Sample Wishlists
+INSERT INTO Wishlists (userId) VALUES
+    ((SELECT id from Users WHERE username = 'nrubinowicz0')),
+    ((SELECT id from Users WHERE username = 'kreignould1')),
+    ((SELECT id from Users WHERE username = 'afoan2'))
+    ;
+
+-- Sample Wishlist Books
+    -- First user has no books in their wishlist
+    -- Second user wants "Yellow River"
+INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES
+    (
+        (SELECT id FROM Wishlists WHERE userId = (
+            SELECT id FROM Users WHERE username = 'kreignould1')
+    ),
+        (SELECT id FROM Books WHERE ISBN = '99999')
+    );
+
+    -- Third user wants "Forever A Loan" and "Six of Crows"
+INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
+    (
+        ( SELECT id FROM Wishlists WHERE userId = (
+            SELECT id FROM Users WHERE username = 'afoan2')),
+        (SELECT id FROM Books WHERE ISBN = '1111111111111')
+    ),
+    (
+        ( SELECT id FROM Wishlists WHERE userId = (
+                SELECT id FROM Users Where username = 'afoan2')),
+        (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227')
+    )
+    ;
