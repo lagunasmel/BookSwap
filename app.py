@@ -1,4 +1,6 @@
 from flask import Flask, render_template, url_for
+from db_connector import get_db#, close_connection
+
 app = Flask(__name__)
 
 
@@ -27,6 +29,19 @@ def wishlist():
 def account():
     return render_template('account.html')
 
+
+@app.route('/reset-db')
+def reset_db():
+    """
+    A "secret" route for resetting database specs and content.
+    """
+    with app.app_context():
+        db = get_db()
+        with app.open_resource('DatabaseSpecs/database-definition-queries.sql',
+                mode = 'r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+    return "Database reset :)"
 
 if __name__ == '__main__':
     """
