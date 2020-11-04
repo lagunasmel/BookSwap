@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, flash, redirect
 from db_connector import get_db#, close_connection
 import sqlite3
 from forms import RegistrationForm, LoginForm
@@ -7,21 +7,40 @@ app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
+
+# Landing Page
 @app.route('/')
 @app.route('/home')
 def home():
     return render_template('home.html')
 
 
-@app.route('/login')
+# Homepage when user is logged in
+@app.route('/userHome')
+def userHome():
+    return render_template('userHome.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = RegistrationForm()
+    form = LoginForm()
+    # Checks if input is valid
+    if form.validate_on_submit():
+        # Simulation of a successful login
+        if form.email.data == 'admin@bookswap.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('userHome'))
+        else:
+            flash('Login Unsuccessful. Please check username and password.', 'danger')
     return render_template('login.html', form=form)
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'success')
+        return redirect(url_for('userHome'))
     return render_template('signup.html', form=form)
 
 
