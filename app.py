@@ -18,23 +18,43 @@ def home():
     return render_template('home.html')
 
 
-# Homepage when user is logged in
-@app.route('/userHome')
-def userHome():
-    return render_template('userHome.html')
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     # Checks if input is valid
     if form.validate_on_submit():
-        # Simulation of a successful login - sample email and password
-        if form.email.data == 'admin@bookswap.com' and form.password.data == 'password':
-            flash('You have been logged in!', 'success')
-            return redirect(url_for('userHome'))
-        else:
-            flash('Login Unsuccessful. Please check username and password.', 'danger')
+        username = form.email.data
+        password = form.password.data
+        error = None
+
+        db = get_db()
+        db.row_factory = sqlite3.Row
+        # Username check
+        user = db.execute("SELECT * FROM Users WHERE username = ?",
+                (username,)).fetchone()
+        if user is None:
+            error = "Incorrect username."
+
+        # Password check
+        elif user['password'] !=  password :
+            error = "Incorrect password."
+
+        # No errors, login proceeds
+        if error is None:
+            session.clear()
+            session['user_id'] = user['username']
+            return redirect(url_for('home'))
+
+        flash(error)
+
+    """
+    # Simulation of a successful login - sample email and password
+    if form.email.data == 'admin@bookswap.com' and form.password.data == 'password':
+        flash('You have been logged in!', 'success')
+        return redirect(url_for('userHome'))
+    else:
+        flash('Login Unsuccessful. Please check username and password.', 'danger')
+    """
     return render_template('login.html', form=form)
 
 
@@ -54,7 +74,7 @@ def wishlist():
 
     # Select user based on username, using generic for now
     c = db.cursor()
-    c.execute("SELECT id FROM Users WHERE username = ?", ("afoan2", ))
+    c.execute("SELECT id FROM Users WHERE username = ?", ("csearl2@cdc.gov", ))
 
     # Fetch the user's id 
     userID = c.fetchall()[0]["id"]
