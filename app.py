@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for
+from flask import Flask, render_template, url_for, session, redirect
 from db_connector import get_db#, close_connection
 import sqlite3
 
@@ -66,8 +66,12 @@ def wishlist():
 
 @app.route('/account')
 def account():
-    return render_template('account.html')
+    return render_template('userHome.html')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
 
 @app.route('/demo-users')
 def demo_users():
@@ -104,12 +108,6 @@ def demo_users():
     return render_template("demo-users.html", data=data)
 
 
-
-
-
-
-
-
 @app.route('/reset-db')
 def reset_db():
     """
@@ -122,6 +120,7 @@ def reset_db():
             db.cursor().executescript(f.read())
         db.commit()
     return "Database reset :)"
+
 
 if __name__ == '__main__':
     """
