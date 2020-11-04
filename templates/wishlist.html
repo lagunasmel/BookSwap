@@ -7,6 +7,12 @@
         <li>{{book}}</li>
         {% endfor %}
     </ul>
+    <form action="/addToWishlist" method="GET">
+        <label for="isbn">ISBN: </label>
+        <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN">
+        <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}">
+        <input type="submit">
+    </form>
     
     {% endfor %}
 {% endblock content %}
