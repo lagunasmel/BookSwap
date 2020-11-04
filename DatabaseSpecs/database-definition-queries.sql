@@ -121,22 +121,22 @@ INSERT INTO CopyQualities ('qualityDescription') VALUES ('Brand New'),
 -- Sample User data from mockaroo.com
 INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress',
     'city', 'state', 'postCode') VALUES
-    ('nrubinowicz0', '5o6RPSL', 'Nettie', 'Rubinowicz', '99 Ruskin Court',	
+    ('fpringle0@archive.org', '5o6RPSL', 'Filmore', 'Pringle', '99 Ruskin Court',	
         'Knoxville', 'Tennessee', '37924'),
-    ('kreignould1',	'IuYdId', 'Kissiah', 'Reignould', '82567 Onsgard Road',	
+    ('khildrup1@pen.io',	'IuYdId', 'Kit', 'Hildrup', '82567 Onsgard Road',	
         'Richmond',	'Virginia',	'23203'),
-    ('afoan2', 'nAvtnI', 'Andonis', 'Foan', '44681 Pearson Alley', 
+    ('csearl2@cdc.gov', 'nAvtnI', 'Cassey', 'Searl', '44681 Pearson Alley', 
         'Saint Louis', 'Missouri', '63131'),
-    ('epennicott3', 'kydXrZxzz9Va', 'Emilia', 'Pennicott',	'63 Welch Court',
+    ('esabates3@samsung.com', 'kydXrZxzz9Va', 'Edward', 'Sabates',	'63 Welch Court',
         'Spokane', 'Washington', '99215'),
-    ('elongmate4', 'DUwvKPx81Iji', 'El', 'Longmate', '98 Sugar Alley', 
+    ('jextal4@reference.com', 'DUwvKPx81Iji', 'Jason', 'Extal', '98 Sugar Alley', 
         'Nashville', 'Tennessee', '37215');
 
 -- Sample Wishlists
 INSERT INTO Wishlists (userId) VALUES
-    ((SELECT id from Users WHERE username = 'nrubinowicz0')),
-    ((SELECT id from Users WHERE username = 'kreignould1')),
-    ((SELECT id from Users WHERE username = 'afoan2'))
+    ((SELECT id from Users WHERE username = 'fpringle0@archive.org')),
+    ((SELECT id from Users WHERE username = 'khildrump1@pen.io')),
+    ((SELECT id from Users WHERE username = 'csearl2@cdc.gov'))
     ;
 
 -- Sample Wishlist Books
@@ -145,7 +145,7 @@ INSERT INTO Wishlists (userId) VALUES
 INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES
     (
         (SELECT id FROM Wishlists WHERE userId = (
-            SELECT id FROM Users WHERE username = 'kreignould1')
+            SELECT id FROM Users WHERE username = 'khildrump1@pen.io')
     ),
         (SELECT id FROM Books WHERE ISBN = '99999')
     );
@@ -154,12 +154,12 @@ INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES
 INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
     (
         ( SELECT id FROM Wishlists WHERE userId = (
-            SELECT id FROM Users WHERE username = 'afoan2')),
+            SELECT id FROM Users WHERE username = 'csearl2@cdc.gov')),
         (SELECT id FROM Books WHERE ISBN = '1111111111111')
     ),
     (
         ( SELECT id FROM Wishlists WHERE userId = (
-                SELECT id FROM Users Where username = 'afoan2')),
+                SELECT id FROM Users Where username = 'csearl2@cdc.gov')),
         (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227')
     )
     ;
