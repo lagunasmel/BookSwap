@@ -26,7 +26,7 @@ def login():
     form = LoginForm()
     # Checks if input is valid
     if form.validate_on_submit():
-        # Simulation of a successful login
+        # Simulation of a successful login - sample email and password
         if form.email.data == 'admin@bookswap.com' and form.password.data == 'password':
             flash('You have been logged in!', 'success')
             return redirect(url_for('userHome'))
