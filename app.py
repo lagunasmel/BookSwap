@@ -59,6 +59,7 @@ def wishlist():
 
     # Using the user's id, select their wishlists
     c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID, ))
+
     wishlists = [ row["id"] for row in c.fetchall() ]
 
     # Build IN query string
@@ -70,8 +71,10 @@ def wishlist():
 
     # Select book names per wishlist
     c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
-
+    for row in c.fetchall():
+        print([i for i in row])
     # Map wishlists to books for user
+    c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
     wishBooks = {}
     for row in c.fetchall():
         if row[0] in wishBooks:
@@ -86,6 +89,24 @@ def wishlist():
     data["headers"] = "Wishlists"
     return render_template('wishlist.html', data=data)
 
+@app.route('/addToWishlist', methods=['GET'])
+def addToWish():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    data = request.args.get("isbn")
+    if data == "":
+        return redirect('/wishlist')
+
+    c = db.cursor()
+    c.execute("SELECT * FROM Books WHERE ISBN = ?", (data, ))
+    bookId = c.fetchall()[0]['id']
+
+    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (request.args.get("wishlist"), bookId))
+    db.commit()
+    db.close()
+    
+    return redirect('/wishlist')
 
 @app.route('/account')
 def account():
