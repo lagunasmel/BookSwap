@@ -1,24 +1,49 @@
-from flask import Flask, render_template, url_for, session, redirect
+
+from flask import Flask, render_template, url_for, flash, redirect, session
+
 from db_connector import get_db#, close_connection
 import sqlite3
+from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
+# Secret Key for Flask Forms security
+app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
 
+# Landing Page
 @app.route('/')
 @app.route('/home')
 def home():
     return render_template('home.html')
 
 
-@app.route('/login')
+# Homepage when user is logged in
+@app.route('/userHome')
+def userHome():
+    return render_template('userHome.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    form = LoginForm()
+    # Checks if input is valid
+    if form.validate_on_submit():
+        # Simulation of a successful login - sample email and password
+        if form.email.data == 'admin@bookswap.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('userHome'))
+        else:
+            flash('Login Unsuccessful. Please check username and password.', 'danger')
+    return render_template('login.html', form=form)
 
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f'Account created for {form.username.data}!', 'success')
+        return redirect(url_for('userHome'))
+    return render_template('signup.html', form=form)
 
 
 @app.route('/wishlist')
@@ -36,6 +61,7 @@ def wishlist():
 
     # Using the user's id, select their wishlists
     c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID, ))
+
     wishlists = [ row["id"] for row in c.fetchall() ]
 
     # Build IN query string
@@ -47,8 +73,10 @@ def wishlist():
 
     # Select book names per wishlist
     c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
-
+    for row in c.fetchall():
+        print([i for i in row])
     # Map wishlists to books for user
+    c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
     wishBooks = {}
     for row in c.fetchall():
         if row[0] in wishBooks:
@@ -63,6 +91,40 @@ def wishlist():
     data["headers"] = "Wishlists"
     return render_template('wishlist.html', data=data)
 
+@app.route('/addToWishlist', methods=['GET'])
+def addToWish():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    data = request.args.get("isbn")
+    if data == "":
+        return redirect('/wishlist')
+
+    c = db.cursor()
+    c.execute("SELECT * FROM Books WHERE ISBN = ?", (data, ))
+    bookId = c.fetchall()[0]['id']
+
+    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (request.args.get("wishlist"), bookId))
+    db.commit()
+    db.close()
+
+    return redirect('/wishlist')
+
+@app.route('/removeFromWishlist', methods=['GET'])
+def removeWish():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    c = db.cursor()
+
+    wishID = request.args.get("wishlistRem")
+    bookID = request.args.get("bookRem")
+    print(wishID, bookID)
+    c.execute("DELETE FROM WishlistsBooks WHERE wishlistId = ? AND bookId = (SELECT id FROM Books WHERE title = ?)", (wishID, bookID))
+    db.commit()
+    db.close()
+    
+    return redirect('/wishlist')
 
 @app.route('/account')
 def account():
