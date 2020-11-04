@@ -13,6 +13,7 @@ app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 # Landing Page
 @app.route('/')
 @app.route('/home')
+@app.route('/index')
 def home():
     return render_template('home.html')
 
@@ -133,7 +134,7 @@ def account():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for('home'))
 
 @app.route('/demo-users')
 def demo_users():
