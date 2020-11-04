@@ -1,3 +1,0 @@
-Nish's test commit for HW1
-
-Like Ryan, I also used Vim, so take that Emacs

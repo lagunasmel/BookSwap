@@ -1,3 +1,0 @@
-This is a test commit for our Book Swap repo.
-
-I used Vim, too, which I think makes me kind of cool.

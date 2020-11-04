@@ -1,9 +1,11 @@
 from flask import Flask, render_template, url_for
 from db_connector import get_db#, close_connection
 import sqlite3
+from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
-
+# Secret Key for Flask Forms security
+app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
 @app.route('/')
 @app.route('/home')
@@ -13,12 +15,14 @@ def home():
 
 @app.route('/login')
 def login():
-    return render_template('login.html')
+    form = RegistrationForm()
+    return render_template('login.html', form=form)
 
 
-@app.route('/signup')
+@app.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    form = RegistrationForm()
+    return render_template('signup.html', form=form)
 
 
 @app.route('/wishlist')
