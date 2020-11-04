@@ -82,6 +82,22 @@ def addToWish():
     c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (request.args.get("wishlist"), bookId))
     db.commit()
     db.close()
+
+    return redirect('/wishlist')
+
+@app.route('/removeFromWishlist', methods=['GET'])
+def removeWish():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    c = db.cursor()
+
+    wishID = request.args.get("wishlistRem")
+    bookID = request.args.get("bookRem")
+    print(wishID, bookID)
+    c.execute("DELETE FROM WishlistsBooks WHERE wishlistId = ? AND bookId = (SELECT id FROM Books WHERE title = ?)", (wishID, bookID))
+    db.commit()
+    db.close()
     
     return redirect('/wishlist')
 
