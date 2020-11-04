@@ -4,7 +4,13 @@
     <h1>Wishlist</h1>
     <ul>
         {% for book in data.table_content[wish] %}
-        <li>{{book}}</li>
+        <li>{{book}}
+            <form action="/removeFromWishlist" method="GET">
+                <input type="hidden" id="wishlistRem" name="wishlistRem" value="{{ wish }}">
+                <input type="hidden" id="bookRem" name="bookRem" value="{{ book }}">
+                <input type="submit" value="Remove">
+            </form>
+        </li>
         {% endfor %}
     </ul>
     <form action="/addToWishlist" method="GET">
