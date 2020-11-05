@@ -7,6 +7,8 @@
                 <fieldset class="form-group">
                 <h1 class="text-center">Create an Account</h1>
                     <legend class="text-center mb-4"></legend>
+                    <!-- Username field removed since we are currently using
+                        email.  Easy to switch back.  - Ben 11/5/20
                     <div class="form-group">
                         {{ form.username.label(class="form-control-label") }}
                         {% if form.username.errors %}
@@ -21,6 +23,7 @@
                         {% endif %}
 
                     </div>
+                    -->
                     <div class="form-group">
                         {{ form.email.label(class="form-control-label") }}
 
@@ -62,7 +65,97 @@
                             {{ form.confirm_password(class="form-control") }}
                         {% endif %}
                     </div>
-                </fieldset>
+                    <div>
+                        <!-- Explanation of request for personal information -->
+                        <p>
+                        Please enter the following information, so we can help you receive books.  :)
+                        </p>
+                    <!-- First Name -->
+                    <div class='form-group'>
+                        {{ form.fName.label(class="form-control-label") }}
+                        {% if form.fName.errors %}
+                            {{ form.fName(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.fName.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.fName(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <!-- Last Name -->
+                    <div class='form-group'>
+                        {{ form.lName.label(class="form-control-label") }}
+                        {% if form.lName.errors %}
+                            {{ form.lName(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.lName.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.lName(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <!-- Street Address -->
+                    <div class='form-group'>
+                        {{ form.streetAddress.label(class="form-control-label") }}
+                        {% if form.streetAddress.errors %}
+                            {{ form.streetAddress(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.streetAddress.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.streetAddress(class="form-control") }}
+                        {% endif %}
+                    </div>
+                    <!-- City -->
+                    <div class='form-group'>
+                        {{ form.city.label(class="form-control-label") }}
+                        {% if form.city.errors %}
+                            {{ form.city(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.city.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.city(class="form-control") }}
+                        {% endif %}
+                    </div>
+                     <!-- State -->
+                    <div class='form-group'>
+                        {{ form.state.label(class="form-control-label") }}
+                        {% if form.state.errors %}
+                            {{ form.state(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.state.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.state(class="form-control") }}
+                        {% endif %}
+                    </div>
+                     <!-- Post Code -->
+                    <div class='form-group'>
+                        {{ form.postCode.label(class="form-control-label") }}
+                        {% if form.postCode.errors %}
+                            {{ form.postCode(class="form-control is-invalid") }}
+                            <div class="invalid-feedback">
+                                {% for error in form.postCode.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {{ form.postCode(class="form-control") }}
+                        {% endif %}
+                    </div>
+                  </fieldset>
+
                 <div class="form-group">
                     {{ form.submit(class="btn btn-info") }}
                 </div>
