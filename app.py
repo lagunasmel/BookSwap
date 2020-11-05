@@ -1,7 +1,6 @@
-
 from flask import Flask, render_template, url_for, flash, redirect, session
 from flask import request as req
-from db_connector import get_db#, close_connection
+from db_connector import get_db, BookSwapDatabase
 import sqlite3
 from forms import RegistrationForm, LoginForm
 
@@ -31,12 +30,12 @@ def login():
         db.row_factory = sqlite3.Row
         # Username check
         user = db.execute("SELECT * FROM Users WHERE username = ?",
-                (username,)).fetchone()
+                          (username,)).fetchone()
         if user is None:
             error = "Incorrect username."
 
         # Password check
-        elif user['password'] != password :
+        elif user['password'] != password:
             error = "Incorrect password."
 
         # No errors, login proceeds
@@ -74,16 +73,15 @@ def wishlist():
 
     # Select user based on username, using generic for now
     c = db.cursor()
-    c.execute("SELECT id FROM Users WHERE username = ?", ("csearl2@cdc.gov", ))
+    c.execute("SELECT id FROM Users WHERE username = ?", ("csearl2@cdc.gov",))
 
     # Fetch the user's id 
     userID = c.fetchall()[0]["id"]
 
-
     # Using the user's id, select their wishlists
-    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID, ))
+    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID,))
 
-    wishlists = [ row["id"] for row in c.fetchall() ]
+    wishlists = [row["id"] for row in c.fetchall()]
 
     # Build IN query string
     values = ""
@@ -93,11 +91,15 @@ def wishlist():
     values = values[:-2]
 
     # Select book names per wishlist
-    c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
+    c.execute(
+        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)",
+        (values,))
     for row in c.fetchall():
         print([i for i in row])
     # Map wishlists to books for user
-    c.execute("SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)", (values, ))
+    c.execute(
+        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)",
+        (values,))
     wishBooks = {}
     for row in c.fetchall():
         if row[0] in wishBooks:
@@ -112,6 +114,7 @@ def wishlist():
     data["headers"] = "Wishlists"
     return render_template('wishlist.html', data=data)
 
+
 @app.route('/addToWishlist', methods=['GET'])
 def addToWish():
     db = get_db()
@@ -122,7 +125,7 @@ def addToWish():
         return redirect('/wishlist')
 
     c = db.cursor()
-    c.execute("SELECT * FROM Books WHERE ISBN = ?", (data, ))
+    c.execute("SELECT * FROM Books WHERE ISBN = ?", (data,))
     bookId = c.fetchall()[0]['id']
 
     c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (req.args.get("wishlist"), bookId))
@@ -130,6 +133,7 @@ def addToWish():
     db.close()
 
     return redirect('/wishlist')
+
 
 @app.route('/removeFromWishlist', methods=['GET'])
 def removeWish():
@@ -141,36 +145,31 @@ def removeWish():
     wishID = req.args.get("wishlistRem")
     bookID = req.args.get("bookRem")
     print(wishID, bookID)
-    c.execute("DELETE FROM WishlistsBooks WHERE wishlistId = ? AND bookId = (SELECT id FROM Books WHERE title = ?)", (wishID, bookID))
+    c.execute("DELETE FROM WishlistsBooks WHERE wishlistId = ? AND bookId = (SELECT id FROM Books WHERE title = ?)",
+              (wishID, bookID))
     db.commit()
     db.close()
-    
+
     return redirect('/wishlist')
+
 
 @app.route('/account')
 def account():
     return render_template('userHome.html')
 
 
-@app.route('/my-books')
-def my_books():
-    # Get current user id
-    # TODO change the temporary fix once we progress with login stuff
+@app.route('/_add-book', methods=['POST'])
+def add_book():
+    isbn = req.get_json()["isbn"]
+    # TODO change the temporary fix below once we progress with login stuff
     if "user_id" in session:
         user_id = session["user_id"]
     else:
         user_id = 1
-    # Get the data of books currently listed
-    db = get_db()
-    db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
-    c = db.cursor()
-    c.execute("""
-                SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality 
-                FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
-                INNER JOIN CopyQualities CQ ON UB.copyQualityId = CQ.id 
-                WHERE userId = ?""", (user_id,))
-    rows = c.fetchall()
-    db.close()
+    bsdb = BookSwapDatabase()
+    bsdb.user_add_book_by_isbn(isbn, user_id)
+    rows = bsdb.get_listed_books(user_id)
+    bsdb.close()
 
     # Build the data to be passed to Jinja
     headers = ["Title", "Author", "Quality", "ISBN"]
@@ -181,10 +180,35 @@ def my_books():
 
     return render_template('myBooks.html', data=data)
 
+
+@app.route('/my-books')
+def my_books():
+    # Get current user id
+    # TODO change the temporary fix below once we progress with login stuff
+    if "user_id" in session:
+        user_id = session["user_id"]
+    else:
+        user_id = 1
+    # Get the data of books currently listed
+    bsdb = BookSwapDatabase()
+    rows = bsdb.get_listed_books(user_id)
+    bsdb.close()
+
+    # Build the data to be passed to Jinja
+    headers = ["Title", "Author", "Quality", "ISBN"]
+    table_content = [[row[header] for header in headers] for row in rows]
+    data = {"headers": headers,
+            "rows": table_content,
+            "caption": ""}
+
+    return render_template('myBooks.html', data=data)
+
+
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('home'))
+
 
 @app.route('/demo-users')
 def demo_users():
@@ -196,7 +220,7 @@ def demo_users():
     Instead use '?' as a placeholder for each parameter then pass a tuple of parameters as the second argument
     """
     c = db.cursor()
-    c.execute("SELECT * FROM Users WHERE city != ?", ("Nashville", ))
+    c.execute("SELECT * FROM Users WHERE city != ?", ("Nashville",))
     """
     Step 2: fetch the results from the SQL query.
     You can treat the cursor as an iterator or call .fetchall() to get a list of all matching rows
@@ -229,7 +253,7 @@ def reset_db():
     with app.app_context():
         db = get_db()
         with app.open_resource('DatabaseSpecs/database-definition-queries.sql',
-                mode = 'r') as f:
+                               mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
     return "Database reset :)"
@@ -241,4 +265,3 @@ if __name__ == '__main__':
     work the same on his local machine.  Maybe others can test too?
     """
     app.run(host='0.0.0.0', debug=True)
-

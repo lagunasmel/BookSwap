@@ -3,6 +3,7 @@ from flask import g
 
 DATABASE = 'DatabaseSpecs/test-db.db'
 
+
 def get_db():
     """
     get_db opens the connection to the Sqlite database file.
@@ -11,6 +12,73 @@ def get_db():
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
     return db
+
+
+class BookSwapDatabase:
+    """
+    This class is intended to deal with everything-SQL related:
+        opening and closing connections to the database
+        running queries and returning the results
+        adding/deleting rows given criteria
+
+    So that the routes in app.py don't have to touch the SQL themselves,
+    and repeated functionality can be consolidated here
+    """
+
+    def __init__(self):
+        self.db = get_db()
+
+    def close(self):
+        """
+        Closes the db connection
+        :return: Nothing
+        """
+        self.db.close()
+
+
+    def get_listed_books(self, user_id):
+        """
+        Returns the rows corresponding to the books that user_id has listed as
+        available for swapping.
+        :param user_id: the ID of the user whose listed books to return
+        :return: a list of sqlite3.Row objects corresponding to the listed books
+        """
+        self.db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
+        c = self.db.cursor()
+        c.execute("""
+                    SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality 
+                    FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
+                    INNER JOIN CopyQualities CQ ON UB.copyQualityId = CQ.id 
+                    WHERE userId = ?""", (user_id,))
+        rows = c.fetchall()
+        self.db.commit()
+        return rows
+
+    def user_add_book_by_isbn(self, isbn, user_id):
+        """
+        'user_id' user lists the book matching 'isbn' as available to swap.
+        Nothing happens on failure.
+
+        :param user_id: database ID of the user to add the book to
+        :param isbn: ISBN of the book to be listed as available to swap
+        :return: Nothing
+        """
+        self.db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
+        c = self.db.cursor()
+        # First get book ID
+        c.execute("""SELECT id FROM Books WHERE ISBN=?""", (isbn,))
+        rows = c.fetchall()
+        # TODO handle multiple matches better
+        if len(rows) != 1:
+            print("Warning: no matching book found when trying to list a book")
+            return
+        book_id = rows[0]["id"]
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""", (user_id, book_id, 2))
+
+
+
+
+
 
 # @app.teardown_appcontext
 # def close_connection(exception):
