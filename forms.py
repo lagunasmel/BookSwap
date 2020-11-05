@@ -7,12 +7,18 @@ class RegistrationForm(FlaskForm):
     username = StringField('Username',
                            # These are validators to make sure the input is valid
                            validators=[DataRequired(), Length(min=5, max=25)])
-    email = StringField('Email',
+    email = StringField('Username (Must be a valid email address)',
                         validators=[DataRequired(), Email()])
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5)])
     confirm_password = PasswordField('Confirm Password',
                                      validators=[DataRequired(), EqualTo('password')])
+    fName = StringField('First Name', validators=[DataRequired()])
+    lName = StringField('Last Name', validators=[DataRequired()])
+    streetAddress = StringField('Street Address', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
+    postCode = StringField('Post Code', validators=[DataRequired()])
     submit = SubmitField('Sign Up')
 
 
