@@ -11,5 +11,6 @@ pip install email_validator
 
 To simulate a successful login, use the following login info:
 
-username: admin@bookswap..com
+username: admin@bookswap.com
 password: password
+
