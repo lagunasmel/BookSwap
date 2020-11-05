@@ -118,6 +118,12 @@ INSERT INTO Books ('title', 'author', 'ISBN') VALUES
 INSERT INTO CopyQualities ('qualityDescription') VALUES ('Brand New'),
     ('Mint -- Like New'), ('Very Good'), ('Useable'), ('Tattered'), ('Dust');
 
+-- Sample "admin" user, for easy login check
+INSERT INTO Users('username', 'password', 'fName', 'lName', 'streetAddress',
+    'city', 'state', 'postCode') VALUES
+    ('admin@bookswap.com', 'password', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
+        'Oregon', '97475');
+
 -- Sample User data from mockaroo.com
 INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress',
     'city', 'state', 'postCode') VALUES
