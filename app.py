@@ -154,7 +154,32 @@ def account():
 
 @app.route('/my-books')
 def my_books():
-    return render_template('myBooks.html')
+    # Get current user id
+    # TODO change the temporary fix once we progress with login stuff
+    if "user_id" in session:
+        user_id = session["user_id"]
+    else:
+        user_id = 1
+    # Get the data of books currently listed
+    db = get_db()
+    db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
+    c = db.cursor()
+    c.execute("""
+                SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality 
+                FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
+                INNER JOIN CopyQualities CQ ON UB.copyQualityId = CQ.id 
+                WHERE userId = ?""", (user_id,))
+    rows = c.fetchall()
+    db.close()
+
+    # Build the data to be passed to Jinja
+    headers = ["Title", "Author", "Quality", "ISBN"]
+    table_content = [[row[header] for header in headers] for row in rows]
+    data = {"headers": headers,
+            "rows": table_content,
+            "caption": ""}
+
+    return render_template('myBooks.html', data=data)
 
 @app.route('/logout')
 def logout():

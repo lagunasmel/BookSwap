@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS WishlistsBooks(
 
 -- UserBooks -- Intersection between Users and Books
 CREATE TABLE IF NOT EXISTS UserBooks(
-    id INTEGER NOT NULL PRIMARY KEY,
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT ,
     userId INTEGER,
     bookId INTEGER,
     copyQualityId INTEGER,
@@ -163,3 +163,8 @@ INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
         (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227')
     )
     ;
+
+INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES
+    (1, 1, 2),
+    (1, 3, 4);
+
