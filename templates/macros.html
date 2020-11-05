@@ -5,15 +5,13 @@
             {% for header in headers %}
                 <th scope="col">{{ header }}</th>
             {% endfor %}
-            <th scope="col">Edit Data</th>
-            <th scope="col">Delete Data</th>
+            <th scope="col">Remove Book</th>
         </tr>
         {% for row in rows %}
             <tr>
                 {% for cell in row %}
                     <td>{{ cell }}</td>
                 {% endfor %}
-                <td><i class="far fa-edit"></i></td>
                 <td><i class="far fa-trash-alt"></i></td>
             </tr>
         {% endfor %}
