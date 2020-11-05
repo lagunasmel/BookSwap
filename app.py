@@ -36,7 +36,7 @@ def login():
             error = "Incorrect username."
 
         # Password check
-        elif user['password'] !=  password :
+        elif user['password'] != password :
             error = "Incorrect password."
 
         # No errors, login proceeds
@@ -150,6 +150,11 @@ def removeWish():
 @app.route('/account')
 def account():
     return render_template('userHome.html')
+
+
+@app.route('/my-books')
+def my_books():
+    return render_template('myBooks.html')
 
 @app.route('/logout')
 def logout():
