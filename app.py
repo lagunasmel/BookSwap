@@ -1,6 +1,6 @@
 
 from flask import Flask, render_template, url_for, flash, redirect, session
-
+from flask import request as req
 from db_connector import get_db#, close_connection
 import sqlite3
 from forms import RegistrationForm, LoginForm
@@ -117,7 +117,7 @@ def addToWish():
     db = get_db()
     db.row_factory = sqlite3.Row
 
-    data = request.args.get("isbn")
+    data = req.args.get("isbn")
     if data == "":
         return redirect('/wishlist')
 
@@ -125,7 +125,7 @@ def addToWish():
     c.execute("SELECT * FROM Books WHERE ISBN = ?", (data, ))
     bookId = c.fetchall()[0]['id']
 
-    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (request.args.get("wishlist"), bookId))
+    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (req.args.get("wishlist"), bookId))
     db.commit()
     db.close()
 
@@ -138,8 +138,8 @@ def removeWish():
 
     c = db.cursor()
 
-    wishID = request.args.get("wishlistRem")
-    bookID = request.args.get("bookRem")
+    wishID = req.args.get("wishlistRem")
+    bookID = req.args.get("bookRem")
     print(wishID, bookID)
     c.execute("DELETE FROM WishlistsBooks WHERE wishlistId = ? AND bookId = (SELECT id FROM Books WHERE title = ?)", (wishID, bookID))
     db.commit()
