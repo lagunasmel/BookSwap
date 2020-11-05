@@ -161,14 +161,16 @@ def account():
 @app.route('/_add-book', methods=['POST'])
 def add_book():
     isbn = req.get_json()["isbn"]
+    copyquality = req.get_json()["quality"]
     # TODO change the temporary fix below once we progress with login stuff
     if "user_id" in session:
         user_id = session["user_id"]
     else:
         user_id = 1
     bsdb = BookSwapDatabase()
-    bsdb.user_add_book_by_isbn(isbn, user_id)
+    bsdb.user_add_book_by_isbn(isbn, user_id, copyquality)
     rows = bsdb.get_listed_books(user_id)
+    copyqualities = bsdb.get_book_qualities()
     bsdb.close()
 
     # Build the data to be passed to Jinja
@@ -176,7 +178,8 @@ def add_book():
     table_content = [[row[header] for header in headers] for row in rows]
     data = {"headers": headers,
             "rows": table_content,
-            "caption": ""}
+            "caption": "",
+            "copyqualities": copyqualities}
 
     return render_template('myBooks.html', data=data)
 
@@ -192,6 +195,7 @@ def my_books():
     # Get the data of books currently listed
     bsdb = BookSwapDatabase()
     rows = bsdb.get_listed_books(user_id)
+    copyqualities = bsdb.get_book_qualities()
     bsdb.close()
 
     # Build the data to be passed to Jinja
@@ -199,7 +203,8 @@ def my_books():
     table_content = [[row[header] for header in headers] for row in rows]
     data = {"headers": headers,
             "rows": table_content,
-            "caption": ""}
+            "caption": "",
+            "copyqualities": copyqualities}
 
     return render_template('myBooks.html', data=data)
 
