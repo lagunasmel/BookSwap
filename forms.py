@@ -4,9 +4,12 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username',
+    """
+Username is removed currently. -- Ben 11/5/20
+username = StringField('Username',
                            # These are validators to make sure the input is valid
                            validators=[DataRequired(), Length(min=5, max=25)])
+    """
     email = StringField('Username (Must be a valid email address)',
                         validators=[DataRequired(), Email()])
     password = PasswordField('Password',
