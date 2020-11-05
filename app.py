@@ -61,8 +61,29 @@ def login():
 def signup():
     form = RegistrationForm()
     if form.validate_on_submit():
-        flash(f'Account created for {form.username.data}!', 'success')
-        return redirect(url_for('userHome'))
+        db = get_db()
+        db.row_factory = sqlite3.Row
+        c = db.cursor()
+        error = None
+
+        #(Redundant) check for uesrname and password entries
+        if not form.email.data:
+            error = "Username is required."
+        elif not form.password.data:
+            error = "Password is required."
+        elif db.execute('SELECT id FROM Users WHERE username = ?', 
+                (form.email.data, )).fetchone() is not None:
+            error = 'User {} already exists.  Please try again with a different username (email), or log in.'.format(form.email.data)
+
+        if error is None:
+            db.execute("INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress', 'city', 'state', 'postCode') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (form.email.data, form.password.data, form.fName.data, 
+                form.lName.data, form.streetAddress.data, form.city.data,
+                form.state.data, form.postCode.data))
+            db.commit()
+            flash(f'Account created for {form.email.data}!', 'success')
+            return redirect(url_for('account'))
+        flash(error)
     return render_template('signup.html', form=form)
 
 
