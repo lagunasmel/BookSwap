@@ -36,6 +36,20 @@ class BookSwapDatabase:
         """
         self.db.close()
 
+    def get_account_settings(self, user_id):
+        """
+        Gets account settings for a given user.
+        Returned as a sqlite3.Row which can be accessed by key.
+        """
+        c = self.db.cursor()
+        c.execute("""
+                SELECT username, password, fName, lName, streetAddress, city, state, postCode, points 
+                FROM Users WHERE id=?;""", (user_id,))
+        rows = c.fetchall()
+        if len(rows) != 1:
+            raise KeyError("User ID did not return one row (could be none, could be multiple)")
+        return rows[0]
+
     def get_book_qualities(self):
         """
         Returns a list of tuples containing (quality ID, copy quality description)
