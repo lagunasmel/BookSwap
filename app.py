@@ -181,7 +181,7 @@ def account():
 
 @app.route('/_add-book', methods=['POST'])
 def add_book():
-    if req.get_json()['request'] = 'add':
+    if req.get_json()['request'] == 'add':
         isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
         # TODO change the temporary fix below once we progress with login stuff
