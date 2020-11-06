@@ -181,28 +181,29 @@ def account():
 
 @app.route('/_add-book', methods=['POST'])
 def add_book():
-    isbn = req.get_json()["isbn"]
-    copyquality = req.get_json()["quality"]
-    # TODO change the temporary fix below once we progress with login stuff
-    if "user_id" in session:
-        user_id = session["user_id"]
-    else:
-        user_id = 1
-    bsdb = BookSwapDatabase()
-    bsdb.user_add_book_by_isbn(isbn, user_id, copyquality)
-    rows = bsdb.get_listed_books(user_id)
-    copyqualities = bsdb.get_book_qualities()
-    bsdb.close()
+    if req.get_json()['request'] = 'add':
+        isbn = req.get_json()["isbn"]
+        copyquality = req.get_json()["quality"]
+        # TODO change the temporary fix below once we progress with login stuff
+        if "user_id" in session:
+            user_id = session["user_id"]
+        else:
+            user_id = 1
+        bsdb = BookSwapDatabase()
+        bsdb.user_add_book_by_isbn(isbn, user_id, copyquality)
+        rows = bsdb.get_listed_books(user_id)
+        copyqualities = bsdb.get_book_qualities()
+        bsdb.close()
 
-    # Build the data to be passed to Jinja
-    headers = ["Title", "Author", "Quality", "ISBN"]
-    table_content = [[row[header] for header in headers] for row in rows]
-    data = {"headers": headers,
-            "rows": table_content,
-            "caption": "",
-            "copyqualities": copyqualities}
+        # Build the data to be passed to Jinja
+        headers = ["Title", "Author", "Quality", "ISBN"]
+        table_content = [[row[header] for header in headers] for row in rows]
+        data = {"headers": headers,
+                "rows": table_content,
+                "caption": "",
+                "copyqualities": copyqualities}
 
-    return render_template('myBooks.html', data=data)
+        return render_template('myBooks.html', data=data)
 
 
 @app.route('/my-books')
