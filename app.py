@@ -174,7 +174,7 @@ def removeWish():
     return redirect('/wishlist')
 
 
-@app.route('/account')
+@app.route('/account', methods=['POST'])
 def account():
     bsdb = BookSwapDatabase()
     account_settings = bsdb.get_account_settings(1)
