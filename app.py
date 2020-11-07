@@ -208,6 +208,23 @@ def add_book():
 
         return render_template('myBooks.html', data=data)
 
+@app.route('/removeFromUserLibrary', methods=['GET'])
+def removeBook():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    c = db.cursor()
+
+    bookID = req.args.get("bookRem")
+    print(bookID)
+    c.execute("DELETE FROM UserBooks WHERE id = ?",
+              (bookID))
+    db.commit()
+    db.close()
+
+    return redirect('/my-books')
+
+
 @app.route('/my-books')
 def my_books():
     # Get current user id
