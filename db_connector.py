@@ -72,13 +72,25 @@ class BookSwapDatabase:
         """
         c = self.db.cursor()
         c.execute("""
-                    SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality 
-                    FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
+                    SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality,
+                    UB.id AS id FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
                     INNER JOIN CopyQualities CQ ON UB.copyQualityId = CQ.id 
                     WHERE userId = ?""", (user_id,))
         rows = c.fetchall()
         self.db.commit()
         return rows
+
+    def get_userBooksID(self, user_id):
+        """
+        Returns the UserBooks.id attribute for each of the user's books
+        """
+
+        c = self.db.cursor()
+        c.execute("""SELECT id FROM UserBooks WHERE userId=?""", (user_id,))
+        rows = c.fetchall()
+        self.db.commit()
+        return rows
+
 
     def user_add_book_by_isbn(self, isbn, user_id, copyquality):
         """

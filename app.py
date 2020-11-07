@@ -208,6 +208,22 @@ def add_book():
 
         return render_template('myBooks.html', data=data)
 
+@app.route('/removeFromUserLibrary', methods=['GET'])
+def removeBook():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    c = db.cursor()
+
+    bookID = req.args.get("bookRem")
+    print(bookID)
+    c.execute("DELETE FROM UserBooks WHERE id = ?",
+              (bookID))
+    db.commit()
+    db.close()
+
+    return redirect('/my-books')
+
 
 @app.route('/my-books')
 def my_books():
@@ -224,12 +240,13 @@ def my_books():
     bsdb.close()
 
     # Build the data to be passed to Jinja
-    headers = ["Title", "Author", "Quality", "ISBN"]
+    headers = ["Title", "Author", "Quality", "ISBN", "ID"]
     table_content = [[row[header] for header in headers] for row in rows]
     data = {"headers": headers,
             "rows": table_content,
             "caption": "",
-            "copyqualities": copyqualities}
+            "copyqualities": copyqualities
+            }
 
     return render_template('myBooks.html', data=data)
 
