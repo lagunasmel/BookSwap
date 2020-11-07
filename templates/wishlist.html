@@ -19,10 +19,10 @@
                 <p></p>
                 <div class="form-group">
                     <form action="/addToWishlist" method="GET">
-                    <label for="isbn">ISBN: </label>
-                    <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control sm">
-                    <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}">
-                    <input type="submit" class="btn btn-info btn-sm">
+                        <label for="isbn">ISBN: </label>
+                        <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control sm">
+                        <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}">
+                        <input type="submit" class="btn btn-info btn-sm">
                     </form>
                 </div>
             {% endfor %}
