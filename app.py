@@ -176,7 +176,10 @@ def removeWish():
 
 @app.route('/account')
 def account():
-    return render_template('userHome.html')
+    bsdb = BookSwapDatabase()
+    account_settings = bsdb.get_account_settings(1)
+    bsdb.close()
+    return render_template('userHome.html', account_settings=account_settings)
 
 
 @app.route('/_add-book', methods=['POST'])

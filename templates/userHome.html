@@ -4,23 +4,19 @@
 
         <section id="front">
         <div class="container text-center mt-5">
-            <h2>Welcome, [username]!</h2> <!-- Edit to show user's name -->
+            <h2>Welcome, {{ account_settings["username"] }}!</h2> <!-- Edit to show user's name -->
             <h3> Here's Your User Information </h3>
-            <ul>
-                <li> Username: </li>
-                <li> First Name: </li>
-                <li> Last Name: </li>
-                <li> Street Address: </li>
-                <li> City: </li>
-                <li> State: </li>
-                <li> State: </li>
-                <li> Post Code: </li>
-            </ul>
 
-            <h3>What would you like to do today?</h3>
-            <ul>
-                <li> Would you like to log out?  <a href="/logout">Click here to log out</a> </li>
-            </ul>
+                <p> Username: {{ account_settings["username"] }} </p>
+                <p> First Name: {{ account_settings["fName"] }}</p>
+                <p> Last Name: {{ account_settings["lName"] }}</p>
+                <p> Street Address: {{ account_settings["streetAddress"] }}</p>
+                <p> City: {{ account_settings["city"] }}</p>
+                <p> State: {{ account_settings["state"] }}</p>
+                <p> Post Code: {{ account_settings["lName"] }}</p>
+
+
+                <p> Would you like to log out?  <a href="/logout">Click here</a> </p>
         </div>
 
         <section id="footer">
