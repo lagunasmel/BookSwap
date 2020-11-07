@@ -208,7 +208,6 @@ def add_book():
 
         return render_template('myBooks.html', data=data)
 
-
 @app.route('/my-books')
 def my_books():
     # Get current user id
@@ -224,12 +223,13 @@ def my_books():
     bsdb.close()
 
     # Build the data to be passed to Jinja
-    headers = ["Title", "Author", "Quality", "ISBN"]
+    headers = ["Title", "Author", "Quality", "ISBN", "ID"]
     table_content = [[row[header] for header in headers] for row in rows]
     data = {"headers": headers,
             "rows": table_content,
             "caption": "",
-            "copyqualities": copyqualities}
+            "copyqualities": copyqualities
+            }
 
     return render_template('myBooks.html', data=data)
 
