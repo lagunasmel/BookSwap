@@ -245,7 +245,7 @@ def removeBook():
     bookID = req.args.get("bookRem")
     print(bookID)
     c.execute("DELETE FROM UserBooks WHERE id = ?",
-              (bookID))
+              (bookID,))
     db.commit()
     db.close()
 
