@@ -22,6 +22,10 @@ Password: `password`
 
 
 
+## Live demo
+
+As an alternative to installating the latest build, you can use the app at http://benwichser.com:5000 - note the lack of SSL implementation at the moment. Also note that this will usually not be the latest release of the app.
+
 
 
 
