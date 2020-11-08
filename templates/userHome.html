@@ -17,17 +17,22 @@
                     <p>  <span class="lead">Post Code:</span> {{ account_settings["postCode"] }}</p>
 
                     <button type="button" class="btn btn-primary" 
-                                          data-toggle="modal"
                                           id="userHomeAccountChangeButton"
-                                          data-target="#userHomeAccountChangeModal"> 
+                                          data-toggle="modal"
+                                          data-target="#userHomeAccountChangeModal">
+                                          
                         Update Your Information
+                    </button>
+                    <button type='button' class="btn btn-primary"
+                                          id="userHomePasswordChangeButton">
+                                                                           Change Your Password
                     </button>
 
 
                 <p> Would you like to log out?  <a href="/logout">Click here</a> </p>
             </div>
         </div>
-        <div class="modal" id="userHomeAccountChangeModal">
+        <div class="modal" tabindex="-1" role="dialog" id="userHomeAccountChangeModal">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
               <div class="modal-header">
@@ -110,8 +115,14 @@
                </form>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Save changes</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" 
+                    onclick="changeUserInformation()">
+                    Save changes
+                </button>
+                <button type="button" class="btn btn-secondary" 
+                    data-dismiss="modal">
+                    Cancel
+                </button>
               </div>
             </div>
           </div>
@@ -126,6 +137,34 @@
         </section>
 
     </section>
+
+    <script type="text/javascript">
+        function changeUserInformation() {
+            $.ajax("{{ url_for('account') }}", {
+                contentType: "application/json",
+                data: JSON.stringify({
+                    // First key:value is flag for request
+                    "request": "changeUserSettings",
+                    // Other key:value pairs are user data
+                    "username": $("#userHomeAccountChangeUsername").val(),
+                    "fName": $("#userHomeAccountChangefName").val(),
+                    "lName": $("#userHomeAccountChangelName").val(),
+                    "streetAddress": $("#userHomeAccountChangeStreetAddress").val(),
+                    "city": $("#userHomeAccountChangeCity").val(),
+                    "state": $("#userHomeAccountChangeState").val(),
+                    "postCode": $("#userHomeAccountChangePostCode").val()
+                }),
+                type: "POST",
+                success: function(account_settings) {
+                    $('#userHomeAccountChangeModal').modal("hide");
+                    location.reload();
+                    // let newDoc = document.open("text/html", "replace");
+                    //newDoc.write({account_settings:account_settings});
+                    //newDoc.close();
+                }
+            });
+        }
+    </script>
 
 
 
