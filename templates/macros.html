@@ -1,18 +1,27 @@
-{% macro book_list_table(caption, headers, rows) %}
+{% macro book_list_table(caption, headers, rows, ids) %}
     <table class="table table-hover">
         <caption>{{ caption }}</caption>
         <tr>
             {% for header in headers %}
-                <th scope="col">{{ header }}</th>
+                {% if header != "ID" %}
+                    <th scope="col">{{ header }}</th>
+                {% endif %}
             {% endfor %}
             <th scope="col">Remove Book</th>
         </tr>
         {% for row in rows %}
             <tr>
-                {% for cell in row %}
-                    <td>{{ cell }}</td>
-                {% endfor %}
-                <td><i class="far fa-trash-alt"></i></td>
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>
+                    <form action="/removeFromUserLibrary" method="GET">
+                        <input type="hidden" id="bookRem" name="bookRem" value="{{ row[4] }}">
+                        <input type="submit" value="Remove">
+                    </form>
+                </td>
+<!--                <td><i class="far fa-trash-alt" id="{{row[4]}}" onclick="confirmRemoveBook({{row[4]}})"></i></td>-->
             </tr>
         {% endfor %}
     </table>
