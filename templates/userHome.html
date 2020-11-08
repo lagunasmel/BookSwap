@@ -174,7 +174,6 @@
                       </fieldset>
                   </form>
               </div>
-              </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-primary" 
                     onclick="changeUserInformation()">
@@ -187,7 +186,7 @@
               </div>
             </div>
           </div>
-{#        </div>#}
+        </div>
 
 
         <section id="footer">
@@ -203,7 +202,7 @@
     <script type="text/javascript">
         // Check that new password confirm matches new password
         $("#new-password-confirm").keyup( function() {
-            if ($("#new-password").val() != $("#new-password-confirm").val())
+            if ($("#new-password").val() !== $(this).val())
             {
                 $(this).removeClass("is-valid").addClass("is-invalid");
             }
@@ -213,6 +212,22 @@
             }
         });
 
+        $("#new-password").on("keyup", function() {
+            if ($("#new-password-confirm").val())
+            {
+                if ($(this).val() !== $("#new-password-confirm").val())
+                {
+                    $("#new-password-confirm").removeClass("is-valid").
+                        addClass("is-invalid");
+                }
+                else
+                {
+                    $("#new-password-confirm").removeClass("is-invalid").
+                        addClass("is-valid");
+                }
+            }
+        });
+    
         // Send off user info change
         function changeUserInformation() {
             $.ajax("{{ url_for('account') }}", {
@@ -236,6 +251,8 @@
                 }
             });
         }
+
+        // Send off password info change
         function changePassword() {
             $.ajax("{{ url_for('account') }}", {
                 contentType: "application/json",
