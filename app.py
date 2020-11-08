@@ -174,9 +174,36 @@ def removeWish():
     return redirect('/wishlist')
 
 
-@app.route('/account')
+@app.route('/account', methods=['GET', 'POST'])
 def account():
     bsdb = BookSwapDatabase()
+    
+    # Check against request to change user settings
+    if req.get_json() and req.get_json()['request'] == 'changeUserSettings':
+        print("Account: request received for changeUserSettings")
+        username = req.get_json()['username']
+        # Check that the username isn't changing or is available
+        if username == session['user_id'] or bsdb.username_available(username):
+            success = bsdb.change_account_information(session['user_id'], req.get_json())
+            bsdb.close()
+            if success == True:
+                flash("Account information updated.")
+                print("Account: returning new account info:") 
+                for key in req.get_json():
+                    print(f"\t {key}: {req.get_json()[key]}")
+                return req.get_json()
+
+            else:
+                flash("Error updating your information. Try again?")
+                return render_template("userHome.html",
+                        account_settings = req.get_json())
+        else:
+            bsdb.close()
+            flash("Username is already taken")
+            return render_template("userHome.thml", 
+                    account_settings = req.get_json())
+
+    # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(1)
     bsdb.close()
     return render_template('userHome.html', account_settings=account_settings)
@@ -184,7 +211,7 @@ def account():
 
 @app.route('/_add-book', methods=['POST'])
 def add_book():
-    if req.get_json()['request'] == 'add':
+    if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
         # TODO change the temporary fix below once we progress with login stuff

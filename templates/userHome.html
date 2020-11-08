@@ -4,19 +4,128 @@
 
         <section id="front">
         <div class="container text-center mt-5">
-            <h2>Welcome, {{ account_settings["username"] }}!</h2> <!-- Edit to show user's name -->
-            <h3> Here's Your User Information </h3>
+            <h2>Welcome, {{ account_settings["username"] }}!</h2>
+            <div class="text-left">
+                <h3> Here's Your User Information </h3>
 
-                <p> Username: {{ account_settings["username"] }} </p>
-                <p> First Name: {{ account_settings["fName"] }}</p>
-                <p> Last Name: {{ account_settings["lName"] }}</p>
-                <p> Street Address: {{ account_settings["streetAddress"] }}</p>
-                <p> City: {{ account_settings["city"] }}</p>
-                <p> State: {{ account_settings["state"] }}</p>
-                <p> Post Code: {{ account_settings["lName"] }}</p>
+                    <p> <span class="lead">Username:</span> {{ account_settings["username"] }} </p>
+                    <p>  <span class="lead">First Name:</span> {{ account_settings["fName"] }}</p>
+                    <p>  <span class="lead">Last Name:</span> {{ account_settings["lName"] }}</p>
+                    <p>  <span class="lead">Street Address:</span> {{ account_settings["streetAddress"] }}</p>
+                    <p>  <span class="lead">City:</span> {{ account_settings["city"] }}</p>
+                    <p>  <span class="lead">State:</span> {{ account_settings["state"] }}</p>
+                    <p>  <span class="lead">Post Code:</span> {{ account_settings["postCode"] }}</p>
+
+                    <button type="button" class="btn btn-primary" 
+                                          id="userHomeAccountChangeButton"
+                                          data-toggle="modal"
+                                          data-target="#userHomeAccountChangeModal">
+                                          
+                        Update Your Information
+                    </button>
+                    <button type='button' class="btn btn-primary"
+                                          id="userHomePasswordChangeButton">
+                                                                           Change Your Password
+                    </button>
 
 
                 <p> Would you like to log out?  <a href="/logout">Click here</a> </p>
+            </div>
+        </div>
+        <div class="modal" tabindex="-1" role="dialog" id="userHomeAccountChangeModal">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Change My Account Information</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                  <form id="userHomeAccountChangeForm">
+                      <fieldset class="form-group">
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                              for="userHomeAccountChangeUsername"> Username/Email 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangeUsername" 
+                                 type="text" required
+                                 value="{{account_settings["username"]}}"> 
+                          </div>
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                                 for="userHomeAccountChangefName"> First Name 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangefName" 
+                                 type="text" required
+                                 value="{{account_settings["fName"]}}"> 
+                          </div>
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                                 for="userHomeAccountChangelName"> Last Name 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangelName" 
+                                 type="text" required
+                                 value="{{account_settings["lName"]}}"> 
+                          </div>
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                                 for="userHomeAccountChangeStreetAddress"> 
+                              Street Address 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangeStreetAddress" 
+                                 type="text" required
+                                 value="{{account_settings["streetAddress"]}}"> 
+                          </div>
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                                 for="userHomeAccountChangeCity"> 
+                              City
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangeCity" 
+                                 type="text" required
+                                 value="{{account_settings["city"]}}"> 
+                          </div>
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                                 for="userHomeAccountChangeState"> 
+                             State 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangeState" 
+                                 type="text" required
+                                 value="{{account_settings["state"]}}"> 
+                          </div>
+                          <div class="form-group"
+                          <label class="form-control-label" 
+                                 for="userHomeAccountChangePostCode"> 
+                             Post Code 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangePostCode" 
+                                 type="text" required
+                                 value="{{account_settings["postCode"]}}"> 
+                      </div>
+                 </fieldset>
+               </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" 
+                    onclick="changeUserInformation()">
+                    Save changes
+                </button>
+                <button type="button" class="btn btn-secondary" 
+                    data-dismiss="modal">
+                    Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <section id="footer">
@@ -25,9 +134,37 @@
                 <small>Citations go here</small>
                 </div>
             </div>
-  </section>
+        </section>
 
     </section>
+
+    <script type="text/javascript">
+        function changeUserInformation() {
+            $.ajax("{{ url_for('account') }}", {
+                contentType: "application/json",
+                data: JSON.stringify({
+                    // First key:value is flag for request
+                    "request": "changeUserSettings",
+                    // Other key:value pairs are user data
+                    "username": $("#userHomeAccountChangeUsername").val(),
+                    "fName": $("#userHomeAccountChangefName").val(),
+                    "lName": $("#userHomeAccountChangelName").val(),
+                    "streetAddress": $("#userHomeAccountChangeStreetAddress").val(),
+                    "city": $("#userHomeAccountChangeCity").val(),
+                    "state": $("#userHomeAccountChangeState").val(),
+                    "postCode": $("#userHomeAccountChangePostCode").val()
+                }),
+                type: "POST",
+                success: function(account_settings) {
+                    $('#userHomeAccountChangeModal').modal("hide");
+                    location.reload();
+                    // let newDoc = document.open("text/html", "replace");
+                    //newDoc.write({account_settings:account_settings});
+                    //newDoc.close();
+                }
+            });
+        }
+    </script>
 
 
 
