@@ -141,6 +141,7 @@
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
+
               <div class="modal-body">
                   <form id="userHomePasswordChangeForm">
                       <fieldset class="form-group">
@@ -176,7 +177,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-primary" 
-                    onclick="changeUserInformation()">
+                    onclick="changePassword()">
                     Save changes
                 </button>
                 <button type="button" class="btn btn-secondary" 
@@ -254,17 +255,37 @@
 
         // Send off password info change
         function changePassword() {
-            $.ajax("{{ url_for('account') }}", {
-                contentType: "application/json",
-                data: JSON.stringify({
-                    // First key:value is flag for request
-                    "request": "changePassword",
-                    // Other key:value pairs are user data
-                    "username": "{{ account_settings["username"] }}",
-                    "oldPassword": $("#userHomeChangePasswordNewPassword").val()
-                }),
-            });
-
+            if ( ($("#new-password").val() === "")  || 
+                ($("#new-password").val() != $("#new-password-confirm").val()))
+            {
+                alert(`Please make sure you enter a new password, and that you
+                enter the same new password twice.`);
+            }
+            else {
+                $.ajax("{{ url_for('account') }}", {
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        // First key:value is flag for request
+                        "request": "changePassword",
+                        // Other key:value pairs are user data
+                        "username": "{{ account_settings["username"] }}",
+                        "oldPassword": $("#old-password").val(),
+                        "newPassword": $("#new-password").val()
+                    }),
+                    type: "POST",
+                    success: function(account_settings) {
+                        if (account_settings['passwordMismatch'])
+                            $("#old-password").val("");
+                        else
+                        {
+                            $("#userHomePasswordChangeModal").modal("hide");
+                            let newDoc = document.open("text/html", "replace");
+                            newDoc.write(account_settings);
+                            newDoc.close();
+                        }
+                    }
+                });
+            }
         }
     </script>
 

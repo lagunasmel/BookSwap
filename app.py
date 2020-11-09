@@ -41,6 +41,7 @@ def login():
         # No errors, login proceeds
         if error is None:
             session.clear()
+            session['user_num'] = user['id']
             session['user_id'] = user['username']
             return redirect(url_for('home'))
 
@@ -200,11 +201,29 @@ def account():
         else:
             bsdb.close()
             flash("Username is already taken")
-            return render_template("userHome.thml", 
+            return render_template("userHome.html", 
                     account_settings = req.get_json())
 
+    # Check against request to change password
+    if req.get_json() and req.get_json()['request'] == 'changePassword':
+        print(f"Account: request received for changePassword for user {session['user_id']}")
+        if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
+            flash("Original password not correct");
+            print(f"Account: Incorrect password entered for {session['user_id']}.")
+            bsdb.close()
+            return {"passwordMismatch": True};
+        
+        success = bsdb.change_password(session["user_num"], req.get_json())
+        if success == True:
+            flash("Account password updated.")
+            print(f"Account: Password updated for user {session['user_id']}.")
+            account_settings = bsdb.get_account_settings(session["user_num"])
+            bsdb.close()
+            return render_template("userHome.html", account_settings=account_settings)
+        
+
     # Default behavior (for loading page)
-    account_settings = bsdb.get_account_settings(1)
+    account_settings = bsdb.get_account_settings(session["user_num"])
     bsdb.close()
     return render_template('userHome.html', account_settings=account_settings)
 
