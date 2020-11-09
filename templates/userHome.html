@@ -24,7 +24,10 @@
                         Update Your Information
                     </button>
                     <button type='button' class="btn btn-primary"
-                                          id="userHomePasswordChangeButton">
+                                          id="userHomePasswordChangeButton"
+                                          data-toggle="modal"
+                                          data-target="#userHomePasswordChangeModal">
+                                    
                                                                            Change Your Password
                     </button>
 
@@ -44,7 +47,7 @@
               <div class="modal-body">
                   <form id="userHomeAccountChangeForm">
                       <fieldset class="form-group">
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                               for="userHomeAccountChangeUsername"> Username/Email 
                           </label>
@@ -53,7 +56,7 @@
                                  type="text" required
                                  value="{{account_settings["username"]}}"> 
                           </div>
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangefName"> First Name 
                           </label>
@@ -62,7 +65,7 @@
                                  type="text" required
                                  value="{{account_settings["fName"]}}"> 
                           </div>
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangelName"> Last Name 
                           </label>
@@ -71,7 +74,7 @@
                                  type="text" required
                                  value="{{account_settings["lName"]}}"> 
                           </div>
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangeStreetAddress"> 
                               Street Address 
@@ -81,7 +84,7 @@
                                  type="text" required
                                  value="{{account_settings["streetAddress"]}}"> 
                           </div>
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangeCity"> 
                               City
@@ -91,7 +94,7 @@
                                  type="text" required
                                  value="{{account_settings["city"]}}"> 
                           </div>
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangeState"> 
                              State 
@@ -101,7 +104,7 @@
                                  type="text" required
                                  value="{{account_settings["state"]}}"> 
                           </div>
-                          <div class="form-group"
+                          <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangePostCode"> 
                              Post Code 
@@ -127,6 +130,65 @@
             </div>
           </div>
         </div>
+        <div class="modal" tabindex="-1" role="dialog" 
+            id="userHomePasswordChangeModal">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Change My Password</h5>
+                <button type="button" class="close" data-dismiss="modal" 
+                    aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+
+              <div class="modal-body">
+                  <form id="userHomePasswordChangeForm">
+                      <fieldset class="form-group">
+                          <div class="form-group">
+                          <label class="form-control-label" 
+                                 for="old-password">
+                              Current Password 
+                          </label>
+                          <input class="form-control" 
+                                 id="old-password" 
+                                 type="password" required>
+                          </div>
+                          <div class="form-group">
+                          <label class="form-control-label" 
+                                 for="new-password">
+                              New Password 
+                          </label>
+                          <input class="form-control" 
+                                 id="new-password" 
+                                 type="password" required>
+                          </div>
+                          <div class="form-group">
+                          <label class="form-control-label" 
+                                 for="new-password-confirm">
+                              Confirm New Password 
+                          </label>
+                          <input class="form-control" 
+                                 id="new-password-confirm" 
+                                 type="password" required>
+                          </div>
+                      </fieldset>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-primary" 
+                    onclick="changePassword()">
+                    Save changes
+                </button>
+                <button type="button" class="btn btn-secondary" 
+                    data-dismiss="modal">
+                    Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
 
         <section id="footer">
             <div class="container text-center">
@@ -139,6 +201,35 @@
     </section>
 
     <script type="text/javascript">
+        // Check that new password confirm matches new password
+        $("#new-password-confirm").keyup( function() {
+            if ($("#new-password").val() !== $(this).val())
+            {
+                $(this).removeClass("is-valid").addClass("is-invalid");
+            }
+            else
+            {
+                $(this).removeClass("is-invalid").addClass("is-valid");
+            }
+        });
+
+        $("#new-password").on("keyup", function() {
+            if ($("#new-password-confirm").val())
+            {
+                if ($(this).val() !== $("#new-password-confirm").val())
+                {
+                    $("#new-password-confirm").removeClass("is-valid").
+                        addClass("is-invalid");
+                }
+                else
+                {
+                    $("#new-password-confirm").removeClass("is-invalid").
+                        addClass("is-valid");
+                }
+            }
+        });
+    
+        // Send off user info change
         function changeUserInformation() {
             $.ajax("{{ url_for('account') }}", {
                 contentType: "application/json",
@@ -158,11 +249,43 @@
                 success: function(account_settings) {
                     $('#userHomeAccountChangeModal').modal("hide");
                     location.reload();
-                    // let newDoc = document.open("text/html", "replace");
-                    //newDoc.write({account_settings:account_settings});
-                    //newDoc.close();
                 }
             });
+        }
+
+        // Send off password info change
+        function changePassword() {
+            if ( ($("#new-password").val() === "")  || 
+                ($("#new-password").val() != $("#new-password-confirm").val()))
+            {
+                alert(`Please make sure you enter a new password, and that you
+                enter the same new password twice.`);
+            }
+            else {
+                $.ajax("{{ url_for('account') }}", {
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        // First key:value is flag for request
+                        "request": "changePassword",
+                        // Other key:value pairs are user data
+                        "username": "{{ account_settings["username"] }}",
+                        "oldPassword": $("#old-password").val(),
+                        "newPassword": $("#new-password").val()
+                    }),
+                    type: "POST",
+                    success: function(account_settings) {
+                        if (account_settings['passwordMismatch'])
+                            $("#old-password").val("");
+                        else
+                        {
+                            $("#userHomePasswordChangeModal").modal("hide");
+                            let newDoc = document.open("text/html", "replace");
+                            newDoc.write(account_settings);
+                            newDoc.close();
+                        }
+                    }
+                });
+            }
         }
     </script>
 

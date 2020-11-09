@@ -170,10 +170,48 @@ class BookSwapDatabase:
                     )
             self.db.commit()
             return True
-
         except sqlite3.Error as e:
             print(e)
             return False
+
+    def check_password(self, user_num, old_password):
+        """
+        Checks if the password is correct.
+        Accepts:
+            user_num (int): User id of logged in user
+            old_password (string): User-entered old password
+        Returns:
+            True if old_password is correct, false if it is not
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("SELECT password FROM Users WHERE id = ?",
+                    (user_num, ))
+            results = c.fetchone()
+            return old_password == results[0]
+        except sqlite3.Error as e:
+            print(e)
+            return
+
+    def change_password(self, user_num, req):
+        """
+        Changes the user password.
+        Accepts:
+            user_num (int): Logged in user ID number in Users table
+            req (JSON): body of request from user
+        Returns:
+            True if successful chnage, false if not
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("UPDATE Users SET password = ? WHERE id = ?;",
+                    ( req['newPassword'], user_num))
+            self.db.commit()
+            return True
+        except sqlite3.Error as e:
+            print(e)
+            return False
+
 
 # @app.teardown_appcontext
 # def close_connection(exception):
