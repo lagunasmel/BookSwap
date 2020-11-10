@@ -185,17 +185,22 @@ def account():
         username = req.get_json()['username']
         # Check that the username isn't changing or is available
         if username == session['user_id'] or bsdb.username_available(username):
-            success = bsdb.change_account_information(session['user_id'], req.get_json())
-            bsdb.close()
+            success = bsdb.change_account_information(session['user_num'], req.get_json())
             if success == True:
                 flash("Account information updated.")
                 print("Account: returning new account info:") 
-                for key in req.get_json():
-                    print(f"\t {key}: {req.get_json()[key]}")
-                return req.get_json()
+                account_settings = bsdb.get_account_settings(session["user_num"]);
+                for key in account_settings.keys():
+                    if key != 'password':
+                        print(f"\t {key}: {account_settings[key]}")
+                account_settings = bsdb.get_account_settings(session["user_num"]);
+                bsdb.close()
+
+                return render_template("user/userHome.html", account_settings=account_settings);
 
             else:
                 flash("Error updating your information. Try again?")
+                bsdb.close()
                 return render_template("user/userHome.html",
                                        account_settings = req.get_json())
         else:

@@ -114,7 +114,7 @@ class BookSwapDatabase:
         book_id = rows[0]["id"]
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""", (user_id, book_id, copyquality))
 
-    def username_available(username):
+    def username_available(self, username):
         """
         Checks if username is not yet taken in database.
         Accepts:
@@ -130,16 +130,15 @@ class BookSwapDatabase:
         rows = c.fetchone()
         return rows is not None
 
-    def change_account_information(self, old_username, req):
+    def change_account_information(self, user_id, req):
         """
         Changes the user account information.
         Accepts:
-            old_username (string): old username
+            user_id (int): user id number
             req (JSON): body of request from user 
         Returns:
             True if successful change, false if not
         """
-        new_info = req
         c = self.db.cursor()
         try:
             c.execute("""
@@ -153,19 +152,17 @@ class BookSwapDatabase:
                         state = ?,
                         postCode = ?
                     WHERE
-                        id = (
-                            SELECT id FROM Users WHERE username = ?)
-                    ;
+                        id = ?
                     """,
                     (
-                        new_info['username'],
-                        new_info['fName'],
-                        new_info['lName'],
-                        new_info['streetAddress'],
-                        new_info['city'],
-                        new_info['state'],
-                        new_info['postCode'],
-                        old_username
+                        req['username'],
+                        req['fName'],
+                        req['lName'],
+                        req['streetAddress'],
+                        req['city'],
+                        req['state'],
+                        req['postCode'],
+                        user_id
                         )
                     )
             self.db.commit()
