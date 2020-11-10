@@ -134,7 +134,7 @@ def wishlist():
     data = {}
     data["table_content"] = wishBooks
     data["headers"] = "Wishlists"
-    return render_template('wishlist.html', data=data)
+    return render_template('user/wishlist.html', data=data)
 
 
 @app.route('/addToWishlist', methods=['GET'])
@@ -196,13 +196,13 @@ def account():
 
             else:
                 flash("Error updating your information. Try again?")
-                return render_template("userHome.html",
-                        account_settings = req.get_json())
+                return render_template("user/userHome.html",
+                                       account_settings = req.get_json())
         else:
             bsdb.close()
             flash("Username is already taken")
-            return render_template("userHome.html", 
-                    account_settings = req.get_json())
+            return render_template("user/userHome.html",
+                                   account_settings = req.get_json())
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
@@ -219,13 +219,13 @@ def account():
             print(f"Account: Password updated for user {session['user_id']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
             bsdb.close()
-            return render_template("userHome.html", account_settings=account_settings)
+            return render_template("user/userHome.html", account_settings=account_settings)
         
 
     # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(session["user_num"])
     bsdb.close()
-    return render_template('userHome.html', account_settings=account_settings)
+    return render_template('user/userHome.html', account_settings=account_settings)
 
 
 @app.route('/_add-book', methods=['POST'])
@@ -252,7 +252,7 @@ def add_book():
                 "caption": "",
                 "copyqualities": copyqualities}
 
-        return render_template('myBooks.html', data=data)
+        return render_template('user/myBooks.html', data=data)
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
 def removeBook():
@@ -294,7 +294,7 @@ def my_books():
             "copyqualities": copyqualities
             }
 
-    return render_template('myBooks.html', data=data)
+    return render_template('user/myBooks.html', data=data)
 
 
 @app.route('/logout')
@@ -335,7 +335,7 @@ def demo_users():
     data = {}
     data["table_content"] = table_content
     data["headers"] = ["Username", "First Name", "Last Name"]
-    return render_template("demo-users.html", data=data)
+    return render_template("demos/demo-users.html", data=data)
 
 
 @app.route('/reset-db')
