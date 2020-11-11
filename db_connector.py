@@ -43,7 +43,7 @@ class BookSwapDatabase:
         """
         c = self.db.cursor()
         c.execute("""
-                SELECT username, password, fName, lName, streetAddress, city, state, postCode, points 
+                SELECT username, fName, lName, streetAddress, city, state, postCode, points 
                 FROM Users WHERE id=?;""", (user_id,))
         rows = c.fetchall()
         if len(rows) != 1:

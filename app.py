@@ -63,7 +63,7 @@ def signup():
     form = RegistrationForm()
     if form.validate_on_submit():
         db = get_db()
-        db.row_factory = sqlite3.Row
+        # db.row_factory = sqlite3.Row
         c = db.cursor()
         error = None
 
@@ -72,17 +72,19 @@ def signup():
             error = "Username is required."
         elif not form.password.data:
             error = "Password is required."
-        elif db.execute('SELECT id FROM Users WHERE username = ?', 
+        elif c.execute('SELECT id FROM Users WHERE username = ?', 
                 (form.email.data, )).fetchone() is not None:
             error = 'User {} already exists.  Please try again with a different username (email), or log in.'.format(form.email.data)
 
         if error is None:
-            db.execute("INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress', 'city', 'state', 'postCode') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            c.execute("INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress', 'city', 'state', 'postCode') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (form.email.data, form.password.data, form.fName.data, 
                 form.lName.data, form.streetAddress.data, form.city.data,
                 form.state.data, form.postCode.data))
             db.commit()
+            print(f"Signup: account created for {form.email.data}, with User id {c.lastrowid}")
             flash(f'Account created for {form.email.data}!', 'success')
+            session['user_num'] = c.lastrowid
             return redirect(url_for('account'))
         flash(error)
     return render_template('signup.html', form=form)
@@ -184,15 +186,16 @@ def account():
         print("Account: request received for changeUserSettings")
         username = req.get_json()['username']
         # Check that the username isn't changing or is available
-        if username == session['user_id'] or bsdb.username_available(username):
+
+        if (username == bsdb.get_account_settings(session["user_num"])["username"] 
+        or bsdb.username_available(username)):
             success = bsdb.change_account_information(session['user_num'], req.get_json())
             if success == True:
                 flash("Account information updated.")
                 print("Account: returning new account info:") 
                 account_settings = bsdb.get_account_settings(session["user_num"]);
                 for key in account_settings.keys():
-                    if key != 'password':
-                        print(f"\t {key}: {account_settings[key]}")
+                    print(f"\t {key}: {account_settings[key]}")
                 account_settings = bsdb.get_account_settings(session["user_num"]);
                 bsdb.close()
 
@@ -211,7 +214,7 @@ def account():
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
-        print(f"Account: request received for changePassword for user {session['user_id']}")
+        print(f"Account: request received for changePassword for user {session['user_num']}")
         if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
             flash("Original password not correct");
             print(f"Account: Incorrect password entered for {session['user_id']}.")
@@ -220,8 +223,8 @@ def account():
         
         success = bsdb.change_password(session["user_num"], req.get_json())
         if success == True:
-            flash("Account password updated.")
-            print(f"Account: Password updated for user {session['user_id']}.")
+            flash("Account password updated.", 'success')
+            print(f"Account: Password updated for user {session['user_num']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
             bsdb.close()
             return render_template("user/userHome.html", account_settings=account_settings)
