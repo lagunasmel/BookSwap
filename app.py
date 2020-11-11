@@ -24,7 +24,7 @@ def login():
     form = LoginForm()
     # Checks if input is valid
     if form.validate_on_submit():
-        username = form.email.data
+        username = form.username.data
         password = form.password.data
         error = None
 
@@ -34,7 +34,10 @@ def login():
         user = db.execute("SELECT * FROM Users WHERE username = ?",
                           (username,)).fetchone()
         if user is None:
-            error = "Incorrect username."
+            user = db.execute("SELECT * FROM Users WHERE email = ?",
+                    (username, )).fetchone()
+            if user is None:
+                error = "Incorrect username."
 
         # Password check
         elif user['password'] != password:
@@ -44,10 +47,9 @@ def login():
         if error is None:
             session.clear()
             session['user_num'] = user['id']
-            session['user_id'] = user['username']
             return redirect(url_for('home'))
 
-        flash(error)
+        flash(error, 'warning')
 
     """
     # Simulation of a successful login - sample email and password
@@ -71,25 +73,41 @@ def signup():
         error = None
 
         #(Redundant) check for uesrname and password entries
-        if not form.email.data:
+        if not form.username.data:
             error = "Username is required."
         elif not form.password.data:
             error = "Password is required."
         elif c.execute('SELECT id FROM Users WHERE username = ?', 
                 (form.email.data, )).fetchone() is not None:
-            error = 'User {} already exists.  Please try again with a different username (email), or log in.'.format(form.email.data)
+            error = 'User {} already exists.  Please try again with a different username, or log in.'.format(form.username.data)
 
         if error is None:
-            c.execute("INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress', 'city', 'state', 'postCode') VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            (form.email.data, form.password.data, form.fName.data, 
-                form.lName.data, form.streetAddress.data, form.city.data,
-                form.state.data, form.postCode.data))
+            c.execute("""INSERT INTO Users (
+            'username', 
+            'password', 
+            'email', 
+            'fName', 
+            'lName', 
+            'streetAddress', 
+            'city', 
+            'state', 
+            'postCode') 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (form.username.data, 
+                form.password.data, 
+                form.email.data,
+                form.fName.data, 
+                form.lName.data, 
+                form.streetAddress.data, 
+                form.city.data,
+                form.state.data, 
+                form.postCode.data))
             db.commit()
-            print(f"Signup: account created for {form.email.data}, with User id {c.lastrowid}")
+            print(f"Signup: account created for {form.username.data}, with User id {c.lastrowid}")
             flash(f'Account created for {form.email.data}!', 'success')
             session['user_num'] = c.lastrowid
             return redirect(url_for('account'))
-        flash(error)
+        flash(error, 'warning')
     return render_template('signup.html', form=form)
 
 
@@ -101,13 +119,13 @@ def wishlist():
 
     # Select user based on username, using generic for now
     c = db.cursor()
-    c.execute("SELECT id FROM Users WHERE username = ?", ("csearl2@cdc.gov",))
+    # c.execute("SELECT id FROM Users WHERE username = ?", (session["user_num"],))
 
     # Fetch the user's id 
-    userID = c.fetchall()[0]["id"]
+    # userID = c.fetchall()[0]["id"]
 
     # Using the user's id, select their wishlists
-    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (userID,))
+    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (session["user_num"],))
 
     wishlists = [row["id"] for row in c.fetchall()]
 
@@ -226,7 +244,7 @@ def account():
         print(f"Account: request received for changePassword for user {session['user_num']}")
         if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
             flash("Original password not correct");
-            print(f"Account: Incorrect password entered for {session['user_id']}.")
+            print(f"Account: Incorrect password entered for {session['user_num']}.")
             bsdb.close()
             return {"passwordMismatch": True};
         
@@ -251,14 +269,10 @@ def add_book():
     if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
-        # TODO change the temporary fix below once we progress with login stuff
-        if "user_id" in session:
-            user_id = session["user_id"]
-        else:
-            user_id = 1
+        user_num = session["user_num"]
         bsdb = BookSwapDatabase()
-        bsdb.user_add_book_by_isbn(isbn, user_id, copyquality)
-        rows = bsdb.get_listed_books(user_id)
+        bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
+        rows = bsdb.get_listed_books(user_num)
         copyqualities = bsdb.get_book_qualities()
         bsdb.close()
 
@@ -293,15 +307,10 @@ def removeBook():
 @app.route('/my-books')
 @login_required
 def my_books():
-    # Get current user id
-    # TODO change the temporary fix below once we progress with login stuff
-    if "user_id" in session:
-        user_id = session["user_id"]
-    else:
-        user_id = 1
+    
     # Get the data of books currently listed
     bsdb = BookSwapDatabase()
-    rows = bsdb.get_listed_books(user_id)
+    rows = bsdb.get_listed_books(session['user_num'])
     copyqualities = bsdb.get_book_qualities()
     bsdb.close()
 

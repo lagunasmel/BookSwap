@@ -7,10 +7,8 @@
                 <fieldset class="form-group">
                 <h1 class="text-center">Create an Account</h1>
                     <legend class="text-center mb-4"></legend>
-                    <!-- Username field removed since we are currently using
-                        email.  Easy to switch back.  - Ben 11/5/20
                     <div class="form-group">
-                    {#                        {{ form.username.label(class="form-control-label") }}
+                      {{ form.username.label(class="form-control-label") }}
                         {% if form.username.errors %}
                             {{ form.username(class="form-control is-invalid") }}
                             <div class="invalid-feedback">
@@ -21,10 +19,8 @@
                         {% else %}
                             {{ form.username(class="form-control") }}
                         {% endif %}
-                        #}
 
                     </div>
-                    -->
                     <div class="form-group">
                         {{ form.email.label(class="form-control-label") }}
 
