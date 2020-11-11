@@ -248,7 +248,10 @@
                 type: "POST",
                 success: function(account_settings) {
                     $('#userHomeAccountChangeModal').modal("hide");
-                    location.reload(true);
+                    let newDoc =  document.open("text/html", "replace");
+                    newDoc.write(account_settings);
+                    newDoc.close();
+                    // location.reload(true);
                 }
             });
         }

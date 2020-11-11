@@ -127,8 +127,15 @@ class BookSwapDatabase:
                 SELECT id FROM Users WHERE username = ?
                 """,
                 (username, ))
-        rows = c.fetchone()
-        return rows is not None
+        rows = c.fetchall()
+        for row in rows:
+            print(f"BSDB Username_Available:  Found user")
+            for key in rows[0].keys():
+                print(f"{key}: {rows[0][key]}")
+        available = (len(rows) == 0)
+        print(available)
+        return available
+        # return len(rows) == 0
 
     def change_account_information(self, user_id, req):
         """

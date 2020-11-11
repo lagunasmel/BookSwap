@@ -191,7 +191,7 @@ def account():
         or bsdb.username_available(username)):
             success = bsdb.change_account_information(session['user_num'], req.get_json())
             if success == True:
-                flash("Account information updated.")
+                flash("Account information updated.", "success")
                 print("Account: returning new account info:") 
                 account_settings = bsdb.get_account_settings(session["user_num"]);
                 for key in account_settings.keys():
@@ -202,15 +202,17 @@ def account():
                 return render_template("user/userHome.html", account_settings=account_settings);
 
             else:
-                flash("Error updating your information. Try again?")
+                flash("Error updating your information. Try again?", "warning")
+                account_settings = bsdb.get_account_settings(session["user_num"])
                 bsdb.close()
                 return render_template("user/userHome.html",
-                                       account_settings = req.get_json())
+                                       account_settings = account_settings)
         else:
+            account_settings = bsdb.get_account_settings(session["user_num"])
             bsdb.close()
-            flash("Username is already taken")
+            flash("Username is already taken", "warning")
             return render_template("user/userHome.html",
-                                   account_settings = req.get_json())
+                               account_settings = account_settings)
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
