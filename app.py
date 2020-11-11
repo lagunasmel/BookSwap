@@ -3,6 +3,7 @@ from flask import request as req
 from db_connector import get_db, BookSwapDatabase
 import sqlite3
 from forms import RegistrationForm, LoginForm
+from auth import login_required, guest_required
 
 app = Flask(__name__)
 # Secret Key for Flask Forms security
@@ -18,6 +19,7 @@ def home():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@guest_required
 def login():
     form = LoginForm()
     # Checks if input is valid
@@ -59,6 +61,7 @@ def login():
 
 
 @app.route('/signup', methods=['GET', 'POST'])
+@guest_required
 def signup():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -91,6 +94,7 @@ def signup():
 
 
 @app.route('/wishlist')
+@login_required
 def wishlist():
     db = get_db()
     db.row_factory = sqlite3.Row
@@ -140,6 +144,7 @@ def wishlist():
 
 
 @app.route('/addToWishlist', methods=['GET'])
+@login_required
 def addToWish():
     db = get_db()
     db.row_factory = sqlite3.Row
@@ -160,6 +165,7 @@ def addToWish():
 
 
 @app.route('/removeFromWishlist', methods=['GET'])
+@login_required
 def removeWish():
     db = get_db()
     db.row_factory = sqlite3.Row
@@ -178,6 +184,7 @@ def removeWish():
 
 
 @app.route('/account', methods=['GET', 'POST'])
+@login_required
 def account():
     bsdb = BookSwapDatabase()
     
@@ -239,6 +246,7 @@ def account():
 
 
 @app.route('/_add-book', methods=['POST'])
+@login_required
 def add_book():
     if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]
@@ -265,6 +273,7 @@ def add_book():
         return render_template('user/myBooks.html', data=data)
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
+@login_required
 def removeBook():
     db = get_db()
     db.row_factory = sqlite3.Row
@@ -282,6 +291,7 @@ def removeBook():
 
 
 @app.route('/my-books')
+@login_required
 def my_books():
     # Get current user id
     # TODO change the temporary fix below once we progress with login stuff
