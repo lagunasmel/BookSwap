@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS CopyQualities(
 CREATE TABLE IF NOT EXISTS Users(
     id INTEGER NOT NULL PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
+    email TEXT NOT NULL,
     password VARCHAR(255) NOT NULL,
     fName VARCHAR(255) NOT NULL,
     lName VARCHAR(255) NOT NULL,
@@ -124,30 +125,30 @@ INSERT INTO CopyQualities ('qualityDescription') VALUES ('Brand New'),
     ('Mint -- Like New'), ('Very Good'), ('Useable'), ('Tattered'), ('Dust');
 
 -- Sample "admin" user, for easy login check
-INSERT INTO Users('username', 'password', 'fName', 'lName', 'streetAddress',
+INSERT INTO Users('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
     'city', 'state', 'postCode') VALUES
-    ('admin@bookswap.com', 'password', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
+    ('admin', 'password', 'admin@bookswap.com', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
         'Oregon', '97475');
 
 -- Sample User data from mockaroo.com
-INSERT INTO Users ('username', 'password', 'fName', 'lName', 'streetAddress',
+INSERT INTO Users ('username', 'password', 'email','fName', 'lName', 'streetAddress',
     'city', 'state', 'postCode') VALUES
-    ('fpringle0@archive.org', '5o6RPSL', 'Filmore', 'Pringle', '99 Ruskin Court',	
+    ('fpringle0', '5o6RPSL', 'fpringle0@archive.org', 'Filmore', 'Pringle', '99 Ruskin Court',	
         'Knoxville', 'Tennessee', '37924'),
-    ('khildrup1@pen.io',	'IuYdId', 'Kit', 'Hildrup', '82567 Onsgard Road',	
+    ('khildrup1',	'IuYdId', 'khildrup1@pen.io', 'Kit', 'Hildrup', '82567 Onsgard Road',	
         'Richmond',	'Virginia',	'23203'),
-    ('csearl2@cdc.gov', 'nAvtnI', 'Cassey', 'Searl', '44681 Pearson Alley', 
+    ('csearl2', 'nAvtnI', 'csearl2@cdc.gov', 'Cassey', 'Searl', '44681 Pearson Alley', 
         'Saint Louis', 'Missouri', '63131'),
-    ('esabates3@samsung.com', 'kydXrZxzz9Va', 'Edward', 'Sabates',	'63 Welch Court',
+    ('esabates3', 'kydXrZxzz9Va', 'esabates3@samsung.com', 'Edward', 'Sabates',	'63 Welch Court',
         'Spokane', 'Washington', '99215'),
-    ('jextal4@reference.com', 'DUwvKPx81Iji', 'Jason', 'Extal', '98 Sugar Alley', 
+    ('jextal4', 'DUwvKPx81Iji', 'jextal4@reference.com', 'Jason', 'Extal', '98 Sugar Alley', 
         'Nashville', 'Tennessee', '37215');
 
 -- Sample Wishlists
 INSERT INTO Wishlists (userId) VALUES
-    ((SELECT id from Users WHERE username = 'fpringle0@archive.org')),
-    ((SELECT id from Users WHERE username = 'khildrump1@pen.io')),
-    ((SELECT id from Users WHERE username = 'csearl2@cdc.gov'))
+    ((SELECT id from Users WHERE username = 'fpringle0')),
+    ((SELECT id from Users WHERE username = 'khildrump1')),
+    ((SELECT id from Users WHERE username = 'csearl2'))
     ;
 
 -- Sample Wishlist Books
@@ -156,7 +157,7 @@ INSERT INTO Wishlists (userId) VALUES
 INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES
     (
         (SELECT id FROM Wishlists WHERE userId = (
-            SELECT id FROM Users WHERE username = 'khildrump1@pen.io')
+            SELECT id FROM Users WHERE username = 'khildrump1')
     ),
         (SELECT id FROM Books WHERE ISBN = '99999')
     );
@@ -165,12 +166,12 @@ INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES
 INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
     (
         ( SELECT id FROM Wishlists WHERE userId = (
-            SELECT id FROM Users WHERE username = 'csearl2@cdc.gov')),
+            SELECT id FROM Users WHERE username = 'csearl2')),
         (SELECT id FROM Books WHERE ISBN = '1111111111111')
     ),
     (
         ( SELECT id FROM Wishlists WHERE userId = (
-                SELECT id FROM Users Where username = 'csearl2@cdc.gov')),
+                SELECT id FROM Users Where username = 'csearl2')),
         (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227')
     )
     ;

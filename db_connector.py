@@ -63,11 +63,11 @@ class BookSwapDatabase:
             out.append((row["id"], row["qualityDescription"]))
         return out
 
-    def get_listed_books(self, user_id):
+    def get_listed_books(self, user_num):
         """
         Returns the rows corresponding to the books that user_id has listed as
         available for swapping.
-        :param user_id: the ID of the user whose listed books to return
+        :param user_num: the ID of the user whose listed books to return
         :return: a list of sqlite3.Row objects corresponding to the listed books
         """
         c = self.db.cursor()
@@ -75,30 +75,30 @@ class BookSwapDatabase:
                     SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality,
                     UB.id AS id FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
                     INNER JOIN CopyQualities CQ ON UB.copyQualityId = CQ.id 
-                    WHERE userId = ?""", (user_id,))
+                    WHERE userId = ?""", (user_num,))
         rows = c.fetchall()
         self.db.commit()
         return rows
 
-    def get_userBooksID(self, user_id):
+    def get_userBooksID(self, user_num):
         """
         Returns the UserBooks.id attribute for each of the user's books
         """
 
         c = self.db.cursor()
-        c.execute("""SELECT id FROM UserBooks WHERE userId=?""", (user_id,))
+        c.execute("""SELECT id FROM UserBooks WHERE userId=?""", (user_num,))
         rows = c.fetchall()
         self.db.commit()
         return rows
 
 
-    def user_add_book_by_isbn(self, isbn, user_id, copyquality):
+    def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
         Nothing happens on failure.
 
         :param copyquality: ID corresponding to the quality of the book copy
-        :param user_id: database ID of the user to add the book to
+        :param user_num: database ID of the user to add the book to
         :param isbn: ISBN of the book to be listed as available to swap
         :return: Nothing
         """
@@ -112,7 +112,7 @@ class BookSwapDatabase:
             print("Warning: no matching book found when trying to list a book")
             return
         book_id = rows[0]["id"]
-        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""", (user_id, book_id, copyquality))
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""", (user_num, book_id, copyquality))
 
     def username_available(self, username):
         """

@@ -10,7 +10,9 @@ username = StringField('Username',
                            # These are validators to make sure the input is valid
                            validators=[DataRequired(), Length(min=5, max=25)])
     """
-    email = StringField('Username (Must be a valid email address)',
+    username = StringField('Username (will be displayed publicly)',
+            validators=[DataRequired()])
+    email = StringField('Email (for contacting purposes)',
                         validators=[DataRequired(), Email()])
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5)])
@@ -26,8 +28,8 @@ username = StringField('Username',
 
 
 class LoginForm(FlaskForm):
-    email = StringField('Email',
-                        validators=[DataRequired(), Email()])
+    username = StringField('Username or Email',
+                        validators=[DataRequired()])
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5)])
     remember = BooleanField('Remember Me')  # will allow users to stay logged in
