@@ -42,8 +42,16 @@ class BookSwapDatabase:
         Returned as a sqlite3.Row which can be accessed by key.
         """
         c = self.db.cursor()
-        c.execute("""
-                SELECT username, fName, lName, streetAddress, city, state, postCode, points 
+        c.execute("""SELECT 
+                    username, 
+                    email,
+                    fName, 
+                    lName, 
+                    streetAddress, 
+                    city, 
+                    state, 
+                    postCode, 
+                    points 
                 FROM Users WHERE id=?;""", (user_id,))
         rows = c.fetchall()
         if len(rows) != 1:
@@ -150,6 +158,7 @@ class BookSwapDatabase:
                     UPDATE Users
                     SET 
                         username = ?,
+                        email = ?,
                         fName = ?,
                         lName = ?,
                         streetAddress = ?,
@@ -161,6 +170,7 @@ class BookSwapDatabase:
                     """,
                     (
                         req['username'],
+                        req['email'],
                         req['fName'],
                         req['lName'],
                         req['streetAddress'],

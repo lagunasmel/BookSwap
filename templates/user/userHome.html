@@ -9,6 +9,7 @@
                 <h3> Here's Your User Information </h3>
 
                     <p> <span class="lead">Username:</span> {{ account_settings["username"] }} </p>
+                    <p> <span class="lead">Email: </span> {{ account_settings["email"] }} </p>
                     <p>  <span class="lead">First Name:</span> {{ account_settings["fName"] }}</p>
                     <p>  <span class="lead">Last Name:</span> {{ account_settings["lName"] }}</p>
                     <p>  <span class="lead">Street Address:</span> {{ account_settings["streetAddress"] }}</p>
@@ -49,7 +50,7 @@
                       <fieldset class="form-group">
                           <div class="form-group">
                           <label class="form-control-label" 
-                              for="userHomeAccountChangeUsername"> Username/Email 
+                              for="userHomeAccountChangeUsername"> Username 
                           </label>
                           <input class="form-control" 
                                  id="userHomeAccountChangeUsername" 
@@ -57,6 +58,15 @@
                                  value="{{account_settings["username"]}}"> 
                           </div>
                           <div class="form-group">
+                          <label class="form-control-label" 
+                              for="userHomeAccountChangeEmail"> Email 
+                          </label>
+                          <input class="form-control" 
+                                 id="userHomeAccountChangeEmail" 
+                                 type="text" required
+                                 value="{{account_settings["email"]}}"> 
+                          </div>
+                           <div class="form-group">
                           <label class="form-control-label" 
                                  for="userHomeAccountChangefName"> First Name 
                           </label>
@@ -238,6 +248,7 @@
                     "request": "changeUserSettings",
                     // Other key:value pairs are user data
                     "username": $("#userHomeAccountChangeUsername").val(),
+                    "email": $("#userHomeAccountChangeEmail").val(),
                     "fName": $("#userHomeAccountChangefName").val(),
                     "lName": $("#userHomeAccountChangelName").val(),
                     "streetAddress": $("#userHomeAccountChangeStreetAddress").val(),
