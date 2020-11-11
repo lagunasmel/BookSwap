@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS Books (
     title TEXT NOT NULL,
     author TEXT NOT NULL,
     ISBN INTEGER NOT NULL,
-    cover BLOB
+    externalLink TEXT
 );
     
 -- CopyQualities

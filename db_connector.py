@@ -1,5 +1,5 @@
 import sqlite3
-from flask import g
+from flask import g, session, redirect, url_for
 
 DATABASE = 'DatabaseSpecs/test-db.db'
 
@@ -54,8 +54,11 @@ class BookSwapDatabase:
                     points 
                 FROM Users WHERE id=?;""", (user_id,))
         rows = c.fetchall()
-        if len(rows) != 1:
-            raise KeyError("User ID did not return one row (could be none, could be multiple)")
+        if len(rows) == 0:
+            session.clear()
+            return redirect(url_for('login'))
+        if len(rows) > 1:
+            raise KeyError("User ID did not return only one row")
         return rows[0]
 
     def get_book_qualities(self):
