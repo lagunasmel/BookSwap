@@ -2,12 +2,12 @@
 {% block content %}
 
 
-        <div class="container mt-5">
+    <div class="container mt-5">
         <div class="w-50 p-3 mx-auto">
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
                 <fieldset class="form-group">
-                <h1 class="text-center">Login to BookSwap</h1>
+                    <h1 class="text-center">Login to BookSwap</h1>
                     <legend class="text-center mb-4"></legend>
 
                     <div class="form-group">
@@ -51,27 +51,8 @@
             </form>
             <div class="border-top pt-3">
                 Don't have an account? <a class="ml-2" href="{{ url_for('signup') }}">Sign up here!</a>
-        </div>
+            </div>
         </div>
     </div>
-
-{#    <div class="container mt-5">#}
-{#        <div class="w-50 p-3 mx-auto">#}
-{#            <div class="text-center"><h1>Login</h1></div>#}
-{#            <form>#}
-{#              <div class="form-group">#}
-{#                <label for="inputUsername">Username</label>#}
-{#                <input type="text" class="form-control" id="inputUsername" aria-describedby="emailHelp" placeholder="Username">#}
-{#              </div>#}
-{#              <div class="form-group">#}
-{#                <label for="inputPassword">Password</label>#}
-{#                <input type="password" class="form-control" id="inputPassword" placeholder="Password">#}
-{#              </div>#}
-{#              <button type="submit" class="btn btn-primary mr-3">Submit</button>#}
-{#                Don't have an account? <a href="{{ url_for('signup') }}">Sign up here!</a>#}
-{#            </form>#}
-{#        </div>#}
-{##}
-{#    </div>#}
 
 {% endblock content %}
