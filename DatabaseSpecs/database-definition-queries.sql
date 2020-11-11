@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS Users(
     city VARCHAR(255) NOT NULL,
     state VARCHAR(255) NOT NULL,
     postCode VARCHAR(255) NOT NULL,
+    dateCreated DATETIME DEFAULT current_timestamp,
     points INT DEFAULT 0
 );
 
@@ -70,6 +71,7 @@ CREATE TABLE IF NOT EXISTS Trades(
     userPostedId INTEGER,
     bookId INTEGER,
     statusId INTEGER,
+    dateCreated DATETIME DEFAULT current_timestamp,
     FOREIGN KEY (userRequestedId) REFERENCES Users (id) ON DELETE NO ACTION ON UPDATE CASCADE,
     FOREIGN KEY (userPostedId) REFERENCES Users (id) ON DELETE NO ACTION ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -80,6 +82,7 @@ CREATE TABLE IF NOT EXISTS Trades(
 CREATE TABLE IF NOT EXISTS Wishlists(
     id INTEGER NOT NULL PRIMARY KEY,
     userId INTEGER,
+    dateCreated DATETIME DEFAULT current_timestamp,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -87,6 +90,7 @@ CREATE TABLE IF NOT EXISTS Wishlists(
 CREATE TABLE IF NOT EXISTS WishlistsBooks(
     wishlistId INTEGER,
     bookId INTEGER,
+    dateCreated DATETIME DEFAULT current_timestamp,
     PRIMARY KEY (wishlistId, bookId),
     FOREIGN KEY (wishlistId) REFERENCES Wishlists (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -98,6 +102,7 @@ CREATE TABLE IF NOT EXISTS UserBooks(
     userId INTEGER,
     bookId INTEGER,
     copyQualityId INTEGER,
+    dateCreated DATETIME DEFAULT current_timestamp,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (CopyQualityId) REFERENCES CopyQualities (id) ON DELETE CASCADE ON UPDATE CASCADE
