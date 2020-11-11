@@ -178,5 +178,8 @@ INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
 
 INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES
     (1, 1, 2),
-    (1, 3, 4);
+    (1, 3, 4),
+    (1, 2, 3),
+    (2, 3, 4),
+    (3, 1, 1);
 
