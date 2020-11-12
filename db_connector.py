@@ -219,7 +219,7 @@ class BookSwapDatabase:
         """
         c = self.db.cursor()
         try:
-            c.execute("UPDATE Users SET password = ? WHERE id = ?;",
+            c.execute("UPDATE Users SET password = ? WHERE id = ?",
                     ( req['newPassword'], user_num))
             self.db.commit()
             return True
@@ -227,7 +227,42 @@ class BookSwapDatabase:
             print(e)
             return False
 
-
+    def get_recent_additions(self, num):
+        """
+        Returns the most recent available additions to the site.
+        Accepts:
+            num (int): Number of recent additions to be returned
+        Returns:
+            Array of Row objects
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""SELECT
+                    title,
+                    author,
+                    ISBN,
+                    externalLink,
+                    CopyQualities.qualityDescription AS copyQuality,
+                    Users.username AS listingUser,
+                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere
+                    FROM Books 
+                    INNER JOIN UserBooks 
+                        on Books.id = UserBooks.bookId
+                    INNER JOIN CopyQualities 
+                        on UserBooks.copyQualityId = CopyQualities.id
+                    INNER JOIN Users
+                        on UserBooks.userId = Users.id
+                    ORDER BY
+                    UserBooks.dateCreated DESC
+                    LIMIT ?""",
+                    (num, ))
+            recent_books = c.fetchall()
+            print(recent_books)
+            return recent_books
+        except sqlite3.Error as e:
+            print(e)
+            return False
+                
 # @app.teardown_appcontext
 # def close_connection(exception):
 # """
