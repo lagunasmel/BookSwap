@@ -19,9 +19,9 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/learnHow')
+@app.route('/learn-how')
 def learnHow():
-    return render_template('learnHow.html')
+    return render_template('learn-how.html')
 
 
 @app.route('/faq')
@@ -29,7 +29,7 @@ def faq():
     return render_template('faq.html')
 
 
-@app.route('/browseBooks', methods=['GET', 'POST'])
+@app.route('/browse-books', methods=['GET', 'POST'])
 def browseBooks():
     form = BookSearchForm()
     bsdb = BookSwapDatabase()
@@ -41,13 +41,12 @@ def browseBooks():
     else:
         book_results = {}
 
-    return render_template('browseBooks.html', recent_books=recent_books, 
+    return render_template('browse-books.html', recent_books=recent_books, 
             book_results = book_results, form=form)
 
-
-@app.route('/myTrades')
+@app.route('/my-trades')
 def myTrades():
-    return render_template('user/myTrades.html')
+    return render_template('user/my-trades.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -263,22 +262,25 @@ def account():
                     session["user_num"])
                 bsdb.close()
 
-                return render_template("user/userHome.html",
-                                       account_settings=account_settings)
+                return render_template("user/user-home.html", account_settings=account_settings);
 
             else:
                 flash("Error updating your information. Try again?", "warning")
                 account_settings = bsdb.get_account_settings(
                     session["user_num"])
                 bsdb.close()
-                return render_template("user/userHome.html",
-                                       account_settings=account_settings)
+
+                return render_template("user/user-home.html",
+                                       account_settings = account_settings)
+
         else:
             account_settings = bsdb.get_account_settings(session["user_num"])
             bsdb.close()
             flash("Username is already taken", "warning")
-            return render_template("user/userHome.html",
-                                   account_settings=account_settings)
+
+            return render_template("user/user-home.html",
+                               account_settings = account_settings)
+
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
@@ -297,12 +299,14 @@ def account():
             print(f"Account: Password updated for user {session['user_num']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
             bsdb.close()
-            return render_template("user/userHome.html", account_settings=account_settings)
+
+            return render_template("user/user-home.html", account_settings=account_settings)
+        
 
     # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(session["user_num"])
     bsdb.close()
-    return render_template('user/userHome.html', account_settings=account_settings)
+    return render_template('user/user-home.html', account_settings=account_settings)
 
 
 @app.route('/_add-book', methods=['POST'])
@@ -326,7 +330,7 @@ def add_book():
                 "caption": "",
                 "copyqualities": copyqualities}
 
-        return render_template('user/myBooks.html', data=data)
+        return render_template('user/my-books.html', data=data)
 
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
@@ -366,7 +370,7 @@ def my_books():
             "copyqualities": copyqualities
             }
 
-    return render_template('user/myBooks.html', data=data)
+    return render_template('user/my-books.html', data=data)
 
 
 @app.route('/logout')
