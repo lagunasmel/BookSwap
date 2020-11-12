@@ -279,8 +279,8 @@ class BookSwapDatabase:
                     externalLink,
                     Users.username as listingUser,
                     CopyQualities.qualityDescription as copyQuality,
-                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
-                    UserBooks.points as pointsNeeded
+                    CAST ((julianday('now') - julianday(UserBooks.dataCreated)) AS INTEGER) AS timeHere,
+                    UserBooks.points as pointsNeeded,
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -290,35 +290,22 @@ class BookSwapDatabase:
                         on UserBooks.userId = Users.id
                     WHERE
                         ISBN = ?
-                    ORDER BY
-                        UserBooks.dateCreated
-                        """,
-                        (ISBN, ))
-            isbn_match = c.fetchall()
-            print("BSDB: Check_ISBN (local) Results")
-            self.print_results(isbn_match)
-            return isbn_match
+
+            rows = c.fetchall()
+            if len(rows) == 0:
+                print("\t No book found.")
+            elif len(rows) > 1:
+                print("WARNING WARNING More than one book has same ISBN WARNING WARNING")
+            for row in rows:
+                print("\t Found book:")
+                for key in row.keys():
+                    print(f"{key}: {row[key]}")
+            return rows
         except sqlite3.Error as e:
             print(e)
             return {}
 
-    def print_results(self, rows):
-        """
-        Prints results.
-        Accepts:
-            rows (Row objects): returns from SQL query
-        Returns:
-            None
-        """
-        print("Printing Search Results:")
-        i = 1
-        for row in rows:
-            print(f"\t Result #{i}:")
-            for key in row.keys():
-                print(f"\t\t {key}: {row[key]}")
-        return
-
-
+                
 # @app.teardown_appcontext
 # def close_connection(exception):
 # """
