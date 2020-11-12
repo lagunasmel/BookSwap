@@ -4,12 +4,6 @@ from wtforms.validators import DataRequired, Length, Email, EqualTo
 
 
 class RegistrationForm(FlaskForm):
-    """
-Username is removed currently. -- Ben 11/5/20
-username = StringField('Username',
-                           # These are validators to make sure the input is valid
-                           validators=[DataRequired(), Length(min=5, max=25)])
-    """
     username = StringField('Username (will be displayed publicly)',
             validators=[DataRequired()])
     email = StringField('Email (for contacting purposes)',
@@ -34,3 +28,9 @@ class LoginForm(FlaskForm):
                              validators=[DataRequired(), Length(min=5)])
     remember = BooleanField('Remember Me')  # will allow users to stay logged in
     submit = SubmitField('Login')
+
+class BookSearchForm(FlaskForm):
+    ISBN = StringField('ISBN')
+    author = StringField("Author")
+    title = StringField("Title")
+    submit = SubmitField("Search For This Book")

@@ -1,27 +1,79 @@
+
 {% extends "layout.html" %}
 {% block content %}
+
 <div class="container mt-5">
     <div class="w-50 p-3 mx-auto">
         <h1 class="text-center">Browse Books</h1>
         <p></p>
-        <h2>
-            Our Most Recent Additions
-        </h2>
-        <div class="list-group">
-            {% for book in recent_books %}
-            <div class="list-group-item list-group-item-action flex-column align-items-start">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ book['title'] }}</h5>
-                    <small>listed {{ book['timeHere'] }} days ago</small>
+
+        <div id="recent-additions">
+            <h2>Our Most Recent Additions</h2>
+            <div class="list-group">
+                {% for book in recent_books %}
+                <div
+                    class="list-group-item list-group-item-action flex-column align-items-start"
+                    >
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ book['title'] }}</h5>
+                        <small>listed {{ book['timeHere'] }} days ago</small>
+                    </div>
+                    <ul class="mb-1">
+                        <li>Author: {{ book['author'] }}</li>
+                        <li>ISBN: {{ book['ISBN'] }}</li>
+                        <li>Copy Quality: {{ book['copyQuality'] }}</li>
+                    </ul>
+                    <small>Listing User: {{ book['listingUser'] }}</small>
                 </div>
-                <ul class="mb-1">
-                    <li> Author: {{ book['author'] }}</li>
-                    <li> ISBN: {{ book['ISBN'] }}</li>
-                    <li> Copy Quality: {{ book['copyQuality'] }}</li>
-                </ul>
-                <small>Listing User: {{ book['listingUser'] }}</small>
+                {% endfor %}
             </div>
-            {% endfor %}
+        </div>
+        <br />
+        <div id="bookSearch">
+            <h2>Search For A Book</h2>
+            <p>
+            Let's find your next thing to read. For this search, the more items you
+            enter, the more precise the search. Entering just an ISBN is always the
+            most efficient way.
+            </p>
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <div class="form-group">
+                        {{ form.ISBN.label(class="form-control-label") }} {% if
+                        form.ISBN.errors %} {{ form.ISBN(class="form-control is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.ISBN.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %} {{ form.ISBN(class="form-control") }} {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.author.label(class="form-control-label") }} {% if
+                        form.author.errors %} {{ form.author(class="form-control
+                        is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.author.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %} {{ form.author(class="form-control") }} {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.title.label(class="form-control-label") }} {% if
+                        form.title.errors %} {{ form.author(class="form-control is-invalid")
+                        }}
+                        <div class="invalid-feedback">
+                            {% for error in form.title.errors %}
+                            <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% else %} {{ form.title(class="form-control") }} {% endif %}
+                    </div>
+                </fieldset>
+                <div class="form-group">{{ form.submit(class="btn btn-primary") }}</div>
+            </form>
         </div>
     </div>
 </div>
