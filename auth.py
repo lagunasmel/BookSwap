@@ -5,7 +5,7 @@ from flask import redirect, session, url_for
 
 """
 Decorator for pages that require user be logged in.  Redirects
-gues user to login page.
+guest user to login page.
 """
 def login_required(view):
     @functools.wraps(view)
