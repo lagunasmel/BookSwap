@@ -34,59 +34,59 @@
     <div class="collapse navbar-collapse" id="navbarColor02">
         <ul class="navbar-nav ml-auto">
             {% if session.user_num %}
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">Home
-                    <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('browseBooks') }}">Browse Books</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('my_books') }}">My Books</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('myTrades') }}">My Trades</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('wishlist') }}">Wishlist</a>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('account') }}">Account Settings</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}">Home
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('browseBooks') }}">Browse Books</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('my_books') }}">My Books</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('myTrades') }}">My Trades</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('wishlist') }}">Wishlist</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('account') }}">Account Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
+                </li>
             {% else %}
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">Home
-                    <span class="sr-only">(current)</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('learnHow') }}">Learn How</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('browseBooks') }}">Browse Books</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('home') }}">Home
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('learnHow') }}">Learn How</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('browseBooks') }}">Browse Books</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                </li>
             {% endif %}
         </ul>
     </div>
 </nav>
 <!-- Allows for alerts to show up on page -->
 {% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-{% for category, message in messages %}
-<div class="alert alert-{{ category }}">
-    {{ message }}
-</div>
-{% endfor %}
-{% endif %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 {% endwith %}
 <!-- This block allows child pages to inherit the layout of this page. -->
 {% block content %}
