@@ -14,6 +14,10 @@ def get_db():
     return db
 
 
+def get_bsdb():
+    return BookSwapDatabase()
+
+
 class BookSwapDatabase:
     """
     This class is intended to deal with everything-SQL related:
@@ -26,9 +30,7 @@ class BookSwapDatabase:
     """
 
     def __init__(self):
-        self.db = getattr(g, '_database', None)
-        if self.db is None:
-            self.db = g._database = sqlite3.connect(DATABASE)
+        self.db = get_db()
         self.db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
 
     def close(self):

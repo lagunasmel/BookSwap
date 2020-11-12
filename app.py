@@ -1,6 +1,6 @@
-from flask import Flask, render_template, url_for, flash, redirect, session
+from flask import Flask, render_template, url_for, flash, redirect, session, g
 from flask import request as req
-from db_connector import get_db, BookSwapDatabase
+from db_connector import get_db, BookSwapDatabase, get_bsdb
 import sqlite3
 from forms import RegistrationForm, LoginForm
 from auth import login_required, guest_required
@@ -9,9 +9,13 @@ app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
-# Database interaction is via this object
-with app.app_context():
-    db = get_db()
+
+# Auto-closes db connection at the end of each request
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 
 # Landing Page
@@ -34,6 +38,7 @@ def faq():
 
 @app.route('/browseBooks', methods=['GET', 'POST'])
 def browseBooks():
+    bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(5)
     return render_template('browseBooks.html', recent_books=recent_books)
 
@@ -230,6 +235,7 @@ def removeWish():
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
+    bsdb = get_bsdb()
     # Check against request to change user settings
     if req.get_json() and req.get_json()['request'] == 'changeUserSettings':
         print("Account: request received for changeUserSettings")
@@ -242,12 +248,12 @@ def account():
             if success == True:
                 flash("Account information updated.", "success")
                 print("Account: returning new account info:")
-                account_settings = bsdb.get_account_settings(session["user_num"]);
+                account_settings = bsdb.get_account_settings(session["user_num"])
                 for key in account_settings.keys():
                     print(f"\t {key}: {account_settings[key]}")
-                account_settings = bsdb.get_account_settings(session["user_num"]);
+                account_settings = bsdb.get_account_settings(session["user_num"])
 
-                return render_template("user/userHome.html", account_settings=account_settings);
+                return render_template("user/userHome.html", account_settings=account_settings)
 
             else:
                 flash("Error updating your information. Try again?", "warning")
@@ -264,9 +270,9 @@ def account():
     if req.get_json() and req.get_json()['request'] == 'changePassword':
         print(f"Account: request received for changePassword for user {session['user_num']}")
         if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
-            flash("Original password not correct");
+            flash("Original password not correct")
             print(f"Account: Incorrect password entered for {session['user_num']}.")
-            return {"passwordMismatch": True};
+            return {"passwordMismatch": True}
 
         success = bsdb.change_password(session["user_num"], req.get_json())
         if success == True:
@@ -283,6 +289,7 @@ def account():
 @app.route('/_add-book', methods=['POST'])
 @login_required
 def add_book():
+    bsdb = get_bsdb()
     if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
@@ -323,6 +330,7 @@ def removeBook():
 @app.route('/my-books')
 @login_required
 def my_books():
+    bsdb = get_bsdb()
     # Get the data of books currently listed
     rows = bsdb.get_listed_books(session['user_num'])
     copyqualities = bsdb.get_book_qualities()
