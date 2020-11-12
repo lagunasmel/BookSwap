@@ -18,6 +18,26 @@ def home():
     return render_template('home.html')
 
 
+@app.route('/learnHow')
+def learnHow():
+    return render_template('learnHow.html')
+
+
+@app.route('/faq')
+def faq():
+    return render_template('faq.html')
+
+
+@app.route('/browseBooks')
+def browseBooks():
+    return render_template('browseBooks.html')
+
+
+@app.route('/myTrades')
+def myTrades():
+    return render_template('user/myTrades.html')
+
+
 @app.route('/login', methods=['GET', 'POST'])
 @guest_required
 def login():
