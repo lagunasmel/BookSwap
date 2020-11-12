@@ -2,88 +2,64 @@
 {% import 'user/macros.html' as macros %}
 
 {% block content %}
-<p class="lead text-center py-4">
-    Here are the books you've offered to swap - feel free to add to, or remove from, this list
-</p>
+    <p class="lead text-center py-4">
+        Here are the books you've offered to swap - feel free to add to, or remove from, this list
+    </p>
 
-<div class="container">
-    <div class="w-75 p-3 mx-auto">
-        <!-- Div for adding a book -->
-        <div id='listBook'>
-            <h4 class="pl-2">List a new book</h4>
-            <form id="newBookForm">
-                <div class="form-group">
-                    <label for="newBookISBN" class="pl-2">ISBN</label>
-                    <input class="form-control" id="newBookISBN" type="text" placeholder="Enter ISBN of book to list">
-                </div>
-                <div class="form-group">
-                    <label for="newBookQuality" class="pl-2">Quality of your copy?</label>
-                    <select class="form-control" id="newBookQuality">
-                        {% for cq in data.copyqualities %}
-                        <option value="{{ cq[0] }}">{{ cq[1] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="button" class="btn btn-primary ml-2" onclick="confirmBook()">Add Book</button>
-            </form>
+    <div class="container">
+        <div class="w-75 p-3 mx-auto">
+            <!-- Div for adding a book -->
+            <div id='listBook'>
+                <h4 class="pl-2">List a new book</h4>
+                <form id="newBookForm">
+                    <div class="form-group">
+                        <label for="newBookISBN" class="pl-2">ISBN</label>
+                        <input class="form-control" id="newBookISBN" type="text"
+                               placeholder="Enter ISBN of book to list">
+                    </div>
+                    <div class="form-group">
+                        <label for="newBookQuality" class="pl-2">Quality of your copy?</label>
+                        <select class="form-control" id="newBookQuality">
+                            {% for cq in data.copyqualities %}
+                                <option value="{{ cq[0] }}">{{ cq[1] }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary ml-2" onclick="confirmBook()">Add Book</button>
+                </form>
+            </div>
+            <!-- Hidden div for confirmation -->
+            <div id='confirmBook' style='display:none'>
+                <h4 class="p1-2">Confirm Adding This Book</h4>
+                <ul>
+                    <li id="confirmBookISBN"></li>
+                    <li id='confirmBookcopyQuality'></li>
+                </ul>
+                <button type="button" class="btn btn-primary ml-2"
+                        onclick="addBook()"> Yes, Add This Book
+                </button>
+                <button type="button" class="btn btn-primary ml-2"
+                        onclick="cancelAddBook()">No, I need To Fix Something
+                </button>
+            </div>
+
         </div>
-        <!-- Hidden div for confirmation -->
-        <div id='confirmBook' style='display:none'>
-            <h4 class="p1-2">Confirm Adding This Book</h4>
-            <ul>
-                <li id="confirmBookISBN"></li>
-                <li id='confirmBookcopyQuality'></li>
-            </ul>
-            <button type="button" class="btn btn-primary ml-2"
-                    onclick="addBook()"> Yes, Add This Book
-            </button>
-            <button type="button" class="btn btn-primary ml-2"
-                    onclick="cancelAddBook()">No, I need To Fix Something
-            </button>
+        <div class="w-75 p-3 mx-auto">
+            <h4 class="pl-2 py-4">Books You've Listed</h4>
+            {{ macros.book_list_table(data.caption, data.headers, data.rows) }}
         </div>
-
     </div>
-    <div class="w-75 p-3 mx-auto">
-        <h4 class="pl-2 py-4">Books You've Listed</h4>
-        {{ macros.book_list_table(data.caption, data.headers, data.rows) }}
-    </div>
-</div>
 
 
-<!-- The AJAX scripts for book list addition -->
-<script type="text/javascript">
+    <!-- The AJAX scripts for book list addition -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/my-books.js') }}">
+    </script>
 
-        function confirmBook(){
-            $("#listBook").hide();
-            $("#confirmBook").show();
-            $("#confirmBookISBN").html(
-                "ISBN: " + $("#newBookISBN").val()
-            );
-            $("#confirmBookcopyQuality").html(
-                "Copy Quality: " + $("#newBookQuality option:selected").text()
-            );
-        }
-        
-        function cancelAddBook() {
-            $("#confirmBook").hide();
-            $("#listBook").show();
-        }
-
+    <script type="text/javascript">
         function addBook() {
-            $.ajax("{{ url_for('add_book') }}", {
-                contentType: "application/json",
-                data: JSON.stringify({'isbn': $('#newBookISBN').val(),
-                                        'quality': $('#newBookQuality').val(), 
-                    'request': 'add'}),
-                type: 'POST',
-                success: function(data) {
-                    let newDoc = document.open("text/html", "replace");
-                    newDoc.write(data);
-                    newDoc.close();
-                }
-            });
-        }
+            addBookTemplate("{{ url_for('add_book') }}")
+        };
+    </script>
 
-</script>
 
 {% endblock content %}
