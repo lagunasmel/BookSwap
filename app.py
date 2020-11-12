@@ -10,7 +10,8 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
 # Database interaction is via this object
-bsdb = BookSwapDatabase()
+with app.app_context():
+    db = get_db()
 
 
 # Landing Page

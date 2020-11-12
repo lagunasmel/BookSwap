@@ -26,7 +26,9 @@ class BookSwapDatabase:
     """
 
     def __init__(self):
-        self.db = get_db()
+        self.db = getattr(g, '_database', None)
+        if self.db is None:
+            self.db = g._database = sqlite3.connect(DATABASE)
         self.db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
 
     def close(self):
@@ -102,7 +104,6 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
-
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
@@ -123,7 +124,8 @@ class BookSwapDatabase:
             print("Warning: no matching book found when trying to list a book")
             return
         book_id = rows[0]["id"]
-        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""", (user_num, book_id, copyquality))
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
+                  (user_num, book_id, copyquality))
 
     def username_available(self, username):
         """
@@ -137,7 +139,7 @@ class BookSwapDatabase:
         c.execute("""
                 SELECT id FROM Users WHERE username = ?
                 """,
-                (username, ))
+                  (username,))
         rows = c.fetchall()
         for row in rows:
             print(f"BSDB Username_Available:  Found user")
@@ -171,18 +173,18 @@ class BookSwapDatabase:
                     WHERE
                         id = ?
                     """,
-                    (
-                        req['username'],
-                        req['email'],
-                        req['fName'],
-                        req['lName'],
-                        req['streetAddress'],
-                        req['city'],
-                        req['state'],
-                        req['postCode'],
-                        user_id
-                        )
-                    )
+                      (
+                          req['username'],
+                          req['email'],
+                          req['fName'],
+                          req['lName'],
+                          req['streetAddress'],
+                          req['city'],
+                          req['state'],
+                          req['postCode'],
+                          user_id
+                      )
+                      )
             self.db.commit()
             return True
         except sqlite3.Error as e:
@@ -201,7 +203,7 @@ class BookSwapDatabase:
         c = self.db.cursor()
         try:
             c.execute("SELECT password FROM Users WHERE id = ?",
-                    (user_num, ))
+                      (user_num,))
             results = c.fetchone()
             return old_password == results[0]
         except sqlite3.Error as e:
@@ -220,7 +222,7 @@ class BookSwapDatabase:
         c = self.db.cursor()
         try:
             c.execute("UPDATE Users SET password = ? WHERE id = ?",
-                    ( req['newPassword'], user_num))
+                      (req['newPassword'], user_num))
             self.db.commit()
             return True
         except sqlite3.Error as e:
@@ -255,14 +257,14 @@ class BookSwapDatabase:
                     ORDER BY
                     UserBooks.dateCreated DESC
                     LIMIT ?""",
-                    (num, ))
+                      (num,))
             recent_books = c.fetchall()
             print(recent_books)
             return recent_books
         except sqlite3.Error as e:
             print(e)
             return False
-                
+
 # @app.teardown_appcontext
 # def close_connection(exception):
 # """
