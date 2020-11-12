@@ -1,8 +1,9 @@
+import sqlite3
+from  book_search import BookSearch
 from flask import Flask, render_template, url_for, flash, redirect, session, g
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
-import sqlite3
-from forms import RegistrationForm, LoginForm
+from forms import RegistrationForm, LoginForm, BookSearchForm
 from auth import login_required, guest_required
 
 app = Flask(__name__)
@@ -26,9 +27,9 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/learnHow')
+@app.route('/learn-how')
 def learnHow():
-    return render_template('learnHow.html')
+    return render_template('learn-how.html')
 
 
 @app.route('/faq')
@@ -36,16 +37,24 @@ def faq():
     return render_template('faq.html')
 
 
-@app.route('/browseBooks', methods=['GET', 'POST'])
+@app.route('/browse-books', methods=['GET', 'POST'])
 def browseBooks():
+    form = BookSearchForm()
     bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(5)
-    return render_template('browseBooks.html', recent_books=recent_books)
+    if req.method=='POST':
+        book_search_query = (form.ISBN.data, form.author.data, form.title.data)
+        book_search = BookSearch(book_search_query, bsdb)
+        book_results = book_search.local_book_search(10)
+    else:
+        book_results = {}
 
+    return render_template('browse-books.html', recent_books=recent_books, 
+            book_results = book_results, form=form)
 
-@app.route('/myTrades')
+@app.route('/my-trades')
 def myTrades():
-    return render_template('user/myTrades.html')
+    return render_template('user/my-trades.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -65,7 +74,7 @@ def login():
                           (username,)).fetchone()
         if user is None:
             user = db.execute("SELECT * FROM Users WHERE email = ?",
-                              (username,)).fetchone()
+                              (username, )).fetchone()
             if user is None:
                 error = "Incorrect username."
 
@@ -108,7 +117,7 @@ def signup():
         elif not form.password.data:
             error = "Password is required."
         elif c.execute('SELECT id FROM Users WHERE username = ?',
-                       (form.email.data,)).fetchone() is not None:
+                       (form.email.data, )).fetchone() is not None:
             error = 'User {} already exists.  Please try again with a different username, or log in.'.format(
                 form.username.data)
 
@@ -134,7 +143,8 @@ def signup():
                        form.state.data,
                        form.postCode.data))
             db.commit()
-            print(f"Signup: account created for {form.username.data}, with User id {c.lastrowid}")
+            print(
+                f"Signup: account created for {form.username.data}, with User id {c.lastrowid}")
             flash(f'Account created for {form.email.data}!', 'success')
             session['user_num'] = c.lastrowid
             return redirect(url_for('account'))
@@ -152,11 +162,12 @@ def wishlist():
     c = db.cursor()
     # c.execute("SELECT id FROM Users WHERE username = ?", (session["user_num"],))
 
-    # Fetch the user's id 
+    # Fetch the user's id
     # userID = c.fetchall()[0]["id"]
 
     # Using the user's id, select their wishlists
-    c.execute("SELECT * FROM Wishlists WHERE userId = ?", (session["user_num"],))
+    c.execute("SELECT * FROM Wishlists WHERE userId = ?",
+              (session["user_num"],))
 
     wishlists = [row["id"] for row in c.fetchall()]
 
@@ -206,7 +217,8 @@ def addToWish():
     c.execute("SELECT * FROM Books WHERE ISBN = ?", (data,))
     bookId = c.fetchall()[0]['id']
 
-    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)", (req.args.get("wishlist"), bookId))
+    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
+              (req.args.get("wishlist"), bookId))
     db.commit()
     db.close()
 
@@ -244,34 +256,46 @@ def account():
 
         if (username == bsdb.get_account_settings(session["user_num"])["username"]
                 or bsdb.username_available(username)):
-            success = bsdb.change_account_information(session['user_num'], req.get_json())
+            success = bsdb.change_account_information(
+                session['user_num'], req.get_json())
             if success == True:
                 flash("Account information updated.", "success")
                 print("Account: returning new account info:")
-                account_settings = bsdb.get_account_settings(session["user_num"])
+                account_settings = bsdb.get_account_settings(
+                    session["user_num"])
                 for key in account_settings.keys():
                     print(f"\t {key}: {account_settings[key]}")
-                account_settings = bsdb.get_account_settings(session["user_num"])
+                account_settings = bsdb.get_account_settings(
+                    session["user_num"])
+                bsdb.close()
 
-                return render_template("user/userHome.html", account_settings=account_settings)
+                return render_template("user/user-home.html", account_settings=account_settings);
 
             else:
                 flash("Error updating your information. Try again?", "warning")
-                account_settings = bsdb.get_account_settings(session["user_num"])
-                return render_template("user/userHome.html",
-                                       account_settings=account_settings)
+                account_settings = bsdb.get_account_settings(
+                    session["user_num"])
+                bsdb.close()
+
+                return render_template("user/user-home.html",
+                                       account_settings = account_settings)
+
         else:
             account_settings = bsdb.get_account_settings(session["user_num"])
             flash("Username is already taken", "warning")
-            return render_template("user/userHome.html",
-                                   account_settings=account_settings)
+
+            return render_template("user/user-home.html",
+                               account_settings = account_settings)
+
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
-        print(f"Account: request received for changePassword for user {session['user_num']}")
+        print(
+            f"Account: request received for changePassword for user {session['user_num']}")
         if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
             flash("Original password not correct")
-            print(f"Account: Incorrect password entered for {session['user_num']}.")
+            print(
+                f"Account: Incorrect password entered for {session['user_num']}.")
             return {"passwordMismatch": True}
 
         success = bsdb.change_password(session["user_num"], req.get_json())
@@ -279,11 +303,12 @@ def account():
             flash("Account password updated.", 'success')
             print(f"Account: Password updated for user {session['user_num']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
-            return render_template("user/userHome.html", account_settings=account_settings)
+            return render_template("user/user-home.html", account_settings=account_settings)
+        
 
     # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(session["user_num"])
-    return render_template('user/userHome.html', account_settings=account_settings)
+    return render_template('user/user-home.html', account_settings=account_settings)
 
 
 @app.route('/_add-book', methods=['POST'])
@@ -306,7 +331,8 @@ def add_book():
                 "caption": "",
                 "copyqualities": copyqualities}
 
-        return render_template('user/myBooks.html', data=data)
+        return render_template('user/my-books.html', data=data)
+
 
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
@@ -344,7 +370,7 @@ def my_books():
             "copyqualities": copyqualities
             }
 
-    return render_template('user/myBooks.html', data=data)
+    return render_template('user/my-books.html', data=data)
 
 
 @app.route('/logout')
@@ -356,7 +382,8 @@ def logout():
 @app.route('/demo-users')
 def demo_users():
     db = get_db()
-    db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
+    # This allows us to access values by column name later on
+    db.row_factory = sqlite3.Row
     """
     Step 1: run the SQL query
     Avoid Python's string operations when putting together SQL queries 
@@ -374,7 +401,8 @@ def demo_users():
     Accessing values by column name is useful if we move around columns later on
     """
     rows = c.fetchall()
-    table_content = [[row["username"], row["fname"], row["lname"]] for row in rows]
+    table_content = [[row["username"], row["fname"], row["lname"]]
+                     for row in rows]
     # Don't forget to close the connection when done with the SQL
     db.close()
     """

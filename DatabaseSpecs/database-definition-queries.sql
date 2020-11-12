@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS UserBooks(
     userId INTEGER,
     bookId INTEGER,
     copyQualityId INTEGER,
+    points INTEGER DEFAULT 1,
     dateCreated DATETIME DEFAULT current_timestamp,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -176,10 +177,11 @@ INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
     )
     ;
 
-INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES
-    (1, 1, 2),
-    (1, 3, 4),
-    (1, 2, 3),
-    (2, 3, 4),
-    (3, 1, 1);
+INSERT INTO UserBooks (userId, bookId, copyQualityId, points) VALUES
+    (1, 1, 2, 1),
+    (1, 3, 4, 2),
+    (1, 2, 3, 3),
+    (2, 3, 4, 4),
+    (3, 1, 3, 2),
+    (3, 1, 1, 3);
 

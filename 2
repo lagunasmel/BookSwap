@@ -14,10 +14,6 @@ def get_db():
     return db
 
 
-def get_bsdb():
-    return BookSwapDatabase()
-
-
 class BookSwapDatabase:
     """
     This class is intended to deal with everything-SQL related:
@@ -106,6 +102,7 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
+
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
@@ -126,8 +123,7 @@ class BookSwapDatabase:
             print("Warning: no matching book found when trying to list a book")
             return
         book_id = rows[0]["id"]
-        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
-                  (user_num, book_id, copyquality))
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""", (user_num, book_id, copyquality))
 
     def username_available(self, username):
         """
@@ -141,7 +137,7 @@ class BookSwapDatabase:
         c.execute("""
                 SELECT id FROM Users WHERE username = ?
                 """,
-                  (username,))
+                (username, ))
         rows = c.fetchall()
         for row in rows:
             print(f"BSDB Username_Available:  Found user")
@@ -175,18 +171,18 @@ class BookSwapDatabase:
                     WHERE
                         id = ?
                     """,
-                      (
-                          req['username'],
-                          req['email'],
-                          req['fName'],
-                          req['lName'],
-                          req['streetAddress'],
-                          req['city'],
-                          req['state'],
-                          req['postCode'],
-                          user_id
-                      )
-                      )
+                    (
+                        req['username'],
+                        req['email'],
+                        req['fName'],
+                        req['lName'],
+                        req['streetAddress'],
+                        req['city'],
+                        req['state'],
+                        req['postCode'],
+                        user_id
+                        )
+                    )
             self.db.commit()
             return True
         except sqlite3.Error as e:
@@ -205,7 +201,7 @@ class BookSwapDatabase:
         c = self.db.cursor()
         try:
             c.execute("SELECT password FROM Users WHERE id = ?",
-                      (user_num,))
+                    (user_num, ))
             results = c.fetchone()
             return old_password == results[0]
         except sqlite3.Error as e:
@@ -224,7 +220,7 @@ class BookSwapDatabase:
         c = self.db.cursor()
         try:
             c.execute("UPDATE Users SET password = ? WHERE id = ?",
-                      (req['newPassword'], user_num))
+                    ( req['newPassword'], user_num))
             self.db.commit()
             return True
         except sqlite3.Error as e:
@@ -259,7 +255,7 @@ class BookSwapDatabase:
                     ORDER BY
                     UserBooks.dateCreated DESC
                     LIMIT ?""",
-                      (num,))
+                    (num, ))
             recent_books = c.fetchall()
             print(recent_books)
             return recent_books
@@ -269,11 +265,9 @@ class BookSwapDatabase:
 
     def check_ISBN(self, ISBN):
         """
-        Checks UserBooks table for all books with ISBN.
+        Checks Books table for ISBN.  Returns single Row object if there is one.
         Accepts:
-            ISBN (string): ISBN search criteria
-        Returns:
-            Array of Row objects
+        ISBN (string): ISBN search criteria
         """
         print(f"BSDB: Fetching local ISBN matches for {ISBN}")
         c = self.db.cursor()
@@ -285,9 +279,8 @@ class BookSwapDatabase:
                     externalLink,
                     Users.username as listingUser,
                     CopyQualities.qualityDescription as copyQuality,
-                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
+                    CAST ((julianday('now') - julianday(UserBooks.dataCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -297,135 +290,22 @@ class BookSwapDatabase:
                         on UserBooks.userId = Users.id
                     WHERE
                         ISBN = ?
-                    ORDER BY
-                        UserBooks.dateCreated
-                        """,
-                        (ISBN, ))
-            isbn_match = c.fetchall()
-            print("BSDB: Check_ISBN (local) Results")
-            self.print_results(isbn_match)
-            return isbn_match
+
+            rows = c.fetchall()
+            if len(rows) == 0:
+                print("\t No book found.")
+            elif len(rows) > 1:
+                print("WARNING WARNING More than one book has same ISBN WARNING WARNING")
+            for row in rows:
+                print("\t Found book:")
+                for key in row.keys():
+                    print(f"{key}: {row[key]}")
+            return rows
         except sqlite3.Error as e:
             print(e)
             return {}
 
-    def check_author_and_title(self, author, title):
-        """
-        Checks Books table for books with both author and title match.
-        Accepts:
-            author (string): author search criteria
-            title (string): title search criteria
-        Returns:
-            Array of Row objects
-        """
-        print(f"BSDB: Fetching local author and title matches for {author} and {title}")
-        c = self.db.cursor()
-        try:
-            c.execute("""SELECT
-                    title,
-                    author,
-                    ISBN,
-                    externalLink,
-                    Users.username as listingUser,
-                    CopyQualities.qualityDescription as copyQuality,
-                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
-                    UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId
-                    FROM Books
-                    INNER JOIN UserBooks
-                        on Books.id = UserBooks.bookId
-                    INNER JOIN CopyQualities
-                        on UserBooks.copyQualityId = CopyQualities.id
-                    INNER JOIN Users
-                        on UserBooks.userId = Users.id
-                    WHERE
-                        author LIKE '%'||?||'%'
-                    AND
-                        title LIKE '%'||?||'%'
-                    ORDER BY
-                        author = ? DESC,
-                        title = ? DESC,
-                        author LIKE ?||'%' DESC,
-                        author LIKE '%'||? DESC,
-                        author
-                        """,
-                        (author, title, author, title, author, author))
-            author_and_title_match = c.fetchall()
-            print("BSDB: Check_author_and_title (local) Results")
-            self.print_results(author_and_title_match)
-            return author_and_title_match
-        except sqlite3.Error as e:
-            print(e)
-            return {}
-
-    def check_author_or_title(self, author, title):
-        """
-        Checks Books table for books with author or title match.
-        Accepts:
-            author (string): author search criteria
-            title (string): title search criteria
-        Returns:
-            Array of Row objects
-        """
-        print(f"BSDB: Fetching local author or title matches for {author} and {title}")
-        c = self.db.cursor()
-        try:
-            c.execute("""SELECT
-                    title,
-                    author,
-                    ISBN,
-                    externalLink,
-                    Users.username as listingUser,
-                    CopyQualities.qualityDescription as copyQuality,
-                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
-                    UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId
-                    FROM Books
-                    INNER JOIN UserBooks
-                        on Books.id = UserBooks.bookId
-                    INNER JOIN CopyQualities
-                        on UserBooks.copyQualityId = CopyQualities.id
-                    INNER JOIN Users
-                        on UserBooks.userId = Users.id
-                    WHERE
-                        author LIKE '%'||?||'%'
-                    OR 
-                        title LIKE '%'||?||'%'
-                    ORDER BY
-                        title = ? DESC,
-                        author = ? DESC,
-                        title LIKE ?||'%' DESC,
-                        author LIKE ?||'%' DESC,
-                        title LIKE '%'||? DESC,
-                        author LIKE '%'||? DESC,
-                        author
-                        """,
-                        (author, title, title, author, title, author, title, author))
-            author_or_title_match = c.fetchall()
-            print("BSDB: Check_author_or_title (local) Results")
-            self.print_results(author_or_title_match)
-            return author_or_title_match
-        except sqlite3.Error as e:
-            print(e)
-            return {}
-
-    def print_results(self, rows):
-        """
-        Prints results.
-        Accepts:
-            rows (Row objects): returns from SQL query
-        Returns:
-            None
-        """
-        print("Printing Search Results:")
-        i = 1
-        for row in rows:
-            print(f"\t Result #{i}:")
-            for key in row.keys():
-                print(f"\t\t {key}: {row[key]}")
-        return
-
-
+                
 # @app.teardown_appcontext
 # def close_connection(exception):
 # """

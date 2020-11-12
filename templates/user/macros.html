@@ -1,28 +1,28 @@
 {% macro book_list_table(caption, headers, rows, ids) %}
-    <table class="table table-hover">
-        <caption>{{ caption }}</caption>
-        <tr>
-            {% for header in headers %}
-                {% if header != "ID" %}
-                    <th scope="col">{{ header }}</th>
-                {% endif %}
-            {% endfor %}
-            <th scope="col">Remove Book</th>
-        </tr>
-        {% for row in rows %}
-            <tr>
-                <th scope="row">{{ row[0] }}</th>
-                <td>{{ row[1] }}</td>
-                <td>{{ row[2] }}</td>
-                <td>{{ row[3] }}</td>
-                <td>
-                    <form action="/removeFromUserLibrary" method="GET">
-                        <input type="hidden" id="bookRem" name="bookRem" value="{{ row[4] }}">
-                        <input type="submit" value="Remove" class="btn btn-outline-danger btn-sm">
-                    </form>
-                </td>
-<!--                <td><i class="far fa-trash-alt" id="{{row[4]}}" onclick="confirmRemoveBook({{row[4]}})"></i></td>-->
-            </tr>
+<table class="table table-hover">
+    <caption>{{ caption }}</caption>
+    <tr>
+        {% for header in headers %}
+        {% if header != "ID" %}
+        <th scope="col">{{ header }}</th>
+        {% endif %}
         {% endfor %}
-    </table>
+        <th scope="col">Remove Book</th>
+    </tr>
+    {% for row in rows %}
+    <tr>
+        <th scope="row">{{ row[0] }}</th>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+        <td>{{ row[3] }}</td>
+        <td>
+            <form action="/removeFromUserLibrary" method="GET">
+                <input type="hidden" id="bookRem" name="bookRem" value="{{ row[4] }}">
+                <input type="submit" value="Remove" class="btn btn-outline-danger btn-sm">
+            </form>
+        </td>
+        <!--                <td><i class="far fa-trash-alt" id="{{row[4]}}" onclick="confirmRemoveBook({{row[4]}})"></i></td>-->
+    </tr>
+    {% endfor %}
+</table>
 {%- endmacro %}
