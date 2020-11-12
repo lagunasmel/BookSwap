@@ -28,8 +28,17 @@ class BookSearch:
         Returns:
             list of dictionaries
         """
+        print("BookSearch: LocalBookSearch for books with")
+        print(f"\tISBN: {self.ISBN}")
+        print(f"\tAuthor: {self.author}")
+        print(f"\tTitle: {self.title}")
         # Check against any ISBN matches
         results = self._check_local_isbn()
+
+        # Check against author and title matches combined
+        results += self._check_local_author_and_title()
+
+        print(results)
 
         return results
 
@@ -49,10 +58,22 @@ class BookSearch:
 
     def _check_local_isbn(self):
         """
-        Checks Books table for ISBN
+        Checks UserBooks table for ISBN
         """
         books_isbn_results = []
         books_isbn = self.bsdb.check_ISBN(self.ISBN)
         for book in books_isbn:
             books_isbn_results.append(self._process_results_row(book))
         return books_isbn_results
+
+    def _check_local_author_and_title(self):
+        """
+        Checks UserBooks table for author and title matches
+        """
+        books_author_and_title_results = []
+        books_author_and_title = self.bsdb.check_author_and_title(self.author,
+                self.title)
+        for book in books_author_and_title:
+            books_author_and_title_results.append(self._process_results_row(book))
+        return books_author_and_title_results
+    

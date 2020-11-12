@@ -265,9 +265,11 @@ class BookSwapDatabase:
 
     def check_ISBN(self, ISBN):
         """
-        Checks Books table for ISBN.  Returns single Row object if there is one.
+        Checks UserBooks table for all books with ISBN.
         Accepts:
-        ISBN (string): ISBN search criteria
+            ISBN (string): ISBN search criteria
+        Returns:
+            Array of Row objects
         """
         print(f"BSDB: Fetching local ISBN matches for {ISBN}")
         c = self.db.cursor()
@@ -296,6 +298,54 @@ class BookSwapDatabase:
                         (ISBN, ))
             isbn_match = c.fetchall()
             print("BSDB: Check_ISBN (local) Results")
+            self.print_results(isbn_match)
+            return isbn_match
+        except sqlite3.Error as e:
+            print(e)
+            return {}
+
+    def check_author_and_title(self, author, title):
+        """
+        Checks Books table for books with both author and title match.
+        Accepts:
+            author (string): author search criteria
+            title (string): title search criteria
+        Returns:
+            Array of Row objects
+        """
+        print(f"BSDB: Fetching local author and title matches for {author} and {title}")
+        c = self.db.cursor()
+        try:
+            c.execute("""SELECT
+                    title,
+                    author,
+                    ISBN,
+                    externalLink,
+                    Users.username as listingUser,
+                    CopyQualities.qualityDescription as copyQuality,
+                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
+                    UserBooks.points as pointsNeeded
+                    FROM Books
+                    INNER JOIN UserBooks
+                        on Books.id = UserBooks.bookId
+                    INNER JOIN CopyQualities
+                        on UserBooks.copyQualityId = CopyQualities.id
+                    INNER JOIN Users
+                        on UserBooks.userId = Users.id
+                    WHERE
+                        author LIKE '%'||?||'%'
+                    AND
+                        title LIKE '%'||?||'%'
+                    ORDER BY
+                        author = ? DESC,
+                        title = ? DESC,
+                        author LIKE ?||'%' DESC,
+                        author LIKE '%'||? DESC,
+                        author
+                        """,
+                        (author, title, author, title, author, author))
+            isbn_match = c.fetchall()
+            print("BSDB: Check_author_and_title (local) Results")
             self.print_results(isbn_match)
             return isbn_match
         except sqlite3.Error as e:
