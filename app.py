@@ -1,14 +1,22 @@
 import sqlite3
 from  book_search import BookSearch
-from flask import Flask, render_template, url_for, flash, redirect, session
+from flask import Flask, render_template, url_for, flash, redirect, session, g
 from flask import request as req
-from db_connector import get_db, BookSwapDatabase
+from db_connector import get_db, BookSwapDatabase, get_bsdb
 from forms import RegistrationForm, LoginForm, BookSearchForm
 from auth import login_required, guest_required
 
 app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
+
+
+# Auto-closes db connection at the end of each request
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 
 # Landing Page
@@ -32,7 +40,7 @@ def faq():
 @app.route('/browse-books', methods=['GET', 'POST'])
 def browseBooks():
     form = BookSearchForm()
-    bsdb = BookSwapDatabase()
+    bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(5)
     if req.method=='POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
@@ -239,8 +247,7 @@ def removeWish():
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    bsdb = BookSwapDatabase()
-
+    bsdb = get_bsdb()
     # Check against request to change user settings
     if req.get_json() and req.get_json()['request'] == 'changeUserSettings':
         print("Account: request received for changeUserSettings")
@@ -275,7 +282,6 @@ def account():
 
         else:
             account_settings = bsdb.get_account_settings(session["user_num"])
-            bsdb.close()
             flash("Username is already taken", "warning")
 
             return render_template("user/user-home.html",
@@ -290,7 +296,6 @@ def account():
             flash("Original password not correct")
             print(
                 f"Account: Incorrect password entered for {session['user_num']}.")
-            bsdb.close()
             return {"passwordMismatch": True}
 
         success = bsdb.change_password(session["user_num"], req.get_json())
@@ -298,29 +303,25 @@ def account():
             flash("Account password updated.", 'success')
             print(f"Account: Password updated for user {session['user_num']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
-            bsdb.close()
-
             return render_template("user/user-home.html", account_settings=account_settings)
         
 
     # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(session["user_num"])
-    bsdb.close()
     return render_template('user/user-home.html', account_settings=account_settings)
 
 
 @app.route('/_add-book', methods=['POST'])
 @login_required
 def add_book():
+    bsdb = get_bsdb()
     if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
         user_num = session["user_num"]
-        bsdb = BookSwapDatabase()
         bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
         rows = bsdb.get_listed_books(user_num)
         copyqualities = bsdb.get_book_qualities()
-        bsdb.close()
 
         # Build the data to be passed to Jinja
         headers = ["Title", "Author", "Quality", "ISBN"]
@@ -331,6 +332,7 @@ def add_book():
                 "copyqualities": copyqualities}
 
         return render_template('user/my-books.html', data=data)
+
 
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
@@ -354,12 +356,10 @@ def removeBook():
 @app.route('/my-books')
 @login_required
 def my_books():
-
+    bsdb = get_bsdb()
     # Get the data of books currently listed
-    bsdb = BookSwapDatabase()
     rows = bsdb.get_listed_books(session['user_num'])
     copyqualities = bsdb.get_book_qualities()
-    bsdb.close()
 
     # Build the data to be passed to Jinja
     headers = ["Title", "Author", "Quality", "ISBN", "ID"]
