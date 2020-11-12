@@ -1,6 +1,29 @@
 {% extends "layout.html" %}
 {% block content %}
-
-<h1> Browse Books </h1>
+    <div class="container mt-5">
+        <div class="w-50 p-3 mx-auto">
+            <h1 class="text-center">Browse Books</h1>
+            <p></p>
+            <h2>
+                Our Most Recent Additions
+            </h2>
+            <div class="list-group">
+                {% for book in recent_books %}
+                  <div class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ book['title'] }}</h5>
+                        <small>listed {{ book['timeHere'] }} days ago</small>
+                    </div>
+                    <ul class="mb-1">
+                        <li> Author: {{ book['author'] }} </li>
+                        <li> ISBN: {{ book['ISBN'] }} </li>
+                        <li> Copy Quality: {{ book['copyQuality'] }} </li>
+                    </ul>
+                        <small>Listing User: {{ book['listingUser'] }}</small>
+                  </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 
 {% endblock content %}

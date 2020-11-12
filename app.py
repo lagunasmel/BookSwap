@@ -28,9 +28,13 @@ def faq():
     return render_template('faq.html')
 
 
-@app.route('/browseBooks')
+@app.route('/browseBooks', methods=['GET', 'POST'])
 def browseBooks():
-    return render_template('browseBooks.html')
+    bsdb = BookSwapDatabase()
+    recent_books = bsdb.get_recent_additions(5)
+
+    
+    return render_template('browseBooks.html', recent_books=recent_books)
 
 
 @app.route('/myTrades')
