@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
-    <h1>Fetching users from the database: a demo</h1>
-    <table style="border: 1px solid black">
-        <tr style="border: 1px solid black">
-            {% for header in data.headers %}
-            <th>{{ header }}</th>
-            {% endfor %}
-        </tr>
-        {% for row in data.table_content %}
-            <tr style="border: 1px solid black">
-                {% for cell in row %}
-                    <td>{{ cell }}</td>
-                {% endfor %}
-            </tr>
+<h1>Fetching users from the database: a demo</h1>
+<table style="border: 1px solid black">
+    <tr style="border: 1px solid black">
+        {% for header in data.headers %}
+        <th>{{ header }}</th>
         {% endfor %}
-    </table>
+    </tr>
+    {% for row in data.table_content %}
+    <tr style="border: 1px solid black">
+        {% for cell in row %}
+        <td>{{ cell }}</td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
 {% endblock content %}
