@@ -9,6 +9,9 @@ app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
+# Database interaction is via this object
+bsdb = BookSwapDatabase()
+
 
 # Landing Page
 @app.route('/')
@@ -30,10 +33,7 @@ def faq():
 
 @app.route('/browseBooks', methods=['GET', 'POST'])
 def browseBooks():
-    bsdb = BookSwapDatabase()
     recent_books = bsdb.get_recent_additions(5)
-
-    
     return render_template('browseBooks.html', recent_books=recent_books)
 
 
@@ -59,7 +59,7 @@ def login():
                           (username,)).fetchone()
         if user is None:
             user = db.execute("SELECT * FROM Users WHERE email = ?",
-                    (username, )).fetchone()
+                              (username,)).fetchone()
             if user is None:
                 error = "Incorrect username."
 
@@ -96,14 +96,15 @@ def signup():
         c = db.cursor()
         error = None
 
-        #(Redundant) check for uesrname and password entries
+        # (Redundant) check for uesrname and password entries
         if not form.username.data:
             error = "Username is required."
         elif not form.password.data:
             error = "Password is required."
-        elif c.execute('SELECT id FROM Users WHERE username = ?', 
-                (form.email.data, )).fetchone() is not None:
-            error = 'User {} already exists.  Please try again with a different username, or log in.'.format(form.username.data)
+        elif c.execute('SELECT id FROM Users WHERE username = ?',
+                       (form.email.data,)).fetchone() is not None:
+            error = 'User {} already exists.  Please try again with a different username, or log in.'.format(
+                form.username.data)
 
         if error is None:
             c.execute("""INSERT INTO Users (
@@ -117,15 +118,15 @@ def signup():
             'state', 
             'postCode') 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (form.username.data, 
-                form.password.data, 
-                form.email.data,
-                form.fName.data, 
-                form.lName.data, 
-                form.streetAddress.data, 
-                form.city.data,
-                form.state.data, 
-                form.postCode.data))
+                      (form.username.data,
+                       form.password.data,
+                       form.email.data,
+                       form.fName.data,
+                       form.lName.data,
+                       form.streetAddress.data,
+                       form.city.data,
+                       form.state.data,
+                       form.postCode.data))
             db.commit()
             print(f"Signup: account created for {form.username.data}, with User id {c.lastrowid}")
             flash(f'Account created for {form.email.data}!', 'success')
@@ -228,40 +229,35 @@ def removeWish():
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
-    bsdb = BookSwapDatabase()
-    
     # Check against request to change user settings
     if req.get_json() and req.get_json()['request'] == 'changeUserSettings':
         print("Account: request received for changeUserSettings")
         username = req.get_json()['username']
         # Check that the username isn't changing or is available
 
-        if (username == bsdb.get_account_settings(session["user_num"])["username"] 
-        or bsdb.username_available(username)):
+        if (username == bsdb.get_account_settings(session["user_num"])["username"]
+                or bsdb.username_available(username)):
             success = bsdb.change_account_information(session['user_num'], req.get_json())
             if success == True:
                 flash("Account information updated.", "success")
-                print("Account: returning new account info:") 
+                print("Account: returning new account info:")
                 account_settings = bsdb.get_account_settings(session["user_num"]);
                 for key in account_settings.keys():
                     print(f"\t {key}: {account_settings[key]}")
                 account_settings = bsdb.get_account_settings(session["user_num"]);
-                bsdb.close()
 
                 return render_template("user/userHome.html", account_settings=account_settings);
 
             else:
                 flash("Error updating your information. Try again?", "warning")
                 account_settings = bsdb.get_account_settings(session["user_num"])
-                bsdb.close()
                 return render_template("user/userHome.html",
-                                       account_settings = account_settings)
+                                       account_settings=account_settings)
         else:
             account_settings = bsdb.get_account_settings(session["user_num"])
-            bsdb.close()
             flash("Username is already taken", "warning")
             return render_template("user/userHome.html",
-                               account_settings = account_settings)
+                                   account_settings=account_settings)
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
@@ -269,21 +265,17 @@ def account():
         if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
             flash("Original password not correct");
             print(f"Account: Incorrect password entered for {session['user_num']}.")
-            bsdb.close()
             return {"passwordMismatch": True};
-        
+
         success = bsdb.change_password(session["user_num"], req.get_json())
         if success == True:
             flash("Account password updated.", 'success')
             print(f"Account: Password updated for user {session['user_num']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
-            bsdb.close()
             return render_template("user/userHome.html", account_settings=account_settings)
-        
 
     # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(session["user_num"])
-    bsdb.close()
     return render_template('user/userHome.html', account_settings=account_settings)
 
 
@@ -294,11 +286,9 @@ def add_book():
         isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
         user_num = session["user_num"]
-        bsdb = BookSwapDatabase()
         bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
         rows = bsdb.get_listed_books(user_num)
         copyqualities = bsdb.get_book_qualities()
-        bsdb.close()
 
         # Build the data to be passed to Jinja
         headers = ["Title", "Author", "Quality", "ISBN"]
@@ -309,6 +299,7 @@ def add_book():
                 "copyqualities": copyqualities}
 
         return render_template('user/myBooks.html', data=data)
+
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
 @login_required
@@ -331,12 +322,9 @@ def removeBook():
 @app.route('/my-books')
 @login_required
 def my_books():
-    
     # Get the data of books currently listed
-    bsdb = BookSwapDatabase()
     rows = bsdb.get_listed_books(session['user_num'])
     copyqualities = bsdb.get_book_qualities()
-    bsdb.close()
 
     # Build the data to be passed to Jinja
     headers = ["Title", "Author", "Quality", "ISBN", "ID"]
