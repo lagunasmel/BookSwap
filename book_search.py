@@ -36,12 +36,36 @@ class BookSearch:
         results = self._check_local_isbn()
 
         # Check against author and title matches combined
-        results += self._check_local_author_and_title()
+        author_and_title = self._check_local_author_and_title()
+        results = self._results_combine(results, author_and_title)
 
-        print(results)
+        # Check against author or title matches
+        author_or_title = self._check_local_author_or_title()
+        results = self._results_combine(results, author_or_title)
+
+        #Strip UserBooksId key,which is unnecessary and may be a security risk
+        results = self._remove_unnecessary_keys(results)
+        for result in results:
+            print(result)
 
         return results
 
+    def _results_combine(self, results, new_results):
+        """
+        Combines the second list to the first, avoiding books with identical 
+            "UserBooks.id" values.
+        Accepts:
+            results (list of dicts): Original list
+            new_results (list of dicts): New list to append
+        Returns:
+            None, but results is mutated.
+        """
+        id_list = [ result["UserBooksId"] for result in results]
+        for new_result in new_results:
+            if new_result.get("UserBooksId", 0) not in id_list:
+                results.append(new_result)
+        return results
+        
     def _process_results_row(self, row):
         """
         Process a row object returned from SQLite database, creating a
@@ -77,3 +101,27 @@ class BookSearch:
             books_author_and_title_results.append(self._process_results_row(book))
         return books_author_and_title_results
     
+    def _check_local_author_or_title(self):
+        """
+        Checks UserBooks table for author or title matches
+        """
+        books_author_or_title_results = []
+        books_author_or_title = self.bsdb.check_author_or_title(self.author,
+                self.title)
+        for book in books_author_or_title:
+            books_author_or_title_results.append(self._process_results_row(book))
+        return books_author_or_title_results
+
+    def _remove_unnecessary_keys(self, results):
+        """
+        Removes keys we don't need, and shouldn't return: UserBooksId
+        Accepts:
+            results (list of dicts)
+        """
+        for result in results:
+            try:
+                del result['UserBooksId']
+            except KeyError:
+                pass
+        return results
+

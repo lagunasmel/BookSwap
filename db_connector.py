@@ -282,7 +282,8 @@ class BookSwapDatabase:
                     Users.username as listingUser,
                     CopyQualities.qualityDescription as copyQuality,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
-                    UserBooks.points as pointsNeeded
+                    UserBooks.points as pointsNeeded,
+                    UserBooks.id as UserBooksId
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -324,7 +325,8 @@ class BookSwapDatabase:
                     Users.username as listingUser,
                     CopyQualities.qualityDescription as copyQuality,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
-                    UserBooks.points as pointsNeeded
+                    UserBooks.points as pointsNeeded,
+                    UserBooks.id as UserBooksId
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -344,10 +346,61 @@ class BookSwapDatabase:
                         author
                         """,
                         (author, title, author, title, author, author))
-            isbn_match = c.fetchall()
+            author_and_title_match = c.fetchall()
             print("BSDB: Check_author_and_title (local) Results")
-            self.print_results(isbn_match)
-            return isbn_match
+            self.print_results(author_and_title_match)
+            return author_and_title_match
+        except sqlite3.Error as e:
+            print(e)
+            return {}
+
+    def check_author_or_title(self, author, title):
+        """
+        Checks Books table for books with author or title match.
+        Accepts:
+            author (string): author search criteria
+            title (string): title search criteria
+        Returns:
+            Array of Row objects
+        """
+        print(f"BSDB: Fetching local author or title matches for {author} and {title}")
+        c = self.db.cursor()
+        try:
+            c.execute("""SELECT
+                    title,
+                    author,
+                    ISBN,
+                    externalLink,
+                    Users.username as listingUser,
+                    CopyQualities.qualityDescription as copyQuality,
+                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
+                    UserBooks.points as pointsNeeded,
+                    UserBooks.id as UserBooksId
+                    FROM Books
+                    INNER JOIN UserBooks
+                        on Books.id = UserBooks.bookId
+                    INNER JOIN CopyQualities
+                        on UserBooks.copyQualityId = CopyQualities.id
+                    INNER JOIN Users
+                        on UserBooks.userId = Users.id
+                    WHERE
+                        author LIKE '%'||?||'%'
+                    OR 
+                        title LIKE '%'||?||'%'
+                    ORDER BY
+                        title = ? DESC,
+                        author = ? DESC,
+                        title LIKE ?||'%' DESC,
+                        author LIKE ?||'%' DESC,
+                        title LIKE '%'||? DESC,
+                        author LIKE '%'||? DESC,
+                        author
+                        """,
+                        (author, title, title, author, title, author, title, author))
+            author_or_title_match = c.fetchall()
+            print("BSDB: Check_author_or_title (local) Results")
+            self.print_results(author_or_title_match)
+            return author_or_title_match
         except sqlite3.Error as e:
             print(e)
             return {}
