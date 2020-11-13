@@ -129,7 +129,7 @@ class BookSwapDatabase:
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
                   (user_num, book_id, copyquality))
 
-    def username_available(self, username):
+    def is_username_available(self, username):
         """
         Checks if username is not yet taken in database.
         Accepts:
@@ -150,7 +150,7 @@ class BookSwapDatabase:
         available = (len(rows) == 0)
         return available
 
-    def change_account_information(self, user_id, req):
+    def set_account_information(self, user_id, req):
         """
         Changes the user account information.
         Accepts:
@@ -193,7 +193,7 @@ class BookSwapDatabase:
             print(e)
             return False
 
-    def check_password(self, user_num, old_password):
+    def is_password_correct(self, user_num, old_password):
         """
         Checks if the password is correct.
         Accepts:
@@ -212,7 +212,7 @@ class BookSwapDatabase:
             print(e)
             return
 
-    def change_password(self, user_num, req):
+    def set_password(self, user_num, req):
         """
         Changes the user password.
         Accepts:
@@ -268,7 +268,7 @@ class BookSwapDatabase:
             print(e)
             return {}
 
-    def check_ISBN(self, ISBN):
+    def get_books_by_ISBN(self, ISBN):
         """
         Checks UserBooks table for all books with ISBN.
         Accepts:
@@ -303,14 +303,14 @@ class BookSwapDatabase:
                         """,
                         (ISBN, ))
             isbn_match = c.fetchall()
-            print("BSDB: Check_ISBN (local) Results")
+            print("BSDB: Get_Books_By_ISBN (local) Results")
             self.print_results(isbn_match)
             return isbn_match
         except sqlite3.Error as e:
             print(e)
             return {}
 
-    def check_author_and_title(self, author, title):
+    def get_books_by_author_and_title(self, author, title):
         """
         Checks Books table for books with both author and title match.
         Accepts:
@@ -354,14 +354,14 @@ class BookSwapDatabase:
                         """,
                         (author, title, author, title, author, author))
             author_and_title_match = c.fetchall()
-            print("BSDB: Check_author_and_title (local) Results")
+            print("BSDB: get_books_by_author_and_title (local) Results")
             self.print_results(author_and_title_match)
             return author_and_title_match
         except sqlite3.Error as e:
             print(e)
             return {}
 
-    def check_author_or_title(self, author, title):
+    def get_books_by_author_or_title(self, author, title):
         """
         Checks Books table for books with author or title match.
         Accepts:
@@ -436,7 +436,7 @@ class BookSwapDatabase:
         try:
             c.execute(query, params)
             author_or_title_match = c.fetchall()
-            print("BSDB: Check_author_or_title (local) Results")
+            print("BSDB: get_books_by_author_or_title (local) Results")
             self.print_results(author_or_title_match)
             return author_or_title_match
         except sqlite3.Error as e:
