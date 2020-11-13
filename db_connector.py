@@ -320,6 +320,8 @@ class BookSwapDatabase:
         """
         print(f"BSDB: Fetching local author and title matches for {author} and {title}")
         c = self.db.cursor()
+        if len(author) == 0 or len(title) == 0:
+            return {}
         try:
             c.execute("""SELECT
                     title,
@@ -368,39 +370,70 @@ class BookSwapDatabase:
             Array of Row objects
         """
         print(f"BSDB: Fetching local author or title matches for {author} and {title}")
+        if len(author) == len(title) == 0:
+            return {}
+        query_start = """
+            SELECT 
+                title, 
+                author, 
+                ISBN, 
+                externalLink,
+                Users.username as listingUser,
+                CopyQualities.qualityDescription as copyQuality,
+                CAST 
+                    ((julianday('now') - julianday(UserBooks.dateCreated)) 
+                        AS INTEGER) AS timeHere,
+                UserBooks.points as pointsNeeded,
+                UserBooks.id as UserBooksId
+            FROM Books
+            INNER JOIN UserBooks
+                on Books.id = UserBooks.bookId
+            INNER JOIN CopyQualities
+                on UserBooks.copyQualityId = CopyQualities.id
+            INNER JOIN Users
+                on UserBooks.userId = Users.id
+            """
+        query_middle = " WHERE "
+        query_end = " ORDER BY "
+        params = []
+        author_exists = title_exists = False
+        if len(author)> 0:
+            author_exists = True
+        if len(title) > 0:
+            title_exists = True
+        if author_exists:
+            query_middle += "author LIKE '%'||?||'%' "
+            params.append(author)
+            if title_exists:
+                query_middle += " OR "
+        if title_exists:
+            query_middle += "title LIKE '%'||?||'%'"
+            query_end += " title = ? DESC,"
+            params += [title, title]
+        if author_exists:
+            query_end +=" author = ? DESC,"
+            params.append(author)
+        if title_exists:
+            query_end += " title LIKE ?||'%' DESC,"
+            params.append(title)
+        if author_exists:
+            query_end += " author LIKE ?||'%' DESC,"
+            params.append(author)
+        if title_exists:
+            query_end += " title LIKE '%'||? DESC,"
+            params.append(title)
+        if author_exists:
+            query_end += " author LIKE '%'||? DESC,"
+            params.append(author)
+        query_end +=" author"
+        query = query_start + query_middle + query_end
+        params = tuple(params)
+        # print("\t Query:")
+        # print(f"\t\t {query}")
+        # print(f"\t\t {params}")
         c = self.db.cursor()
         try:
-            c.execute("""SELECT
-                    title,
-                    author,
-                    ISBN,
-                    externalLink,
-                    Users.username as listingUser,
-                    CopyQualities.qualityDescription as copyQuality,
-                    CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
-                    UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId
-                    FROM Books
-                    INNER JOIN UserBooks
-                        on Books.id = UserBooks.bookId
-                    INNER JOIN CopyQualities
-                        on UserBooks.copyQualityId = CopyQualities.id
-                    INNER JOIN Users
-                        on UserBooks.userId = Users.id
-                    WHERE
-                        author LIKE '%'||?||'%'
-                    OR 
-                        title LIKE '%'||?||'%'
-                    ORDER BY
-                        title = ? DESC,
-                        author = ? DESC,
-                        title LIKE ?||'%' DESC,
-                        author LIKE ?||'%' DESC,
-                        title LIKE '%'||? DESC,
-                        author LIKE '%'||? DESC,
-                        author
-                        """,
-                        (author, title, title, author, title, author, title, author))
+            c.execute(query, params)
             author_or_title_match = c.fetchall()
             print("BSDB: Check_author_or_title (local) Results")
             self.print_results(author_or_title_match)
@@ -423,6 +456,7 @@ class BookSwapDatabase:
             print(f"\t Result #{i}:")
             for key in row.keys():
                 print(f"\t\t {key}: {row[key]}")
+            i += 1
         return
 
 
