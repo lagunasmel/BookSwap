@@ -1,5 +1,5 @@
 import sqlite3
-from  book_search import BookSearch
+from book_search import BookSearch
 from flask import Flask, render_template, url_for, flash, redirect, session, g
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
@@ -42,7 +42,7 @@ def browseBooks():
     form = BookSearchForm()
     bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(5)
-    if req.method=='POST':
+    if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
         book_results = book_search.local_book_search(10)
@@ -60,16 +60,17 @@ def browseBooks():
     print(f"\t book_results: {book_results}")
     print(f"\t form: {form}")
     return render_template('browse-books.html', 
-            recent_books = recent_books, 
-            book_results = book_results, 
-            form = form,
-            show_recent= show_recent,
-            show_search = show_search,
-            show_results = show_results
+            recent_books=recent_books, 
+            book_results=book_results, 
+            form=form,
+            show_recent=show_recent,
+            show_search=show_search,
+            show_results=show_results
             )
 
+
 @app.route('/my-trades')
-def myTrades():
+def my_trades():
     return render_template('user/my-trades.html')
 
 
@@ -90,7 +91,7 @@ def login():
                           (username,)).fetchone()
         if user is None:
             user = db.execute("SELECT * FROM Users WHERE email = ?",
-                              (username, )).fetchone()
+                              (username,)).fetchone()
             if user is None:
                 error = "Incorrect username."
 
@@ -133,7 +134,7 @@ def signup():
         elif not form.password.data:
             error = "Password is required."
         elif c.execute('SELECT id FROM Users WHERE username = ?',
-                       (form.email.data, )).fetchone() is not None:
+                       (form.email.data,)).fetchone() is not None:
             error = 'User {} already exists.  Please try again with a different username, or log in.'.format(
                 form.username.data)
 
@@ -294,15 +295,14 @@ def account():
                 bsdb.close()
 
                 return render_template("user/user-home.html",
-                                       account_settings = account_settings)
+                                       account_settings=account_settings)
 
         else:
             account_settings = bsdb.get_account_settings(session["user_num"])
             flash("Username is already taken", "warning")
 
             return render_template("user/user-home.html",
-                               account_settings = account_settings)
-
+                                   account_settings=account_settings)
 
     # Check against request to change password
     if req.get_json() and req.get_json()['request'] == 'changePassword':
@@ -320,7 +320,6 @@ def account():
             print(f"Account: Password updated for user {session['user_num']}.")
             account_settings = bsdb.get_account_settings(session["user_num"])
             return render_template("user/user-home.html", account_settings=account_settings)
-        
 
     # Default behavior (for loading page)
     account_settings = bsdb.get_account_settings(session["user_num"])
@@ -348,7 +347,6 @@ def add_book():
                 "copyqualities": copyqualities}
 
         return render_template('user/my-books.html', data=data)
-
 
 
 @app.route('/removeFromUserLibrary', methods=['GET'])

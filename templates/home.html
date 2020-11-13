@@ -1,51 +1,60 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<section id="front">
-    <div class="container text-center mt-5">
-        <h1>Welcome to BookSwap!</h1>
-        <div class="row">
-            <div class="col-md-4 p-3">
-                <img src="{{ url_for('static', filename='images/recycle.png') }}" alt=""
-                     class="img-fluid col-6 mx-auto">
-                <p></p>
-                <h3>PHRASE 1 HERE</h3>
-                <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
-                    molestias! Quo expedita omnis aliquam placeat consequuntur deleniti doloribus!</p>
+    <section id="front">
+        <div class="container text-center mt-5">
+            <h1>Welcome to BookSwap!</h1>
+            <div class="row">
+                <div class="col-md-4 p-3">
+                    <img src="{{ url_for('static', filename='images/recycle.png') }}" alt=""
+                         class="img-fluid col-6 mx-auto">
+                    <p></p>
+                    <h3>PHRASE 1 HERE</h3>
+                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
+                        molestias! Quo expedita omnis aliquam placeat consequuntur deleniti doloribus!</p>
+                </div>
+                <div class="col-md-4 p-3">
+                    <img src="{{ url_for('static', filename='images/book.png') }}" alt=""
+                         class="img-fluid col-6 mx-auto">
+                    <p></p>
+                    <h3>PHRASE 2 HERE</h3>
+                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
+                        molestias!
+                        Quo expedita omnis aliquam
+                        placeat consequuntur deleniti doloribus!</p>
+                </div>
+                <div class="col-md-4 p-3">
+                    <img src="{{ url_for('static', filename='images/mail.png') }}" alt=""
+                         class="img-fluid col-6 mx-auto">
+                    <p></p>
+                    <h3>PHRASE 3 HERE</h3>
+                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
+                        molestias!
+                        Quo expedita omnis aliquam
+                        placeat consequuntur deleniti doloribus!</p>
+                </div>
             </div>
-            <div class="col-md-4 p-3">
-                <img src="{{ url_for('static', filename='images/book.png') }}" alt=""
-                     class="img-fluid col-6 mx-auto">
-                <p></p>
-                <h3>PHRASE 2 HERE</h3>
-                <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque molestias!
-                    Quo expedita omnis aliquam
-                    placeat consequuntur deleniti doloribus!</p>
-            </div>
-            <div class="col-md-4 p-3">
-                <img src="{{ url_for('static', filename='images/mail.png') }}" alt="" class="img-fluid col-6 mx-auto">
-                <p></p>
-                <h3>PHRASE 3 HERE</h3>
-                <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque molestias!
-                    Quo expedita omnis aliquam
-                    placeat consequuntur deleniti doloribus!</p>
-            </div>
-        </div>
-        <h5>Ready to get started?</h5>
-        <p><a>Sign up today</a> or <a>login.</a></p>
+            <h5>Ready to get started?</h5>
+            {% if session.user_num %}
+                <p>You can <a href="{{ url_for('my_trades') }}">list a book for trade</a>,
+                    or <a href="{{ url_for('browseBooks') }}">search for a book.</p>
+            {% else %}
+                <p><a href="{{ url_for('signup') }}">Sign up today</a> or <a href="{{ url_for('login') }}">login.</a>
+                </p>
+            {% endif %}
 
-    </div>
-
-    <section id="footer">
-        <div class="container text-center">
-            <div class="footer">
-                <small>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>
-                    from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></small>
-            </div>
         </div>
+
+        <section id="footer">
+            <div class="container text-center">
+                <div class="footer">
+                    <small>Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a>
+                        from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a></small>
+                </div>
+            </div>
+        </section>
+
     </section>
-
-</section>
 
 
 {% endblock content %}
