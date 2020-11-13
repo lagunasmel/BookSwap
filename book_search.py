@@ -85,7 +85,7 @@ class BookSearch:
         Checks UserBooks table for ISBN
         """
         books_isbn_results = []
-        books_isbn = self.bsdb.check_ISBN(self.ISBN)
+        books_isbn = self.bsdb.get_books_by_ISBN(self.ISBN)
         for book in books_isbn:
             books_isbn_results.append(self._process_results_row(book))
         return books_isbn_results
@@ -95,7 +95,7 @@ class BookSearch:
         Checks UserBooks table for author and title matches
         """
         books_author_and_title_results = []
-        books_author_and_title = self.bsdb.check_author_and_title(self.author,
+        books_author_and_title = self.bsdb.get_books_by_author_and_title(self.author,
                 self.title)
         for book in books_author_and_title:
             books_author_and_title_results.append(self._process_results_row(book))
@@ -106,7 +106,7 @@ class BookSearch:
         Checks UserBooks table for author or title matches
         """
         books_author_or_title_results = []
-        books_author_or_title = self.bsdb.check_author_or_title(self.author,
+        books_author_or_title = self.bsdb.get_books_by_author_or_title(self.author,
                 self.title)
         for book in books_author_or_title:
             books_author_or_title_results.append(self._process_results_row(book))

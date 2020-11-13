@@ -272,8 +272,8 @@ def account():
         # Check that the username isn't changing or is available
 
         if (username == bsdb.get_account_settings(session["user_num"])["username"]
-                or bsdb.username_available(username)):
-            success = bsdb.change_account_information(
+                or bsdb.is_username_available(username)):
+            success = bsdb.set_account_information(
                 session['user_num'], req.get_json())
             if success == True:
                 flash("Account information updated.", "success")
@@ -308,13 +308,13 @@ def account():
     if req.get_json() and req.get_json()['request'] == 'changePassword':
         print(
             f"Account: request received for changePassword for user {session['user_num']}")
-        if not bsdb.check_password(session["user_num"], req.get_json()['oldPassword']):
+        if not bsdb.is_password_correct(session["user_num"], req.get_json()['oldPassword']):
             flash("Original password not correct")
             print(
                 f"Account: Incorrect password entered for {session['user_num']}.")
             return {"passwordMismatch": True}
 
-        success = bsdb.change_password(session["user_num"], req.get_json())
+        success = bsdb.set_password(session["user_num"], req.get_json())
         if success == True:
             flash("Account password updated.", 'success')
             print(f"Account: Password updated for user {session['user_num']}.")
