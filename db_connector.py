@@ -87,10 +87,24 @@ class BookSwapDatabase:
         """
         c = self.db.cursor()
         c.execute("""
-                    SELECT B.title AS Title, B.ISBN AS ISBN, B.author AS Author, CQ.qualityDescription AS Quality,
-                    UB.id AS id FROM UserBooks UB INNER JOIN Books B on UB.bookId = B.id 
-                    INNER JOIN CopyQualities CQ ON UB.copyQualityId = CQ.id 
-                    WHERE userId = ?""", (user_num,))
+                    SELECT 
+                        B.title AS Title, 
+                        B.ISBN AS ISBN, 
+                        B.author AS Author, 
+                        CQ.qualityDescription AS Quality,
+                        UB.id AS id 
+                        FROM 
+                            UserBooks UB 
+                        INNER JOIN 
+                            Books B on UB.bookId = B.id 
+                        INNER JOIN 
+                        CopyQualities CQ ON UB.copyQualityId = CQ.id 
+                        WHERE 
+                            userId = ?
+                        AND
+                            UB.available == 1
+                    """, 
+                    (user_num,))
         rows = c.fetchall()
         self.db.commit()
         return rows
@@ -257,6 +271,7 @@ class BookSwapDatabase:
                         on UserBooks.copyQualityId = CopyQualities.id
                     INNER JOIN Users
                         on UserBooks.userId = Users.id
+                    WHERE UserBooks.available == 1
                     ORDER BY
                     UserBooks.dateCreated DESC
                     LIMIT ?""",
