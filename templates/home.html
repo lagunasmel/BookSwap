@@ -36,10 +36,11 @@
             </div>
             <h5>Ready to get started?</h5>
             {% if session.user_num %}
-                <p>You can <a href="{{ url_for('my_trades') }}">list a book for trade</a>,
-                    or <a href="{{ url_for('browseBooks') }}">search for a book.</p>
+                <p>You can <a href="{{ url_for('my_trades') }}" class="text-info">list a book for trade</a>,
+                    or <a href="{{ url_for('browseBooks') }}" class="text-info">search for a book.</a></p>
             {% else %}
-                <p><a href="{{ url_for('signup') }}">Sign up today</a> or <a href="{{ url_for('login') }}">login.</a>
+                <p><a href="{{ url_for('signup') }}" class="text-info">Sign up today</a> or
+                    <a href="{{ url_for('login') }}" class="text-info">login.</a>
                 </p>
             {% endif %}
 
