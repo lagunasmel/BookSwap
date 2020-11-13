@@ -266,7 +266,7 @@ class BookSwapDatabase:
             return recent_books
         except sqlite3.Error as e:
             print(e)
-            return False
+            return {}
 
     def check_ISBN(self, ISBN):
         """
