@@ -69,13 +69,12 @@ CREATE TABLE IF NOT EXISTS TradeStatuses(
 CREATE TABLE IF NOT EXISTS Trades(
     id INTEGER NOT NULL PRIMARY KEY,
     userRequestedId INTEGER,
-    userPostedId INTEGER,
-    bookId INTEGER,
+    userBookId INTEGER,
     statusId INTEGER,
-    dateCreated DATETIME DEFAULT current_timestamp,
+    dateInitiated DATETIME DEFAULT current_timestamp,
+    dateCompleted DATETIME DEFAULT NULL,
     FOREIGN KEY (userRequestedId) REFERENCES Users (id) ON DELETE NO ACTION ON UPDATE CASCADE,
-    FOREIGN KEY (userPostedId) REFERENCES Users (id) ON DELETE NO ACTION ON UPDATE CASCADE,
-    FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE NO ACTION ON UPDATE CASCADE,
+    FOREIGN KEY (userBookId) REFERENCES UserBooks (id) ON DELETE NO ACTION ON UPDATE CASCADE,
     FOREIGN KEY (statusId) REFERENCES TradeStatuses (id) ON DELETE NO ACTION ON UPDATE CASCADE
 );
 
@@ -105,6 +104,7 @@ CREATE TABLE IF NOT EXISTS UserBooks(
     copyQualityId INTEGER,
     points INTEGER DEFAULT 1,
     dateCreated DATETIME DEFAULT current_timestamp,
+    available INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY (userId) REFERENCES Users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (bookId) REFERENCES Books (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (CopyQualityId) REFERENCES CopyQualities (id) ON DELETE CASCADE ON UPDATE CASCADE
@@ -177,6 +177,8 @@ INSERT Into WishlistsBooks (wishlistId, bookId) VALUES
 )
 ;
 
+-- Some sample books in UserBooks
+-- First user Has 3 books, second uesr has 1 book, third user has 2 books
 INSERT INTO UserBooks (userId, bookId, copyQualityId, points) VALUES
 (1, 1, 2, 1),
 (1, 3, 4, 2),
@@ -185,3 +187,12 @@ INSERT INTO UserBooks (userId, bookId, copyQualityId, points) VALUES
 (3, 1, 3, 2),
 (3, 1, 1, 3);
 
+-- TradeStatus values
+INSERT INTO TradeStatuses (statusDescription) VALUES
+("No Current Trade"),
+("Trade Requested"),
+("Trade Accepted -- In Progress"),
+("Trade Rejected: Rejected By Book Owner"),
+("Trade Rejected: Rejected By Inaction"),
+("Trade Completed"),
+("Trade Marked As Failed");
