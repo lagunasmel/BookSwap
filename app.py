@@ -49,8 +49,11 @@ def browseBooks():
     else:
         book_results = {}
 
-    return render_template('browse-books.html', recent_books=recent_books, 
-            book_results = book_results, form=form)
+    print("App.py: BrowseBooks:")
+    print(f"\t recent_books: {recent_books}")
+    print(f"\t book_results: {book_results}")
+    print(f"\t form: {form}")
+    return render_template('browse-books.html', recent_books=recent_books, book_results = book_results, form=form)
 
 @app.route('/my-trades')
 def myTrades():
