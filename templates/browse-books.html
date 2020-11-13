@@ -22,6 +22,7 @@
                         <li>Author: {{ book['author'] }}</li>
                         <li>ISBN: {{ book['ISBN'] }}</li>
                         <li>Copy Quality: {{ book['copyQuality'] }}</li>
+                        <li>Points Needed: {{ book['pointsNeeded'] }}</li>
                     </ul>
                     <small>Listing User: {{ book['listingUser'] }}</small>
                 </div>
@@ -72,10 +73,38 @@
                         {% else %} {{ form.title(class="form-control") }} {% endif %}
                     </div>
                 </fieldset>
-                <div class="form-group">{{ form.submit(class="btn btn-primary") }}</div>
+                <div class="form-group">
+                    {{ form.submit(id="bookSearchFormButton" , class="btn btn-primary") }}
+                </div>
             </form>
+        </div>
+        <div id="bookSearchResults" style="display:none">
+            <h2>Book Search Results</h2>
+            <p>This is what we found.  Time to get your read on!</p>
+            <div class="list-group">
+                {% for book in book_results %}
+                <div
+                    class="list-group-item list-group-item-action flex-column align-items-start"
+                    >
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ book['title'] }}</h5>
+                        <small>listed {{ book['timeHere'] }} days ago</small>
+                    </div>
+                    <ul class="mb-1">
+                        <li>Author: {{ book['author'] }}</li>
+                        <li>ISBN: {{ book['ISBN'] }}</li>
+                        <li>Copy Quality: {{ book['copyQuality'] }}</li>
+                        <li>Points Needed: {{ book['pointsNeeded'] }}</li>
+                    </ul>
+                    <small>Listing User: {{ book['listingUser'] }}</small>
+                </div>
+                {% endfor %}
+            </div>
+             
         </div>
     </div>
 </div>
 
+    <script type="text/javascript" src="{{ url_for('static', filename='js/browse-books.js') }}"/>
+    </script>
 {% endblock content %}
