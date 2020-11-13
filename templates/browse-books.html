@@ -7,16 +7,19 @@
         <h1 class="text-center">Browse Books</h1>
         <p></p>
 
+        {% if show_recent %}
         <div id="recent-additions">
             <h2>Our Most Recent Additions</h2>
             <div class="list-group">
                 {% for book in recent_books %}
                 <div
-                    class="list-group-item list-group-item-action flex-column align-items-start"
-                    >
+                    class="list-group-item list-group-item-action 
+                             flex-column align-items-start">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ book['title'] }}</h5>
-                        <small>listed {{ book['timeHere'] }} days ago</small>
+                        <small>
+                            listed {{ book['timeHere'] }} days ago
+                        </small>
                     </div>
                     <ul class="mb-1">
                         <li>Author: {{ book['author'] }}</li>
@@ -30,6 +33,8 @@
             </div>
         </div>
         <br />
+        {% endif %}
+        {% if show_search %}
         <div id="bookSearch">
             <h2>Search For A Book</h2>
             <p>
@@ -78,7 +83,10 @@
                 </div>
             </form>
         </div>
-        <div id="bookSearchResults" style="display:none">
+        <br/>
+        {% endif %}
+        {% if show_results %}
+        <div id="bookSearchResults">
             <h2>Book Search Results</h2>
             <p>This is what we found.  Time to get your read on!</p>
             <div class="list-group">
@@ -100,11 +108,10 @@
                 </div>
                 {% endfor %}
             </div>
-             
+
         </div>
+        {% endif %}
     </div>
 </div>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/browse-books.js') }}"/>
-    </script>
 {% endblock content %}

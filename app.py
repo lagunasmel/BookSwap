@@ -46,14 +46,27 @@ def browseBooks():
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
         book_results = book_search.local_book_search(10)
+        show_recent = False 
+        show_search = False 
+        show_results = True
     else:
         book_results = {}
+        show_recent = True
+        show_search = True
+        show_results = False
 
     print("App.py: BrowseBooks:")
     print(f"\t recent_books: {recent_books}")
     print(f"\t book_results: {book_results}")
     print(f"\t form: {form}")
-    return render_template('browse-books.html', recent_books=recent_books, book_results=book_results, form=form)
+    return render_template('browse-books.html', 
+            recent_books=recent_books, 
+            book_results=book_results, 
+            form=form,
+            show_recent=show_recent,
+            show_search=show_search,
+            show_results=show_results
+            )
 
 
 @app.route('/my-trades')
