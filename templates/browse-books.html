@@ -12,18 +12,23 @@
                 {% for book in recent_books %}
                     <div class="col-3 mb-4">
                         <div class="card text-center">
-                            <img class="card-img-top img-fluid mx-auto"
-                                 src="{{ url_for('static', filename='images/book.png') }}"
-                                 style="max-width: 60%">
+                            <div class="card-body">
+                                <img class="card-img-top img-fluid mx-auto"
+                                     src="{{ url_for('static', filename='images/book.png') }}"
+                                     style="max-width: 75%">
+                            </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ book['title'] }}</h5>
-                                <p class="card-text text-center">
-                                    <br><span class="text-info">Author:</span> {{ book['author'] }}
+                                <p class="card-text text-left">
+                                    <span class="text-info">Author:</span> {{ book['author'] }}
                                     <br><span class="text-info">ISBN:</span> {{ book['ISBN'] }}
                                     <br><span class="text-info">Quality:</span> {{ book['copyQuality'] }}
                                     <br><span class="text-info">Points Needed:</span> {{ book['pointsNeeded'] }}
-                                    <br><small>Listing User: {{ book['listingUser'] }}</small>
                                 </p>
+                                <p class="card-text text-center">
+                                    <small>Listing User: {{ book['listingUser'] }}</small>
+                                </p>
+
                                 {% if session.user_num %}
                                     <form>
                                         <button type="submit" class="btn btn-primary btn-sm"
