@@ -146,7 +146,7 @@ INSERT INTO Users ('username', 'password', 'email','fName', 'lName', 'streetAddr
     'Nashville', 'Tennessee', '37215');
 
 -- Sample Wishlists
-INSERT INTO Wishlists (userId) VALUES (1), (2), (3)
+INSERT INTO Wishlists (userId) VALUES (1), (2), (3), (4), (5), (6)
 ;
 
 -- Sample Wishlist Books

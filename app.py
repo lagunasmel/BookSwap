@@ -159,11 +159,15 @@ def signup():
                        form.city.data,
                        form.state.data,
                        form.postCode.data))
-            db.commit()
+
             print(
                 f"Signup: account created for {form.username.data}, with User id {c.lastrowid}")
             flash(f'Account created for {form.email.data}!', 'success')
             session['user_num'] = c.lastrowid
+
+            c.execute("INSERT INTO Wishlists (userId) VALUES (?)", (c.lastrowid,)) # Default wishlist for user
+            db.commit()
+
             return redirect(url_for('account'))
         flash(error, 'warning')
     return render_template('signup.html', form=form)
@@ -226,6 +230,7 @@ def addToWish(isbn=None):
     db = get_db()
     db.row_factory = sqlite3.Row
 
+    # Special path for browse-books route
     if isbn:
         c = db.cursor()
         c.execute("SELECT * FROM Books WHERE ISBN = ?", (isbn,))
