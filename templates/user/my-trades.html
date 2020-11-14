@@ -1,6 +1,16 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<h1> My Trades </h1>
-
+<h1> My Requests </h1>
+<ul>
+{% for trade in trades %}
+    <li>{{ trade }}</li>
+{% endfor %}
+</ul>
+<h1> Pending Trades </h1>
+<ul>
+{% for pend in pending %}
+    <li>{{ pend }}</li>
+{% endfor %}
+</ul>
 {% endblock content %}

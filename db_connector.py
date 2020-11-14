@@ -262,6 +262,7 @@ class BookSwapDatabase:
                     externalLink,
                     CopyQualities.qualityDescription AS copyQuality,
                     Users.username AS listingUser,
+                    UserBooks.id AS userBooksId,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded
                     FROM Books 

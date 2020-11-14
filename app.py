@@ -36,6 +36,24 @@ def learnHow():
 def faq():
     return render_template('faq.html')
 
+@app.route('/request-book', methods=['GET'])
+def requestBook():
+    db = get_db()
+    db.row_factory = sqlite3.Row
+
+    c = db.cursor()
+
+    userBooksId = req.args.get('userBooksId')
+    lister = req.args.get('listing_user')
+    isbn = req.args.get('requested_book')
+    requester = session['user_num']
+
+    c.execute("INSERT INTO Trades (userRequestedId, userBookId, statusId) VALUES (?, ?, ?)", 
+        (requester, userBooksId, 2))
+
+    db.commit()
+
+    return redirect('/browse-books')
 
 @app.route('/browse-books', methods=['GET', 'POST'])
 def browseBooks():
@@ -71,7 +89,22 @@ def browseBooks():
 
 @app.route('/my-trades')
 def my_trades():
-    return render_template('user/my-trades.html')
+    db = get_db()
+    c = db.cursor()
+
+    user = session["user_num"]
+    c.execute("SELECT * FROM Trades WHERE userRequestedId = ?", (user,))
+
+    trades = c.fetchall()
+
+    c.execute("SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?", 
+        (user,))
+
+    pending = c.fetchall()
+
+    return render_template('user/my-trades.html', 
+    trades=trades, 
+    pending=pending)
 
 
 @app.route('/login', methods=['GET', 'POST'])
