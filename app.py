@@ -220,28 +220,11 @@ def wishlist():
     return render_template('user/wishlist.html', data=data)
 
 
-@app.route('/addToWishlist/<isbn>', methods=['GET'])
 @app.route('/addToWishlist', methods=['GET'])
 @login_required
-def addToWish(isbn=None):
+def addToWish():
     db = get_db()
     db.row_factory = sqlite3.Row
-
-    if isbn:
-        c = db.cursor()
-        c.execute("SELECT * FROM Books WHERE ISBN = ?", (isbn,))
-        bookId = c.fetchall()[0]['id']
-        
-        c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?", 
-        (session['user_num'], bookId))
-
-        if not c.fetchall():
-            c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
-                    (session['user_num'], bookId))
-
-        db.commit()
-        db.close()
-        return redirect('/browse-books')
 
     data = req.args.get("isbn")
     if data == "":
