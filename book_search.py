@@ -44,7 +44,7 @@ class BookSearch:
         results = self._results_combine(results, author_or_title)
 
         #Strip UserBooksId key,which is unnecessary and may be a security risk
-        results = self._remove_unnecessary_keys(results)
+        #results = self._remove_unnecessary_keys(results)
         for result in results:
             print(result)
 
