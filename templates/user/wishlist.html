@@ -4,6 +4,7 @@
     <div class="w-50 p-3 mx-auto">
         <h1 class="text-center">My Wishlist</h1>
         <p></p>
+        {% if data.table_content %}
         {% for wish in data.table_content %}
         <ul class="list-group">
             {% for book in data.table_content[wish] %}
@@ -16,7 +17,12 @@
             </li>
             {% endfor %}
         </ul>
+        {% endfor %}
+        {% endif %}
         <p></p>
+        {% if not data.table_content %}
+            <h5 class="text-center">You don't have anything in your wishlist</h5>
+        {% endif %}
         <div class="form-group">
             <form action="/addToWishlist" method="GET">
                 <label for="isbn">Book ISBN number: </label>
@@ -25,7 +31,6 @@
                 <input type="submit" class="btn btn-info btn-sm">
             </form>
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock content %}
