@@ -251,8 +251,12 @@ def addToWish(isbn=None):
     c.execute("SELECT * FROM Books WHERE ISBN = ?", (data,))
     bookId = c.fetchall()[0]['id']
 
-    c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
-              (req.args.get("wishlist"), bookId))
+    c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?", 
+        (session['user_num'], bookId))
+    
+    if not c.fetchall():
+        c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
+                (req.args.get("wishlist"), bookId))
     db.commit()
     db.close()
 

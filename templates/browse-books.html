@@ -112,7 +112,7 @@
                     <div class="d-flex w-100 justify-content-between">
                         <small>Listing User: {{ book['listingUser'] }}</small>
                         <form>
-                            <button type="submit" class="btn btn-primary btn-sm">Add to Wishlist</button>
+                            <button type="submit" class="btn btn-primary btn-sm" formaction="/addToWishlist/{{ book['ISBN'] }}">Add to Wishlist</button>
                         </form>
                     </div>
                 </div>
