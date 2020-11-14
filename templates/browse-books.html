@@ -1,49 +1,12 @@
 {% extends "layout.html" %}
 {% block content %}
 
-    {% if show_recent %}
-        <div class="container mt-4 text-center mx-auto">
-            <h1>Browse Books</h1>
-            <p>
-            <h3 class="text-info">Our most recent additions</h3>
-            </p>
-
-            <div class="row p-2">
-                {% for book in recent_books %}
-                    <div class="col-3 mb-4">
-                        <div class="card text-center">
-                            <img class="card-img-top img-fluid mx-auto"
-                                 src="{{ url_for('static', filename='images/book.png') }}"
-                                 style="max-width: 60%">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ book['title'] }}</h5>
-                                <p class="card-text text-center">
-                                    <br><span class="text-info">Author:</span> {{ book['author'] }}
-                                    <br><span class="text-info">ISBN:</span> {{ book['ISBN'] }}
-                                    <br><span class="text-info">Quality:</span> {{ book['copyQuality'] }}
-                                    <br><span class="text-info">Points Needed:</span> {{ book['pointsNeeded'] }}
-                                    <br><small>Listing User: {{ book['listingUser'] }}</small>
-                                </p>
-                                <a href="#" class="btn btn-primary">Go somewhere</a>
-                                <p></p>
-                                <a href="#" class="btn btn-success">Go somewhere</a>
-                            </div>
-                            <div class="card-footer text-muted text-center">
-                                listed {{ book['timeHere'] }} days ago
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-
-        </div>
-    {% endif %}
-
-
     {% if show_search %}
         <div class="container w-50 text-center mx-auto mt-5">
-        <div id="bookSearch">
-            <h2>Search For A Book</h2>
+        <h1>Browse Books</h1>
+
+        <div id="bookSearch" class="mt-4">
+            <h2 class="text-info">Search For A Book</h2>
             <p>
                 Let's find your next thing to read. For this search, the more items you
                 enter, the more precise the search. Entering just an ISBN is always the
@@ -91,6 +54,7 @@
         </div>
         <br/>
     {% endif %}
+    
 {% if show_results %}
     <div id="bookSearchResults">
         <h2>Book Search Results</h2>
@@ -118,6 +82,47 @@
     </div>
 {% endif %}
 </div>
+
+    {% if show_recent %}
+        <div class="container mt-4 text-center mx-auto">
+            <p>
+            <h3 class="text-info">Our most recent additions</h3>
+            </p>
+
+            <div class="row p-2">
+                {% for book in recent_books %}
+                    <div class="col-3 mb-4">
+                        <div class="card text-center">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 src="{{ url_for('static', filename='images/book.png') }}"
+                                 style="max-width: 60%">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ book['title'] }}</h5>
+                                <p class="card-text text-center">
+                                    <br><span class="text-info">Author:</span> {{ book['author'] }}
+                                    <br><span class="text-info">ISBN:</span> {{ book['ISBN'] }}
+                                    <br><span class="text-info">Quality:</span> {{ book['copyQuality'] }}
+                                    <br><span class="text-info">Points Needed:</span> {{ book['pointsNeeded'] }}
+                                    <br><small>Listing User: {{ book['listingUser'] }}</small>
+                                </p>
+                                <form>
+                                    <button type="submit" class="btn btn-primary btn-sm"
+                                            formaction="/addToWishlist/{{ book['ISBN'] }}">Add to Wishlist
+                                    </button>
+                                </form>
+                                <p></p>
+                                <a href="#" class="btn btn-success btn-sm">Go somewhere</a>
+                            </div>
+                            <div class="card-footer text-muted text-center">
+                                listed {{ book['timeHere'] }} days ago
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    {% endif %}
 
 
 {% endblock content %}
