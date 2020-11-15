@@ -49,6 +49,22 @@ def search_books_openlibrary(title=None, author=None, isbn=None, num_results=1):
     out = []
 
     # Fetch the first English edition, then store all data
+    """
+    TODO
+    The way forward here: assume that Books.row:work_key:edition_key is 1:1:1
+    - in the below, for each result, select the edition_key from the db
+    - if the WORK_KEY is not in the db (because this is IFF the edition_key is present since they're 1:1 now):
+    -- go through the editions, find the best match, and store it in the DB
+    
+    this means that 'get_or_add_book' is redundant:
+    - when would it have been used?
+    - I guess it's still useful: it'll just always be a 'get_book_id' and not 'add' ever?
+    - ie: it doesn't need to add, because it'll only ever be called as a follow-up from searching, and searching
+    will always add?
+    
+    - well, just in case, i can preserve the add functionality by refactoring out the 'go through editions and store
+    the best match' part into its own function
+    """
     for result in results:
         # First store work-level information
         d = {'title': result['title'], 'author': result['author_name'], 'work_key': result['key']}
