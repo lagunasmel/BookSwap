@@ -1,9 +1,11 @@
 import sqlite3
 from book_search import BookSearch
+from account import AccountSettings
 from flask import Flask, render_template, url_for, flash, redirect, session, g
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
-from forms import RegistrationForm, LoginForm, BookSearchForm
+from forms import (RegistrationForm, LoginForm, BookSearchForm,
+    AccountSettingsChangeForm, PasswordChangeForm)
 from auth import login_required, guest_required
 
 app = Flask(__name__)
@@ -323,65 +325,64 @@ def removeWish():
 @login_required
 def account():
     bsdb = get_bsdb()
-    # Check against request to change user settings
-    if req.get_json() and req.get_json()['request'] == 'changeUserSettings':
-        print("Account: request received for changeUserSettings")
-        username = req.get_json()['username']
+    acct = AccountSettings(session['user_num'])
+    account_settings_change_form = AccountSettingsChangeForm()
+    password_change_form = PasswordChangeForm()
+    # Check against requests to change account settings
+    if (req.method == 'POST' and 
+            account_settings_change_form.validate_on_submit()):
+        print(f"App: Account - request received for changeUserSettings for user {session['user_num']}")
         # Check that the username isn't changing or is available
-
-        if (username == bsdb.get_account_settings(session["user_num"])["username"]
-                or bsdb.is_username_available(username)):
-            success = bsdb.set_account_information(
-                session['user_num'], req.get_json())
-            if success == True:
+        if acct.is_username_valid(session['user_num'], 
+            account_settings_change_form.username.data):
+            print("App: Account - username is valid")
+            try:
+                acct.set_account_information(
+                session['user_num'], account_settings_change_form)
                 flash("Account information updated.", "success")
-                print("Account: returning new account info:")
+                print("App: Account - returning new account info:")
                 account_settings = bsdb.get_account_settings(
                     session["user_num"])
                 for key in account_settings.keys():
                     print(f"\t {key}: {account_settings[key]}")
                 account_settings = bsdb.get_account_settings(
                     session["user_num"])
-                bsdb.close()
-
-                return render_template("user/user-home.html", account_settings=account_settings);
-
-            else:
-                flash("Error updating your information. Try again?", "warning")
-                account_settings = bsdb.get_account_settings(
-                    session["user_num"])
-                bsdb.close()
-
-                return render_template("user/user-home.html",
-                                       account_settings=account_settings)
-
+            except Exception:
+                flash("Error updating your information.  Try again?",
+                        "warning")
         else:
-            account_settings = bsdb.get_account_settings(session["user_num"])
             flash("Username is already taken", "warning")
 
-            return render_template("user/user-home.html",
-                                   account_settings=account_settings)
-
     # Check against request to change password
-    if req.get_json() and req.get_json()['request'] == 'changePassword':
-        print(
-            f"Account: request received for changePassword for user {session['user_num']}")
-        if not bsdb.is_password_correct(session["user_num"], req.get_json()['oldPassword']):
-            flash("Original password not correct")
-            print(
-                f"Account: Incorrect password entered for {session['user_num']}.")
-            return {"passwordMismatch": True}
-
-        success = bsdb.set_password(session["user_num"], req.get_json())
-        if success == True:
-            flash("Account password updated.", 'success')
-            print(f"Account: Password updated for user {session['user_num']}.")
-            account_settings = bsdb.get_account_settings(session["user_num"])
-            return render_template("user/user-home.html", account_settings=account_settings)
-
-    # Default behavior (for loading page)
+    elif (req.method == 'POST' and 
+            password_change_form.validate_on_submit()):
+        print(f"App.py: Account -- request received to change password for user {session['user_num']}")
+        try:
+            correct_password = acct.is_password_correct(session["user_num"], password_change_form)
+            if not correct_password:
+                flash("Original password was not correct.  Please try again.", "warning")
+            else:
+                print("App.py: Account -- Original password was entered correctly.")
+                try:
+                    acct.set_password(session["user_num"], password_change_form)
+                    print("App.py: Account -- New Password set")
+                    flash("New Password Sucessfully Set.", "success")
+                except Exception:
+                    print("App.py: Account -- Error setting new password")
+                    flash("Error setting new password.  Try again?", "warning")
+            
+        except Exception:
+            flash("Error determining if the original password is correct.  Try again?", "warning")
+            print("App.py: Account -- Error checking original password.")
+    
+    account_settings_change_form = acct.fill_account_settings_change_form()
     account_settings = bsdb.get_account_settings(session["user_num"])
-    return render_template('user/user-home.html', account_settings=account_settings)
+    return render_template(
+            'user/user-home.html', 
+            account_settings=account_settings, 
+            account_settings_change_form=account_settings_change_form, 
+            password_change_form=password_change_form
+            )
 
 
 @app.route('/_add-book', methods=['POST'])
@@ -500,6 +501,7 @@ def reset_db():
             db.cursor().executescript(f.read())
         db.commit()
     return "Database reset :)"
+
 
 
 if __name__ == '__main__':
