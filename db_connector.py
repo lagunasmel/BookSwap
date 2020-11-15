@@ -135,7 +135,7 @@ class BookSwapDatabase:
         :returns a dict of the attributes for the Books row
         """
         # Get the Work Key from the search result
-        work_key = search_result.split('/')[2]
+        work_key = search_result['key'].split('/')[2]
 
         # First check if it exists
         local = self.get_ol_book_details(work_key)
@@ -149,31 +149,34 @@ class BookSwapDatabase:
         # Check the editions 10 at a time
         n = len(editions)
         edition_key = None
+        isbn = None
         i = 0
         while (i < (n // 10) + 1) and (edition_key is None):
             batch = editions[i:i + 10]
             url = 'https://openlibrary.org/api/books'
             payload = {'format': 'json',
                        'jscmd': 'details',
-                       'bibkeys': batch}
+                       'bibkeys': ','.join(batch)}
             r = requests.get(url, params=payload)
             data = r.json()
             for candidate in data.keys():
-                languages = data[candidate]['languages']
-                f = data[candidate]['physical_format']
-                if len(languages) == 1 and languages[0]['key'] == '/languages/eng' and (
-                        f == 'Paperback' or f == 'Hardcover'):
-                    edition_key = candidate
-                    break
+                details = data[candidate]['details']
+                if 'languages' in details and 'covers' in details and 'isbn_13' in details:
+                    languages = details['languages']
+                    if len(languages) == 1 and languages[0]['key'] == '/languages/eng':
+                        edition_key = candidate
+                        isbn = int(details['isbn_13'][0])
+                        break
             i += 10
 
         # Note that edition_key could still be None if we didn't find a suitable one, that's fine
         # Insert the book info now
         d['OLEditionKey'] = edition_key
+        d['ISBN'] = isbn
         c = self.db.cursor()
-        c.execute("""INSERT INTO Books (title, author, OLWorkKey, OLEditionKey) VALUES (?, ?, ?, ?)""",
-                  (d['title'], d['author'], work_key, edition_key))
-        c.commit()
+        c.execute("""INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey) VALUES (?, ?, ?, ?, ?)""",
+                  (d['title'], d['author'], isbn, work_key, edition_key))
+        self.db.commit()
         d['id'] = c.lastrowid  # ID of the recently inserted Books row
         return d
 
@@ -188,7 +191,7 @@ class BookSwapDatabase:
         'OLEditionKey', 'OLWorkKey'
         """
         c = self.db.cursor()
-        c.execute("""SELECT (id, title, author, ISBN, OLWorkKey, OLEditionKey) FROM Books WHERE OLWorkKey=?""",
+        c.execute("""SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey FROM Books WHERE OLWorkKey=?""",
                   (work_key,))
         rows = c.fetchall()
         if len(rows) > 1:
@@ -204,14 +207,11 @@ class BookSwapDatabase:
 
     def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
         """
-        Searches for books that match the provided details, and then returns the results. The search is conducted
-        on the Open Library API. Open Library works by creating a 'Work' for each book, which has a 1:M relationship
-        with
-        'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions' that
-        come in
-        different languages and formats. Here we fetch some details from the Work (author, title) and others from the
-        Edition
-         - using the first English paperback/hardback edition.
+        Searches for books that match the provided details, and then returns the results. The search is conducted on
+        the Open Library API. Open Library works by creating a 'Work' for each book, which has a 1:M relationship
+        with 'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions'
+        that come in different languages and formats. Here we fetch some details from the Work (author, title) and
+        others from the Edition - using the first English paperback/hardback edition.
 
          Note that cover art can be fetched using the returned edition id:
             eg http://covers.openlibrary.org/b/olid/<edition_id>-<S/M/L>.jpg
@@ -236,7 +236,7 @@ class BookSwapDatabase:
 
         # Return the book info
         for result in results:
-            book_info = self.get_or_add_ol_book_details(result)
+            book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
             out.append(book_info)
 
         return out

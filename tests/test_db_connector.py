@@ -10,7 +10,8 @@ def app():
     yield app
 
 
-def test_db(app):
+def test_search_books_openlibrary_1(app):
     with app.app_context():
         bsdb = dbc.BookSwapDatabase()
-        
+        out = bsdb.search_books_openlibrary(title="lord", author="tolkien")
+        print(out[0]['id'])
