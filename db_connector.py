@@ -1,5 +1,6 @@
 import sqlite3
 from flask import g, session, redirect, url_for
+import requests
 
 DATABASE = 'DatabaseSpecs/test-db.db'
 
@@ -136,8 +137,24 @@ class BookSwapDatabase:
         :param title: String, search is done for books whose title contains this
         :param author: Search is done for books whose author contains this string
         :param isbn: Must be a STRING
+        :param num_results: int, the number of results to return
+
+        :returns A 'num_results' long list of dicts corresponding to search results. Each dict has the following keys:
+                    'title'
+                    'olid' (a unique open library key for the volume)
+                    'authors' (a list)
+                    // TODO 'cover_id' (not implemented yet)
         """
-        
+        # Get the search results
+        url = "http://openlibrary.org/search.json"
+        payload = {'title': title, 'author': author, 'isbn': isbn}
+        r = requests.get(url, params=payload)  # auto-ignores 'None' values
+        results = r.json()[:num_results]
+        out = [{'title': result['title'],
+                'author': result['author_name'],
+                'olid': result['key']} for result in results]
+        return out
+
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
