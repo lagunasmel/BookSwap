@@ -19,6 +19,57 @@ def get_bsdb():
     return BookSwapDatabase()
 
 
+def search_books_openlibrary(title=None, author=None, isbn=None, num_results=1):
+    """
+    Searches for books that match the provided details, and then returns the results. The search is conducted
+    on the Open Library API. Open Library works by creating a 'Work' for each book, which has a 1:M relationship with
+    'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions' that come in
+    different languages and formats. Here we fetch some details from the Work (author, title) and others from the Edition
+     - using the first English paperback/hardback edition.
+
+     Note that cover art can be fetched using the returned edition id:
+        eg http://covers.openlibrary.org/b/olid/<edition_id>-<S/M/L>.jpg
+
+    :param title: String, search is done for books whose title contains this
+    :param author: Search is done for books whose author contains this string
+    :param isbn: Must be a STRING
+    :param num_results: int, the number of results to return
+
+    :returns A 'num_results' long list of dicts corresponding to search results. Each dict has the following keys:
+                'title'
+                'work_key' (a unique open library key for the work - not a specific edition)
+                'edition_key' (as above, but for a specific edition - could be None if no suitable edition found)
+                'authors' (a list)
+    """
+    # Get the search results
+    url = "http://openlibrary.org/search.json"
+    payload = {'title': title, 'author': author, 'isbn': isbn}
+    r = requests.get(url, params=payload)  # auto-ignores 'None' values
+    results = r.json()['docs'][:num_results]
+    out = []
+
+    # Fetch the first English edition, then store all data
+    for result in results:
+        # First store work-level information
+        d = {'title': result['title'], 'author': result['author_name'], 'work_key': result['key']}
+        # Find the first English language paperback/hardback edition, checking editions 10 at a time
+        edition_key = None
+        for key in result['edition_key']:
+            r = requests.get('https://openlibrary.org/books/' + key + '.json').json()
+            if ('languages' not in r) or ('physical_format' not in r):
+                continue
+            languages = r['languages']
+            f = r['physical_format']
+            if len(languages) == 1 and languages[0]['key'] == '/languages/eng' and (
+                    f == 'Paperback' or f == 'Hardcover'):
+                edition_key = key
+                break
+        # Note that edition_key could still be None here
+        d['edition_key'] = edition_key
+        out.append(d)
+    return out
+
+
 class BookSwapDatabase:
     """
     This class is intended to deal with everything-SQL related:
@@ -135,7 +186,8 @@ class BookSwapDatabase:
         if len(rows) > 1:
             # This should not happen!
             raise LookupError(
-                "Multiple Books found to correspond to a single (work key, edition key) pair - this should never happen!")
+                "Multiple Books found to correspond to a single (work key, edition key) pair - this should never "
+                "happen!")
         elif len(rows) == 1:
             return rows[0]['id']
         elif len(rows) == 0:
@@ -152,52 +204,7 @@ class BookSwapDatabase:
             return c.lastrowid  # ID of the recently inserted Books row
 
     def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
-        """
-        Searches for books that match the provided details, and then returns the results. The search is conducted
-        on the Open Library API. Open Library works by creating a 'Work' for each book, which has a 1:M relationship with
-        'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions' that come in
-        different languages and formats. Here we fetch some details from the Work (author, title) and others from the Edition
-         - using the first English paperback/hardback edition.
-
-         Note that cover art can be fetched using the returned edition id:
-            eg http://covers.openlibrary.org/b/olid/<edition_id>-<S/M/L>.jpg
-
-        :param title: String, search is done for books whose title contains this
-        :param author: Search is done for books whose author contains this string
-        :param isbn: Must be a STRING
-        :param num_results: int, the number of results to return
-
-        :returns A 'num_results' long list of dicts corresponding to search results. Each dict has the following keys:
-                    'title'
-                    'work_key' (a unique open library key for the work - not a specific edition)
-                    'edition_key' (as above, but for a specific edition - could be None if no suitable edition found)
-                    'authors' (a list)
-        """
-        # Get the search results
-        url = "http://openlibrary.org/search.json"
-        payload = {'title': title, 'author': author, 'isbn': isbn}
-        r = requests.get(url, params=payload)  # auto-ignores 'None' values
-        results = r.json()[:num_results]
-        out = []
-
-        # Fetch the first English edition, then store all data
-        for result in results:
-            # First store work-level information
-            d = {'title': result['title'], 'author': result['author_name'], 'work_key': result['key']}
-            # Find the first English language paperback/hardback edition
-            edition_key = None
-            for key in result['edition_key']:
-                r = requests.get('https://openlibrary.org/books/' + ed_key + '.json').json()
-                languages = r['languages']
-                f = r['physical_format']
-                if len(languages) == 1 and languages[0]['key'] == '/languages/eng' and (
-                        f == 'Paperback' or f == 'Hardcover'):
-                    edition_key = key
-                    break
-            # Note that edition_key could still be None here
-            d['edition_key'] = edition_key
-            out.append(d)
-        return out
+        return search_books_openlibrary(title, author, isbn, num_results)
 
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
@@ -252,7 +259,7 @@ class BookSwapDatabase:
         Changes the user account information.
         Accepts:
             user_id (int): user id number
-            req (JSON): body of request from user 
+            req (JSON): body of request from user
         Returns:
             True if successful change, false if not
         """
