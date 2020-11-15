@@ -31,19 +31,15 @@ function document_ready(show_account_modal, show_password_modal)
 {
   if (show_account_modal)
   {
-      $('#userHomePasswordChangeModal').modal("hide");
+      // alert("Showing account settings modal");
       $('#userHomeAccountChangeModal').modal("show");
   }
-  else
-      $('#userHomeAccountChangeModal').modal("hide");
   if (show_password_modal)
   {
-      $('#userHomeAccountChangeModal').modal("hide");
+      // alert("Showing password change modal");
       $('#userHomePasswordChangeModal').modal("show");
   }
-  else
-      $('#userHomePasswordChangeModal').modal('hide');
-  $('#new-password').removeClass('is-valid').removeClass('is-invalid')
-  $('#new-password-confirm').removeClass('is-invalid').removeClass('is-invalid')
+  // $('#new-password').removeClass('is-valid').removeClass('is-invalid')
+  // $('#new-password-confirm').removeClass('is-valid').removeClass('is-invalid')
 }
  

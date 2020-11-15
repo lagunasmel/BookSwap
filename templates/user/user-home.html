@@ -271,7 +271,7 @@
                                 {{
                                 password_change_form.new_password.label(class="form-control-label")
                                 }} {% if password_change_form.new_password.errors %} {{
-                                password_change_form.new_password(class="form-control is-invalid")
+                                password_change_form.new_password(class="form-control is-invalid", id="new-password")
                                 }}
                                 <div class="invalid-feedback">
                                     {% for error in password_change_form.new_password.errors %}
@@ -288,7 +288,7 @@
                                 password_change_form.confirm_new_password.label(class="form-control-label")
                                 }} {% if password_change_form.confirm_new_password.errors %} {{
                                 password_change_form.confirm_new_password(class="form-control
-                                is-invalid") }}
+                                is-invalid", id="new-password-confirm") }}
                                 <div class="invalid-feedback">
                                     {% for error in password_change_form.confirm_new_password.errors
                                     %}
@@ -334,13 +334,24 @@
             </div>
         </div>
     </section>
-        <script type="text/javascript" src="{{ url_for('static', filename='js/user-home.js') }}">
-        </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/user-home.js') }}">
+    </script>
 
-        <script type="text/javascript">
-            $(document).ready( function() {
-                document_ready({{show_account_modal}}, {{show_password_modal }})
-            });
-   </script>
-        {% endblock content %}
+    <script type="text/javascript">
+        $(window).on("load", function () {
+            document_ready (
+                {% if show_account_modal %}
+                true
+                {% else %}
+                false
+                {% endif %},
+                {% if show_password_modal %}
+                true
+                {% else %}
+                false
+                {% endif %}
+                )
+        });
+    </script>
+    {% endblock content %}
 
