@@ -1,9 +1,16 @@
-from unittest import TestCase
-import unittest
-from db_connector import search_books_openlibrary
+import pytest
+import db_connector as dbc
+from flask import Flask, render_template, url_for, flash, redirect, session, g
 
 
-class TestSearch(TestCase):
-    def test_lotr(self):
-        results = search_books_openlibrary(title="Lord", author="Tolkien")
-        self.assertGreaterEqual(len(results), 1)
+@pytest.fixture
+def app():
+    app = Flask(__name__)
+    app.config["TESTING"] = True
+    yield app
+
+
+def test_db(app):
+    with app.app_context():
+        bsdb = dbc.BookSwapDatabase()
+        

@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS Books
     title        TEXT    NOT NULL,
     author       TEXT    NOT NULL,
     ISBN         INTEGER,
-    OLWorkKey    TEXT,
-    OLEditionKey TEXT,
+    OLWorkKey    TEXT UNIQUE,
+    OLEditionKey TEXT UNIQUE,
     externalLink TEXT
 );
 
