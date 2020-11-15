@@ -11,7 +11,7 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password',
                              validators=[DataRequired(), Length(min=5)])
     confirm_password = PasswordField('Confirm Password',
-                                     validators=[DataRequired(), EqualTo('password')])
+                             validators=[DataRequired(), EqualTo('password')])
     fName = StringField('First Name', validators=[DataRequired()])
     lName = StringField('Last Name', validators=[DataRequired()])
     streetAddress = StringField('Street Address', validators=[DataRequired()])
@@ -34,3 +34,25 @@ class BookSearchForm(FlaskForm):
     author = StringField("Author")
     title = StringField("Title")
     submit = SubmitField("Search For This Book")
+
+class AccountSettingsChangeForm(FlaskForm):
+    username = StringField('Username (will be displayed publicly)',
+            validators=[DataRequired()])
+    email = StringField('Email (for contacting purposes)',
+                        validators=[DataRequired(), Email()])
+    fName = StringField('First Name', validators=[DataRequired()])
+    lName = StringField('Last Name', validators=[DataRequired()])
+    streetAddress = StringField('Street Address', validators=[DataRequired()])
+    city = StringField('City', validators=[DataRequired()])
+    state = StringField('State', validators=[DataRequired()])
+    postCode = StringField('Post Code', validators=[DataRequired()])
+    submit = SubmitField('Save Changes')
+
+class PasswordChangeForm(FlaskForm):
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password',
+                             validators=[DataRequired(), Length(min=5)])
+    confirm_new_password = PasswordField('Confirm New Password',
+                             validators=[DataRequired(), EqualTo('new_password')])
+    submit = SubmitField('Save Changes')
+ 

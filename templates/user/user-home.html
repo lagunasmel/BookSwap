@@ -1,233 +1,348 @@
-{% extends "layout.html" %} <!-- Edit to extend logged-in-layout HTML file (which has not yet been created).
-                            It will have more navbar tabs -->
+{% extends "layout.html" %}
+<!-- Edit to extend logged-in-layout HTML file (which has not yet been created).
+It will have more navbar tabs -->
 {% block content %}
 
-    <div class="container text-center mt-5">
-        <div class="col-6 mx-auto">
-            <img src="{{ url_for('static', filename='images/settings.png') }}" alt=""
-                 class="img-fluid col-2 mx-auto float-left">
-            <h2 class="display-5">Welcome, {{ account_settings["username"] }}!</h2>
-            <p class="lead"> Your Account Information </p>
-            <hr class="my-6">
-            <p><span class="text-info text-uppercase">Username</span> <br>{{ account_settings["username"] }} </p>
-            <p><span class="text-info text-uppercase">Email</span> <br>{{ account_settings["email"] }} </p>
-            <p><span class="text-info text-uppercase">First Name</span> <br>{{ account_settings["fName"] }}</p>
-            <p><span class="text-info text-uppercase">Last Name</span><br> {{ account_settings["lName"] }}</p>
-            <p><span class="text-info text-uppercase">Street Address</span><br> {{ account_settings["streetAddress"] }}
-            </p>
-            <p><span class="text-info text-uppercase">City</span><br> {{ account_settings["city"] }}</p>
-            <p><span class="text-info text-uppercase">State</span><br> {{ account_settings["state"] }}</p>
-            <p><span class="text-info text-uppercase">Postal Code</span><br> {{ account_settings["postCode"] }}</p>
+<div class="container text-center mt-5">
+  <div class="col-6 mx-auto">
+    <img
+      src="{{ url_for('static', filename='images/settings.png') }}"
+      alt=""
+      class="img-fluid col-2 mx-auto float-left"
+    />
+    <h2 class="display-5">Welcome, {{ account_settings.username.data }}!</h2>
+    <p class="lead">Your Account Information</p>
+    <hr class="my-6" />
+    <p>
+      <span class="text-info text-uppercase">Username</span> <br />{{
+      account_settings["username"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">Email</span> <br />{{
+      account_settings["email"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">First Name</span> <br />{{
+      account_settings["fName"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">Last Name</span><br />
+      {{ account_settings["lName"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">Street Address</span><br />
+      {{ account_settings.streetAddress.data }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">City</span><br />
+      {{ account_settings["streetAddress"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">State</span><br />
+      {{ account_settings["city"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">Postal Code</span><br />
+      {{ account_settings["state"] }}
+    </p>
+    <p>
+      <span class="text-info text-uppercase">Point Total</span><br />
+      {{ account_settings["points"] }}
+    </p>
 
-            <button type="button" class="btn btn-primary"
-                    id="userHomeAccountChangeButton"
-                    data-toggle="modal"
-                    data-target="#userHomeAccountChangeModal">
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="userHomeAccountChangeButton"
+      data-toggle="modal"
+      data-target="#userHomeAccountChangeModal"
+    >
+      Update Your Information
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      id="userHomePasswordChangeButton"
+      data-toggle="modal"
+      data-target="#userHomePasswordChangeModal"
+    >
+      Change Your Password
+    </button>
 
-                Update Your Information
-            </button>
-            <button type='button' class="btn btn-primary"
-                    id="userHomePasswordChangeButton"
-                    data-toggle="modal"
-                    data-target="#userHomePasswordChangeModal">
-
-                Change Your Password
-            </button>
-
-            <p><br> Would you like to log out? <a href="/logout">Click here</a></p>
-        </div>
-
-    </div>
-    <div class="modal" tabindex="-1" role="dialog" id="userHomeAccountChangeModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Change My Account Information</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="userHomeAccountChangeForm">
-                        <fieldset class="form-group">
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangeUsername"> Username
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangeUsername"
-                                       type="text" required
-                                       value="{{ account_settings["username"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangeEmail"> Email
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangeEmail"
-                                       type="text" required
-                                       value="{{ account_settings["email"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangefName"> First Name
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangefName"
-                                       type="text" required
-                                       value="{{ account_settings["fName"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangelName"> Last Name
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangelName"
-                                       type="text" required
-                                       value="{{ account_settings["lName"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangeStreetAddress">
-                                    Street Address
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangeStreetAddress"
-                                       type="text" required
-                                       value="{{ account_settings["streetAddress"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangeCity">
-                                    City
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangeCity"
-                                       type="text" required
-                                       value="{{ account_settings["city"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangeState">
-                                    State
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangeState"
-                                       type="text" required
-                                       value="{{ account_settings["state"] }}">
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="userHomeAccountChangePostCode">
-                                    Post Code
-                                </label>
-                                <input class="form-control"
-                                       id="userHomeAccountChangePostCode"
-                                       type="text" required
-                                       value="{{ account_settings["postCode"] }}">
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary"
-                            onclick="changeUserInformation()">
-                        Save changes
-                    </button>
-                    <button type="button" class="btn btn-secondary"
-                            data-dismiss="modal">
-                        Cancel
-                    </button>
-                </div>
+    <p>
+      <br />
+      Would you like to log out? <a href="/logout">Click here</a>
+    </p>
+  </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="userHomeAccountChangeModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change My Account Information</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="userHomeAccountChangeForm" action="" method="POST">
+          {{ account_settings_change_form.hidden_tag() }}
+          <fieldset class="form-group">
+            <div class="form-group">
+              {{
+              account_settings_change_form.username.label(class="form-control-label")
+              }} {% if account_settings_change_form.username.errors %} {{
+              account_settings_change_form.username(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.username.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.username(class="form-control") }} {%
+              endif %}
             </div>
-        </div>
-    </div>
-    <div class="modal" tabindex="-1" role="dialog"
-         id="userHomePasswordChangeModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Change My Password</h5>
-                    <button type="button" class="close" data-dismiss="modal"
-                            aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
 
-                <div class="modal-body">
-                    <form id="userHomePasswordChangeForm">
-                        <fieldset class="form-group">
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="old-password">
-                                    Current Password
-                                </label>
-                                <input class="form-control"
-                                       id="old-password"
-                                       type="password" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="new-password">
-                                    New Password
-                                </label>
-                                <input class="form-control"
-                                       id="new-password"
-                                       type="password" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label"
-                                       for="new-password-confirm">
-                                    Confirm New Password
-                                </label>
-                                <input class="form-control"
-                                       id="new-password-confirm"
-                                       type="password" required>
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary"
-                            onclick="changePassword()">
-                        Save changes
-                    </button>
-                    <button type="button" class="btn btn-secondary"
-                            data-dismiss="modal">
-                        Cancel
-                    </button>
-                </div>
+            <div class="form-group">
+              {{
+              account_settings_change_form.email.label(class="form-control-label")
+              }} {% if account_settings_change_form.email.errors %} {{
+              account_settings_change_form.email(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.email.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.email(class="form-control") }} {%
+              endif %}
             </div>
-        </div>
-    </div>
-
-
-    <section id="footer">
-        <div class="container text-center">
-            <div class="footer">
-                <small>
-                    Icon made by
-                    <a href="https://www.flaticon.com/authors/pixel-perfect" title="Pixel perfect">Pixel perfect</a>
-                    from
-                    <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-                </small>
+            <div class="form-group">
+              {{
+              account_settings_change_form.fName.label(class="form-control-label")
+              }} {% if account_settings_change_form.fName.errors %} {{
+              account_settings_change_form.fName(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.fName.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.fName(class="form-control") }} {%
+              endif %}
             </div>
+            <div class="form-group">
+              {{
+              account_settings_change_form.lName.label(class="form-control-label")
+              }} {% if account_settings_change_form.lName.errors %} {{
+              account_settings_change_form.lName(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.lName.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.lName(class="form-control") }} {%
+              endif %}
+            </div>
+            <div class="form-group">
+              {{
+              account_settings_change_form.streetAddress.label(class="form-control-label")
+              }} {% if account_settings_change_form.streetAddress.errors %} {{
+              account_settings_change_form.streetAddress(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in
+                account_settings_change_form.streetAddress.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.streetAddress(class="form-control")
+              }} {% endif %}
+            </div>
+            <div class="form-group">
+              {{
+              account_settings_change_form.city.label(class="form-control-label")
+              }} {% if account_settings_change_form.city.errors %} {{
+              account_settings_change_form.city(class="form-control is-invalid")
+              }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.city.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.city(class="form-control") }} {%
+              endif %}
+            </div>
+            <div class="form-group">
+              {{
+              account_settings_change_form.state.label(class="form-control-label")
+              }} {% if account_settings_change_form.state.errors %} {{
+              account_settings_change_form.state(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.state.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.state(class="form-control") }} {%
+              endif %}
+            </div>
+            <div class="form-group">
+              {{
+              account_settings_change_form.postCode.label(class="form-control-label")
+              }} {% if account_settings_change_form.postCode.errors %} {{
+              account_settings_change_form.postCode(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in account_settings_change_form.postCode.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              account_settings_change_form.postCode(class="form-control") }} {%
+              endif %}
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="form-group">
+          {{account_settings_change_form.submit(class="btn btn-primary",
+          form="userHomeAccountChangeForm", id="userHomeAccountChangeButton")}}
         </div>
-    </section>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" tabindex="-1" role="dialog" id="userHomePasswordChangeModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Change My Password</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="userHomePasswordChangeForm" action="" method="POST">
+          {{ password_change_form.hidden_tag() }}
+          <fieldset class="form-group">
+            <div class="form-group">
+              {{
+              password_change_form.old_password.label(class="form-control-label")
+              }} {% if password_change_form.old_password.errors %} {{
+              password_change_form.old_password(class="form-control is-invalid")
+              }}
+              <div class="invalid-feedback">
+                {% for error in password_change_form.old_password.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              password_change_form.old_password(class="form-control") }} {%
+              endif %}
+            </div>
 
+            <div class="form-group">
+              {{
+              password_change_form.new_password.label(class="form-control-label")
+              }} {% if password_change_form.new_password.errors %} {{
+              password_change_form.new_password(class="form-control is-invalid")
+              }}
+              <div class="invalid-feedback">
+                {% for error in password_change_form.new_password.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              password_change_form.new_password(class="form-control") }} {%
+              endif %}
+            </div>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='js/user-home.js') }}">
-    </script>
+            <div class="form-group">
+              {{
+              password_change_form.confirm_new_password.label(class="form-control-label")
+              }} {% if password_change_form.confirm_new_password.errors %} {{
+              password_change_form.confirm_new_password(class="form-control
+              is-invalid") }}
+              <div class="invalid-feedback">
+                {% for error in password_change_form.confirm_new_password.errors
+                %}
+                <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+              {% else %} {{
+              password_change_form.confirm_new_password(class="form-control") }}
+              {% endif %}
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="form-group">
+          {{ password_change_form.submit( class="btn btn-primary",
+          form="userHomePasswordChangeForm", id="userHomePasswordChangeButton" )
+          }}
+        </div>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <script type="text/javascript">
-        function changeUserInformation() {
-            changeUserInformationTemplate("{{ url_for('account') }}")
-        }
+<section id="footer">
+  <div class="container text-center">
+    <div class="footer">
+      <small>
+        Icon made by
+        <a
+          href="https://www.flaticon.com/authors/pixel-perfect"
+          title="Pixel perfect"
+          >Pixel perfect</a
+        >
+        from
+        <a href="https://www.flaticon.com/" title="Flaticon"
+          >www.flaticon.com</a
+        >
+      </small>
+    </div>
+  </div>
+</section>
+<!--
+<script type="text/javascript" src="{{ url_for('static', filename='js/user-home.js') }}">
+</script>
 
-        function changePassword() {
-            changePasswordTemplate("{{ url_for('account') }}", "{{ account_settings["username"] }}")
-        }
-    </script>
+<script type="text/javascript">
+    function changeUserInformation() {
+        changeUserInformationTemplate("{{ url_for('account') }}")
+    }
 
-
+function changePassword() {
+    changePasswordTemplate("{{ url_for('account') }}", "{{ account_settings["username"] }}")
+}
+</script>
+-->
 {% endblock content %}
