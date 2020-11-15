@@ -121,13 +121,35 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
-    def get_or_add_book_id(self, olid):
+    def get_or_add_book_id(self, work_key, edition_key):
         """
         Returns the Books.id value of a given volume. If the volume has not yet been locally stored in the database,
-        its details are added as a part of this method. 'olid' is the Open Library Works Key associated with the volume.
+        its details are added as a part of this method.
 
-        :param olid: the Open Library Works Key (eg 'OL27448W') associated with the volume.
+        :param work_key: the Open Library Works Key (eg 'OL27448W') associated with the volume.
+        :param edition_key: the Open Library Edition Key (eg 'OL9064559M') associated with the edition. This can be None.
         """
+        c = self.db.cursor()
+        c.execute("""SELECT id FROM Books WHERE OLWorkKey=? AND OLEditionKey=?""", (work_key, edition_key))
+        rows = c.fetchall()
+        if len(rows) > 1:
+            # This should not happen!
+            raise LookupError(
+                "Multiple Books found to correspond to a single (work key, edition key) pair - this should never happen!")
+        elif len(rows) == 1:
+            return rows[0]['id']
+        elif len(rows) == 0:
+            # Add the book's details
+            r = requests.get('https://openlibrary.org/works/' + work_key + '.json').json()
+            title = r['title']
+            # Get the first author name
+            author_key = r['authors'][0]['author']['key']
+            r = requests.get('https://openlibrary.org' + author_key + '.json').json()
+            author = r['name']
+            c.execute("""INSERT INTO Books (title, author, OLWorkKey, OLEditionKey) VALUES (?, ?, ?, ?)""",
+                      (title, author, work_key, edition_key))
+            c.commit()
+            return c.lastrowid  # ID of the recently inserted Books row
 
     def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
         """
