@@ -324,14 +324,31 @@ def removeWish():
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
+    # Get basic database and forms ready to return
     bsdb = get_bsdb()
     acct = AccountSettings(session['user_num'])
     account_settings_change_form = AccountSettingsChangeForm()
     password_change_form = PasswordChangeForm()
+    account_settings = bsdb.get_account_settings(session["user_num"])
+    show_account_modal = False
+    show_password_modal = False
     # Check against requests to change account settings
     if (req.method == 'POST' and 
-            account_settings_change_form.validate_on_submit()):
-        print(f"App: Account - request received for changeUserSettings for user {session['user_num']}")
+            account_settings_change_form.submit_account_change.data):
+        show_account_modal = True
+        print(f"App: Account - request received to change user settings for user {session['user_num']}")
+        # Check to make sure form was valid, return form if it was not
+        if not account_settings_change_form.validate_on_submit():
+            print(f"App: Account -- Settings change form failed validation")
+            flash("Your information wouldn't work.  Try again?", "warning")
+            return render_template(
+                    'user/user-home.html', 
+                    account_settings=account_settings, 
+                    account_settings_change_form=account_settings_change_form, 
+                    password_change_form=password_change_form,
+                    show_account_modal=show_account_modal,
+                    show_password_modal=show_password_modal
+                    )
         # Check that the username isn't changing or is available
         if acct.is_username_valid(session['user_num'], 
             account_settings_change_form.username.data):
@@ -343,6 +360,7 @@ def account():
                 print("App: Account - returning new account info:")
                 account_settings = bsdb.get_account_settings(
                     session["user_num"])
+                show_account_modal = False
                 for key in account_settings.keys():
                     print(f"\t {key}: {account_settings[key]}")
                 account_settings = bsdb.get_account_settings(
@@ -354,19 +372,33 @@ def account():
             flash("Username is already taken", "warning")
 
     # Check against request to change password
-    elif (req.method == 'POST' and 
-            password_change_form.validate_on_submit()):
+    elif (req.method == 'POST' and password_change_form.submit.data):
+        show_password_modal = True
         print(f"App.py: Account -- request received to change password for user {session['user_num']}")
+        if not password_change_form.validate_on_submit():
+            print(f"App: Account -- Password change form failed verification")
+            flash("Your infromation wouldn't work.  Try again?", "warning")
+            return render_template(
+                    'user/user-home.html', 
+                    account_settings=account_settings, 
+                    account_settings_change_form=account_settings_change_form, 
+                    password_change_form=password_change_form,
+                    show_account_modal= show_account_modal,
+                    show_password_modal= show_password_modal
+                    )
         try:
-            correct_password = acct.is_password_correct(session["user_num"], password_change_form)
+            correct_password = acct.is_password_correct(session["user_num"], 
+                    password_change_form)
             if not correct_password:
                 flash("Original password was not correct.  Please try again.", "warning")
             else:
                 print("App.py: Account -- Original password was entered correctly.")
                 try:
-                    acct.set_password(session["user_num"], password_change_form)
+                    acct.set_password(session["user_num"], 
+                            password_change_form)
                     print("App.py: Account -- New Password set")
                     flash("New Password Sucessfully Set.", "success")
+                    show_password_modal = False
                 except Exception:
                     print("App.py: Account -- Error setting new password")
                     flash("Error setting new password.  Try again?", "warning")
@@ -375,13 +407,17 @@ def account():
             flash("Error determining if the original password is correct.  Try again?", "warning")
             print("App.py: Account -- Error checking original password.")
     
+    # We got here either by being GET or succeeding making changes.
+    # Refill account_setting and account_settings_change_form
     account_settings_change_form = acct.fill_account_settings_change_form()
     account_settings = bsdb.get_account_settings(session["user_num"])
     return render_template(
             'user/user-home.html', 
             account_settings=account_settings, 
             account_settings_change_form=account_settings_change_form, 
-            password_change_form=password_change_form
+            password_change_form=password_change_form,
+            show_account_modal = show_account_modal,
+            show_password_modal = show_password_modal
             )
 
 
