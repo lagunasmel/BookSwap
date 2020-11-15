@@ -103,8 +103,8 @@ class BookSwapDatabase:
                             userId = ?
                         AND
                             UB.available == 1
-                    """, 
-                    (user_num,))
+                    """,
+                  (user_num,))
         rows = c.fetchall()
         self.db.commit()
         return rows
@@ -120,10 +120,32 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
+    def get_or_add_book_id(self, olid):
+        """
+        Returns the Books.id value of a given volume. If the volume has not yet been locally stored in the database,
+        its details are added as a part of this method. 'olid' is the Open Library Works Key associated with the volume.
+
+        :param olid: the Open Library Works Key (eg 'OL27448W') associated with the volume.
+        """
+
+    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
+        """
+        Searches for books that match the provided details, and then returns the results. The search is conducted
+        on the Open Library API.
+
+        :param title: String, search is done for books whose title contains this
+        :param author: Search is done for books whose author contains this string
+        :param isbn: Must be a STRING
+        """
+        
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
         Nothing happens on failure.
+
+        This method delegates the job of getting the Books.id value for a given volume to another method,
+        and only deals with the job of creating the required UserBooks entry. It is that other method that interfaces
+        with the Google Books API.
 
         :param copyquality: ID corresponding to the quality of the book copy
         :param user_num: database ID of the user to add the book to
@@ -315,7 +337,7 @@ class BookSwapDatabase:
                     ORDER BY
                         UserBooks.dateCreated
                         """,
-                        (ISBN, ))
+                      (ISBN,))
             isbn_match = c.fetchall()
             print("BSDB: Get_Books_By_ISBN (local) Results")
             self.print_results(isbn_match)
@@ -366,7 +388,7 @@ class BookSwapDatabase:
                         author LIKE '%'||? DESC,
                         author
                         """,
-                        (author, title, author, title, author, author))
+                      (author, title, author, title, author, author))
             author_and_title_match = c.fetchall()
             print("BSDB: get_books_by_author_and_title (local) Results")
             self.print_results(author_and_title_match)
@@ -412,7 +434,7 @@ class BookSwapDatabase:
         query_end = " ORDER BY "
         params = []
         author_exists = title_exists = False
-        if len(author)> 0:
+        if len(author) > 0:
             author_exists = True
         if len(title) > 0:
             title_exists = True
@@ -426,7 +448,7 @@ class BookSwapDatabase:
             query_end += " title = ? DESC,"
             params += [title, title]
         if author_exists:
-            query_end +=" author = ? DESC,"
+            query_end += " author = ? DESC,"
             params.append(author)
         if title_exists:
             query_end += " title LIKE ?||'%' DESC,"
@@ -440,7 +462,7 @@ class BookSwapDatabase:
         if author_exists:
             query_end += " author LIKE '%'||? DESC,"
             params.append(author)
-        query_end +=" author"
+        query_end += " author"
         query = query_start + query_middle + query_end
         params = tuple(params)
         # print("\t Query:")
@@ -473,7 +495,6 @@ class BookSwapDatabase:
                 print(f"\t\t {key}: {row[key]}")
             i += 1
         return
-
 
 # @app.teardown_appcontext
 # def close_connection(exception):

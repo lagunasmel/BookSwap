@@ -5,7 +5,7 @@ from flask import Flask, render_template, url_for, flash, redirect, session, g
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
 from forms import (RegistrationForm, LoginForm, BookSearchForm,
-    AccountSettingsChangeForm, PasswordChangeForm)
+                   AccountSettingsChangeForm, PasswordChangeForm)
 from auth import login_required, guest_required
 
 app = Flask(__name__)
@@ -38,6 +38,7 @@ def learnHow():
 def faq():
     return render_template('faq.html')
 
+
 @app.route('/request-book', methods=['GET'])
 def requestBook():
     db = get_db()
@@ -50,12 +51,13 @@ def requestBook():
     isbn = req.args.get('requested_book')
     requester = session['user_num']
 
-    c.execute("INSERT INTO Trades (userRequestedId, userBookId, statusId) VALUES (?, ?, ?)", 
-        (requester, userBooksId, 2))
+    c.execute("INSERT INTO Trades (userRequestedId, userBookId, statusId) VALUES (?, ?, ?)",
+              (requester, userBooksId, 2))
 
     db.commit()
 
     return redirect('/browse-books')
+
 
 @app.route('/browse-books', methods=['GET', 'POST'])
 def browseBooks():
@@ -66,8 +68,8 @@ def browseBooks():
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
         book_results = book_search.local_book_search(10)
-        show_recent = False 
-        show_search = False 
+        show_recent = False
+        show_search = False
         show_results = True
     else:
         book_results = {}
@@ -79,14 +81,14 @@ def browseBooks():
     print(f"\t recent_books: {recent_books}")
     print(f"\t book_results: {book_results}")
     print(f"\t form: {form}")
-    return render_template('browse-books.html', 
-            recent_books=recent_books, 
-            book_results=book_results, 
-            form=form,
-            show_recent=show_recent,
-            show_search=show_search,
-            show_results=show_results
-            )
+    return render_template('browse-books.html',
+                           recent_books=recent_books,
+                           book_results=book_results,
+                           form=form,
+                           show_recent=show_recent,
+                           show_search=show_search,
+                           show_results=show_results
+                           )
 
 
 @app.route('/my-trades')
@@ -99,14 +101,15 @@ def my_trades():
 
     trades = c.fetchall()
 
-    c.execute("SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?", 
+    c.execute(
+        "SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?",
         (user,))
 
     pending = c.fetchall()
 
-    return render_template('user/my-trades.html', 
-    trades=trades, 
-    pending=pending)
+    return render_template('user/my-trades.html',
+                           trades=trades,
+                           pending=pending)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -200,7 +203,7 @@ def signup():
             flash(f'Account created for {form.email.data}!', 'success')
             session['user_num'] = c.lastrowid
 
-            c.execute("INSERT INTO Wishlists (userId) VALUES (?)", (c.lastrowid,)) # Default wishlist for user
+            c.execute("INSERT INTO Wishlists (userId) VALUES (?)", (c.lastrowid,))  # Default wishlist for user
             db.commit()
 
             return redirect(url_for('account'))
@@ -258,6 +261,7 @@ def wishlist():
     data["headers"] = "Wishlists"
     return render_template('user/wishlist.html', data=data)
 
+
 @app.route('/addToWishlist/<isbn>', methods=['GET'])
 @app.route('/addToWishlist', methods=['GET'])
 @login_required
@@ -271,12 +275,12 @@ def addToWish(isbn=None):
         c.execute("SELECT * FROM Books WHERE ISBN = ?", (isbn,))
         bookId = c.fetchall()[0]['id']
 
-        c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?", 
-        (session['user_num'], bookId))
+        c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?",
+                  (session['user_num'], bookId))
 
         if not c.fetchall():
             c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
-                    (session['user_num'], bookId))
+                      (session['user_num'], bookId))
 
         db.commit()
         db.close()
@@ -290,12 +294,12 @@ def addToWish(isbn=None):
     c.execute("SELECT * FROM Books WHERE ISBN = ?", (data,))
     bookId = c.fetchall()[0]['id']
 
-    c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?", 
-        (session['user_num'], bookId))
-    
+    c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?",
+              (session['user_num'], bookId))
+
     if not c.fetchall():
         c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
-                (req.args.get("wishlist"), bookId))
+                  (req.args.get("wishlist"), bookId))
     db.commit()
     db.close()
 
@@ -333,7 +337,7 @@ def account():
     show_account_modal = False
     show_password_modal = False
     # Check against requests to change account settings
-    if (req.method == 'POST' and 
+    if (req.method == 'POST' and
             account_settings_change_form.submit_account_change.data):
         show_account_modal = True
         print(f"App: Account - request received to change user settings for user {session['user_num']}")
@@ -342,20 +346,20 @@ def account():
             print(f"App: Account -- Settings change form failed validation")
             flash("Your information wouldn't work.  Try again?", "warning")
             return render_template(
-                    'user/user-home.html', 
-                    account_settings=account_settings, 
-                    account_settings_change_form=account_settings_change_form, 
-                    password_change_form=password_change_form,
-                    show_account_modal=show_account_modal,
-                    show_password_modal=show_password_modal
-                    )
+                'user/user-home.html',
+                account_settings=account_settings,
+                account_settings_change_form=account_settings_change_form,
+                password_change_form=password_change_form,
+                show_account_modal=show_account_modal,
+                show_password_modal=show_password_modal
+            )
         # Check that the username isn't changing or is available
-        if acct.is_username_valid(session['user_num'], 
-            account_settings_change_form.username.data):
+        if acct.is_username_valid(session['user_num'],
+                                  account_settings_change_form.username.data):
             print("App: Account - username is valid")
             try:
                 acct.set_account_information(
-                session['user_num'], account_settings_change_form)
+                    session['user_num'], account_settings_change_form)
                 flash("Account information updated.", "success")
                 print("App: Account - returning new account info:")
                 account_settings = bsdb.get_account_settings(
@@ -367,7 +371,7 @@ def account():
                     session["user_num"])
             except Exception:
                 flash("Error updating your information.  Try again?",
-                        "warning")
+                      "warning")
         else:
             flash("Username is already taken", "warning")
 
@@ -379,51 +383,56 @@ def account():
             print(f"App: Account -- Password change form failed verification")
             flash("Your infromation wouldn't work.  Try again?", "warning")
             return render_template(
-                    'user/user-home.html', 
-                    account_settings=account_settings, 
-                    account_settings_change_form=account_settings_change_form, 
-                    password_change_form=password_change_form,
-                    show_account_modal= show_account_modal,
-                    show_password_modal= show_password_modal
-                    )
+                'user/user-home.html',
+                account_settings=account_settings,
+                account_settings_change_form=account_settings_change_form,
+                password_change_form=password_change_form,
+                show_account_modal=show_account_modal,
+                show_password_modal=show_password_modal
+            )
         try:
-            correct_password = acct.is_password_correct(session["user_num"], 
-                    password_change_form)
+            correct_password = acct.is_password_correct(session["user_num"],
+                                                        password_change_form)
             if not correct_password:
                 flash("Original password was not correct.  Please try again.", "warning")
             else:
                 print("App.py: Account -- Original password was entered correctly.")
                 try:
-                    acct.set_password(session["user_num"], 
-                            password_change_form)
+                    acct.set_password(session["user_num"],
+                                      password_change_form)
                     print("App.py: Account -- New Password set")
                     flash("New Password Sucessfully Set.", "success")
                     show_password_modal = False
                 except Exception:
                     print("App.py: Account -- Error setting new password")
                     flash("Error setting new password.  Try again?", "warning")
-            
+
         except Exception:
             flash("Error determining if the original password is correct.  Try again?", "warning")
             print("App.py: Account -- Error checking original password.")
-    
+
     # We got here either by being GET or succeeding making changes.
     # Refill account_setting and account_settings_change_form
     account_settings_change_form = acct.fill_account_settings_change_form()
     account_settings = bsdb.get_account_settings(session["user_num"])
     return render_template(
-            'user/user-home.html', 
-            account_settings=account_settings, 
-            account_settings_change_form=account_settings_change_form, 
-            password_change_form=password_change_form,
-            show_account_modal = show_account_modal,
-            show_password_modal = show_password_modal
-            )
+        'user/user-home.html',
+        account_settings=account_settings,
+        account_settings_change_form=account_settings_change_form,
+        password_change_form=password_change_form,
+        show_account_modal=show_account_modal,
+        show_password_modal=show_password_modal
+    )
 
 
 @app.route('/_add-book', methods=['POST'])
 @login_required
 def add_book():
+    """
+    This method lists a book as available for trade by a user. It involves the following steps:
+    - add the book to the backend DB as being available for trade
+    - then fetch all books available for trade and redraw the table - so that the new book is now included
+    """
     bsdb = get_bsdb()
     if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]
@@ -537,7 +546,6 @@ def reset_db():
             db.cursor().executescript(f.read())
         db.commit()
     return "Database reset :)"
-
 
 
 if __name__ == '__main__':
