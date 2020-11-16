@@ -442,7 +442,7 @@ def add_book():
         book_id = req.get_json()["bookId"]
         user_num = session["user_num"]
         # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
-
+        bsdb.user_add_book_by_id(book_id, user_num, copyquality)
         rows = bsdb.get_listed_books(user_num)
         copyqualities = bsdb.get_book_qualities()
 
