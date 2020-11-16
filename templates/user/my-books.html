@@ -2,6 +2,24 @@
 {% import 'user/macros.html' as macros %}
 
 {% block content %}
+    <!-- The AJAX scripts for book list addition -->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/my-books.js') }}">
+    </script>
+
+    <script type="text/javascript">
+        function addBook(bookId, quality) {
+            addBookTemplate("{{ url_for('add_book') }}", bookId, quality)
+        };
+
+        function searchBook() {
+            searchBookTemplate("{{ url_for('search_book') }}")
+        };
+
+        function testHandler() {
+            alert('Success!');
+        }
+    </script>
+
     <p class="lead text-center py-4">
         Here are the books you've offered to swap - feel free to add to, or remove from, this list
     </p>
@@ -62,25 +80,7 @@
             {{ macros.book_list_table(data.caption, data.headers, data.rows) }}
         </div>
     </div>
-
-
-    <!-- The AJAX scripts for book list addition -->
-    <script type="text/javascript" src="{{ url_for('static', filename='js/my-books.js') }}">
-    </script>
-
-    <script type="text/javascript">
-        function addBook(bookId, quality) {
-            addBookTemplate("{{ url_for('add_book') }}", bookId, quality)
-        };
-
-        function searchBook() {
-            searchBookTemplate("{{ url_for('search_book') }}")
-        };
-
-        function testHandler() {
-            alert('Success!');
-        }
-    </script>
+    
 
 
 {% endblock content %}
