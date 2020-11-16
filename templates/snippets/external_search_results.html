@@ -1,14 +1,23 @@
 {% block body %}
     {% if search_results|length > 0 %}
-        {% for result in search_results %}
-            <div class="searchResult">
-                <ul>
-                    <li>Title: {{ result.title }}</li>
-                    <li>Author: {{ result.author }}</li>
-
-                </ul>
-            </div>
-        {% endfor %}
+        <table class="table table-hover">
+            {% for result in search_results %}
+                <tr class="search_result">
+                    <td><h5>{{ result.title }}</h5> <br>
+                        by {{ result.author }}</td>
+                    <td>
+                        {% if result.coverImageUrl %}
+                            <img src="{{ result.coverImageUrl }}" alt="Book Cover Image" width="200" height="200">
+                        {% endif %}
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary ml-2 add-book-button"
+                        >Add Book
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
     {% else %}
         <h4 class="p1-2">Sorry, no matches found!</h4>
     {% endif %}
