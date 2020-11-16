@@ -173,7 +173,10 @@ class BookSwapDatabase:
         # Insert the book info now
         d['OLEditionKey'] = edition_key
         d['ISBN'] = isbn
-        d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
+        if edition_key is not None:
+            d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
+        else:
+            d['coverImageUrl'] = None
         c = self.db.cursor()
         c.execute(
             """INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl) VALUES (?, ?, ?, ?, ?, 
@@ -245,7 +248,10 @@ class BookSwapDatabase:
         url = "http://openlibrary.org/search.json"
         payload = {'title': title, 'author': author, 'isbn': isbn}
         r = requests.get(url, params=payload)  # auto-ignores 'None' values
-        results = r.json()['docs'][:num_results]
+        if r.status_code != 200:
+            results = []
+        else:
+            results = r.json()['docs'][:num_results]
         out = []
 
         # Return the book info
@@ -255,6 +261,17 @@ class BookSwapDatabase:
 
         return out
 
+    def user_add_book_by_id(self, book_id, user_num, copyquality):
+        """
+        'user_id' user lists the book matching 'id' as available to swap.
+        Nothing happens on failure.
+        """
+        c = self.db.cursor()
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
+                  (user_num, book_id, copyquality))
+        self.db.commit()
+        return
+        
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
@@ -281,6 +298,7 @@ class BookSwapDatabase:
         book_id = rows[0]["id"]
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
                   (user_num, book_id, copyquality))
+        self.db.commit()
 
     def is_username_available(self, username):
         """
