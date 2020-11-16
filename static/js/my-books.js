@@ -11,7 +11,28 @@ function confirmBook() {
 
 function cancelAddBook() {
     $("#confirmBook").hide();
+    $("#searchResults").hide();
     $("#listBook").show();
+}
+
+function searchBookTemplate(url) {
+    $("#listBook").hide();
+    $("#pendingSearch").show();
+    $.ajax(url, {
+        contentType: "application/json",
+        data: JSON.stringify({
+            'isbn': $('#newBookISBN').val(),
+            'author': $('#newBookAuthor').val(),
+            'title': $('#newBookTitle').val(),
+            'request': 'search'
+        }),
+        type: 'POST',
+        success: function (data) {
+            $("#pendingSearch").hide();
+            $("#searchResultsInner").html(data);
+            $("#searchResults").show();
+        }
+    })
 }
 
 function addBookTemplate(url) {

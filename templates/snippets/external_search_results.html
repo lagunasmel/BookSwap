@@ -1,0 +1,15 @@
+{% block body %}
+    {% if search_results|length > 0 %}
+        {% for result in search_results %}
+            <div class="searchResult">
+                <ul>
+                    <li>Title: {{ result.title }}</li>
+                    <li>Author: {{ result.author }}</li>
+
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <h4 class="p1-2">Sorry, no matches found!</h4>
+    {% endif %}
+{% endblock %}

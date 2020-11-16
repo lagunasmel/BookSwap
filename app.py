@@ -239,13 +239,15 @@ def wishlist():
 
     # Select book names per wishlist
     c.execute(
-        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)",
+        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE "
+        "wishlistId IN (?)",
         (values,))
     for row in c.fetchall():
         print([i for i in row])
     # Map wishlists to books for user
     c.execute(
-        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE wishlistId IN (?)",
+        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE "
+        "wishlistId IN (?)",
         (values,))
     wishBooks = {}
     for row in c.fetchall():
@@ -451,6 +453,24 @@ def add_book():
                 "copyqualities": copyqualities}
 
         return render_template('user/my-books.html', data=data)
+
+
+@app.route('/_search-book', methods=['POST'])
+@login_required
+def search_book():
+    """
+    This method is POSTed a request with the fields 'isbn', 'author', and 'title', and searches for
+    results on the open library API that match these fields. It returns a rendered set of divs to be inserted
+    into the html as appropriate.
+    """
+    bsdb = get_bsdb()
+    if req.get_json().get('request') == 'search':
+        isbn = req.get_json()["isbn"]
+        author = req.get_json()["author"]
+        title = req.get_json()["title"]
+        # TODO magic number here - number of search results
+        search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=5)
+        return render_template("snippets/external_search_results.html", search_results=search_results)
 
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
