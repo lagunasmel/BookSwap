@@ -31,13 +31,14 @@ Queries that initialize the tables.
 -- Books
 CREATE TABLE IF NOT EXISTS Books
 (
-    id           INTEGER NOT NULL PRIMARY KEY,
-    title        TEXT    NOT NULL,
-    author       TEXT    NOT NULL,
-    ISBN         INTEGER,
-    OLWorkKey    TEXT UNIQUE,
-    OLEditionKey TEXT UNIQUE,
-    externalLink TEXT
+    id            INTEGER NOT NULL PRIMARY KEY,
+    title         TEXT    NOT NULL,
+    author        TEXT    NOT NULL,
+    ISBN          INTEGER,
+    OLWorkKey     TEXT UNIQUE,
+    OLEditionKey  TEXT UNIQUE,
+    coverImageUrl TEXT,
+    externalLink  TEXT
 );
 
 -- CopyQualities

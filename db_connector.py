@@ -173,9 +173,12 @@ class BookSwapDatabase:
         # Insert the book info now
         d['OLEditionKey'] = edition_key
         d['ISBN'] = isbn
+        d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
         c = self.db.cursor()
-        c.execute("""INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey) VALUES (?, ?, ?, ?, ?)""",
-                  (d['title'], d['author'], isbn, work_key, edition_key))
+        c.execute(
+            """INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl) VALUES (?, ?, ?, ?, ?, 
+            ?)""",
+            (d['title'], d['author'], isbn, work_key, edition_key, d['coverImageUrl']))
         self.db.commit()
         d['id'] = c.lastrowid  # ID of the recently inserted Books row
         return d
@@ -191,8 +194,9 @@ class BookSwapDatabase:
         'OLEditionKey', 'OLWorkKey'
         """
         c = self.db.cursor()
-        c.execute("""SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey FROM Books WHERE OLWorkKey=?""",
-                  (work_key,))
+        c.execute(
+            """SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl FROM Books WHERE OLWorkKey=?""",
+            (work_key,))
         rows = c.fetchall()
         if len(rows) > 1:
             # This should not happen!
@@ -221,11 +225,13 @@ class BookSwapDatabase:
         :param isbn: Must be a STRING
         :param num_results: int, the number of results to return
 
-        :returns A 'num_results' long list of dicts corresponding to search results. Each dict has the following keys:
+        :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
+                    Each row has the following keys:
                     'title'
-                    'work_key' (a unique open library key for the work - not a specific edition)
-                    'edition_key' (as above, but for a specific edition - could be None if no suitable edition found)
-                    'authors' (a list)
+                    'OLWorkKey' (a unique open library key for the work - not a specific edition)
+                    'OLEditionKey' (as above, but for a specific edition - could be None if no suitable edition found)
+                    'author'
+                    'coverImageUrl'
         """
         # Get the search results
         url = "http://openlibrary.org/search.json"
