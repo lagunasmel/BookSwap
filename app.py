@@ -63,7 +63,7 @@ def requestBook():
 def browse_books():
     form = BookSearchForm()
     bsdb = get_bsdb()
-    recent_books = bsdb.get_recent_additions(5)
+    recent_books = bsdb.get_recent_additions(8)
     if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)

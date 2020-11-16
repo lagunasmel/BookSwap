@@ -11,7 +11,7 @@
             <div class="row p-2">
                 {% for book in recent_books %}
                     <div class="col-3 mb-4">
-                        <div class="card text-center">
+                        <div class="card text-center h-100">
                             <div class="card-body">
                                 <img class="card-img-top img-fluid mx-auto"
                                      src="{{ url_for('static', filename='images/book.png') }}"
@@ -119,9 +119,7 @@
         <p>This is what we found. Time to get your read on!</p>
         <div class="list-group">
             {% for book in book_results %}
-                <div
-                        class="list-group-item list-group-item-action flex-column align-items-start"
-                >
+                <div class="list-group-item list-group-item-action flex-column align-items-start">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ book['title'] }}</h5>
                         <small>listed {{ book['timeHere'] }} days ago</small>
