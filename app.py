@@ -428,6 +428,11 @@ def account():
 @app.route('/_add-book', methods=['POST'])
 @login_required
 def add_book():
+    """
+    This method lists a book as available for trade by a user. It involves the following steps:
+    - add the book to the backend DB as being available for trade
+    - then fetch all books available for trade and redraw the table - so that the new book is now included
+    """
     bsdb = get_bsdb()
     if req.get_json().get('request') == 'add':
         isbn = req.get_json()["isbn"]

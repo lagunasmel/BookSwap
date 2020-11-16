@@ -1,5 +1,6 @@
 import sqlite3
 from flask import g, session, redirect, url_for
+import requests
 
 DATABASE = 'DatabaseSpecs/test-db.db'
 
@@ -103,8 +104,8 @@ class BookSwapDatabase:
                             userId = ?
                         AND
                             UB.available == 1
-                    """, 
-                    (user_num,))
+                    """,
+                  (user_num,))
         rows = c.fetchall()
         self.db.commit()
         return rows
@@ -120,10 +121,140 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
+    def get_or_add_ol_book_details(self, search_result):
+        """
+        Does the same thing as get_ol_book_details, but if the book is not yet stored then finds the first english
+        language paperback/hardcover Edition of the Work corresponding to the given key in the Open Library API and
+        then inserts its details into the Books table.
+
+        To do this a dict called 'search result' corresponding to the JSON search result returned by Open Library is
+        required. To clarify: there is currently no way to add details for an Open Library Work, given a Work Key,
+        unless we have access to the information from the search result.  
+
+        :param editions: a list of Open Library keys for Editions corresponding to the given Work
+        :returns a dict of the attributes for the Books row
+        """
+        # Get the Work Key from the search result
+        work_key = search_result['key'].split('/')[2]
+
+        # First check if it exists
+        local = self.get_ol_book_details(work_key)
+        if local is not None:
+            return local
+
+        # Get the info of the first printed, english-language, edition, to store
+        d = {'title': search_result['title'], 'author': search_result['author_name'][0], 'OLWorkKey': work_key}
+        editions = search_result['edition_key']
+
+        # Check the editions 10 at a time
+        n = len(editions)
+        edition_key = None
+        isbn = None
+        i = 0
+        while (i < (n // 10) + 1) and (edition_key is None):
+            batch = editions[i:i + 10]
+            url = 'https://openlibrary.org/api/books'
+            payload = {'format': 'json',
+                       'jscmd': 'details',
+                       'bibkeys': ','.join(batch)}
+            r = requests.get(url, params=payload)
+            data = r.json()
+            for candidate in data.keys():
+                details = data[candidate]['details']
+                if 'languages' in details and 'covers' in details and 'isbn_13' in details:
+                    languages = details['languages']
+                    if len(languages) == 1 and languages[0]['key'] == '/languages/eng':
+                        edition_key = candidate
+                        isbn = int(details['isbn_13'][0])
+                        break
+            i += 10
+
+        # Note that edition_key could still be None if we didn't find a suitable one, that's fine
+        # Insert the book info now
+        d['OLEditionKey'] = edition_key
+        d['ISBN'] = isbn
+        d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
+        c = self.db.cursor()
+        c.execute(
+            """INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl) VALUES (?, ?, ?, ?, ?, 
+            ?)""",
+            (d['title'], d['author'], isbn, work_key, edition_key, d['coverImageUrl']))
+        self.db.commit()
+        d['id'] = c.lastrowid  # ID of the recently inserted Books row
+        return d
+
+    def get_ol_book_details(self, work_key):
+        """
+        Returns the Books table attributes for a given Work, as defined by Open Library. If the volume has not yet
+        been locally stored in the database, None is returned, and 'get_or_add_ol_book_details' must be called instead.
+
+        :param work_key: the Open Library Works Key (eg 'OL27448W') associated with the volume.
+
+        :returns a sqlite Row or a dict of the Book's attributes, with the keys: 'id', 'title', 'author', 'isbn',
+        'OLEditionKey', 'OLWorkKey'
+        """
+        c = self.db.cursor()
+        c.execute(
+            """SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl FROM Books WHERE OLWorkKey=?""",
+            (work_key,))
+        rows = c.fetchall()
+        if len(rows) > 1:
+            # This should not happen!
+            raise LookupError(
+                "Multiple Books found to correspond to a single work key - this should never "
+                "happen!")
+        elif len(rows) == 1:
+            return rows[0]
+        elif len(rows) == 0:
+            # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
+            return None
+
+    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
+        """
+        Searches for books that match the provided details, and then returns the results. The search is conducted on
+        the Open Library API. Open Library works by creating a 'Work' for each book, which has a 1:M relationship
+        with 'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions'
+        that come in different languages and formats. Here we fetch some details from the Work (author, title) and
+        others from the Edition - using the first English paperback/hardback edition.
+
+         Note that cover art can be fetched using the returned edition id:
+            eg http://covers.openlibrary.org/b/olid/<edition_id>-<S/M/L>.jpg
+
+        :param title: String, search is done for books whose title contains this
+        :param author: Search is done for books whose author contains this string
+        :param isbn: Must be a STRING
+        :param num_results: int, the number of results to return
+
+        :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
+                    Each row has the following keys:
+                    'title'
+                    'OLWorkKey' (a unique open library key for the work - not a specific edition)
+                    'OLEditionKey' (as above, but for a specific edition - could be None if no suitable edition found)
+                    'author'
+                    'coverImageUrl'
+        """
+        # Get the search results
+        url = "http://openlibrary.org/search.json"
+        payload = {'title': title, 'author': author, 'isbn': isbn}
+        r = requests.get(url, params=payload)  # auto-ignores 'None' values
+        results = r.json()['docs'][:num_results]
+        out = []
+
+        # Return the book info
+        for result in results:
+            book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
+            out.append(book_info)
+
+        return out
+
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
         Nothing happens on failure.
+
+        This method delegates the job of getting the Books.id value for a given volume to another method,
+        and only deals with the job of creating the required UserBooks entry. It is that other method that interfaces
+        with the Google Books API.
 
         :param copyquality: ID corresponding to the quality of the book copy
         :param user_num: database ID of the user to add the book to
@@ -169,7 +300,7 @@ class BookSwapDatabase:
         Changes the user account information.
         Accepts:
             user_id (int): user id number
-            req (JSON): body of request from user 
+            req (JSON): body of request from user
         Returns:
             True if successful change, false if not
         """
@@ -315,7 +446,7 @@ class BookSwapDatabase:
                     ORDER BY
                         UserBooks.dateCreated
                         """,
-                        (ISBN, ))
+                      (ISBN,))
             isbn_match = c.fetchall()
             print("BSDB: Get_Books_By_ISBN (local) Results")
             self.print_results(isbn_match)
@@ -366,7 +497,7 @@ class BookSwapDatabase:
                         author LIKE '%'||? DESC,
                         author
                         """,
-                        (author, title, author, title, author, author))
+                      (author, title, author, title, author, author))
             author_and_title_match = c.fetchall()
             print("BSDB: get_books_by_author_and_title (local) Results")
             self.print_results(author_and_title_match)
@@ -412,7 +543,7 @@ class BookSwapDatabase:
         query_end = " ORDER BY "
         params = []
         author_exists = title_exists = False
-        if len(author)> 0:
+        if len(author) > 0:
             author_exists = True
         if len(title) > 0:
             title_exists = True
@@ -426,7 +557,7 @@ class BookSwapDatabase:
             query_end += " title = ? DESC,"
             params += [title, title]
         if author_exists:
-            query_end +=" author = ? DESC,"
+            query_end += " author = ? DESC,"
             params.append(author)
         if title_exists:
             query_end += " title LIKE ?||'%' DESC,"
@@ -440,7 +571,7 @@ class BookSwapDatabase:
         if author_exists:
             query_end += " author LIKE '%'||? DESC,"
             params.append(author)
-        query_end +=" author"
+        query_end += " author"
         query = query_start + query_middle + query_end
         params = tuple(params)
         # print("\t Query:")
@@ -473,7 +604,6 @@ class BookSwapDatabase:
                 print(f"\t\t {key}: {row[key]}")
             i += 1
         return
-
 
 # @app.teardown_appcontext
 # def close_connection(exception):
