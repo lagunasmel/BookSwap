@@ -471,7 +471,7 @@ def search_book():
         author = req.get_json()["author"]
         title = req.get_json()["title"]
         # TODO magic number here - number of search results
-        search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=3)
+        search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=5)
         copyqualities = bsdb.get_book_qualities()
         return render_template("snippets/external_search_results.html", search_results=search_results,
                                copyqualities=copyqualities)

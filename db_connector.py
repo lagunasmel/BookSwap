@@ -246,6 +246,10 @@ class BookSwapDatabase:
         """
         # Get the search results
         url = "http://openlibrary.org/search.json"
+        if title == '':
+            title = None
+        if author == '':
+            author = None
         payload = {'title': title, 'author': author, 'isbn': isbn}
         r = requests.get(url, params=payload)  # auto-ignores 'None' values
         if r.status_code != 200:
@@ -271,7 +275,7 @@ class BookSwapDatabase:
                   (user_num, book_id, copyquality))
         self.db.commit()
         return
-        
+
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
