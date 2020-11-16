@@ -27,14 +27,6 @@
                         <input class="form-control" id="newBookISBN" type="text"
                                placeholder="Enter ISBN of book to list">
                     </div>
-                    {#                    <div class="form-group">#}
-                    {#                        <label for="newBookQuality" class="pl-2">Quality of your copy?</label>#}
-                    {#                        <select class="form-control" id="newBookQuality">#}
-                    {#                            {% for cq in data.copyqualities %}#}
-                    {#                                <option value="{{ cq[0] }}">{{ cq[1] }}</option>#}
-                    {#                            {% endfor %}#}
-                    {#                        </select>#}
-                    {#                    </div>#}
                     <button type="button" class="btn btn-primary ml-2" onclick="searchBook()">Search for Book</button>
                 </form>
             </div>
@@ -77,13 +69,17 @@
     </script>
 
     <script type="text/javascript">
-        function addBook() {
-            addBookTemplate("{{ url_for('add_book') }}")
+        function addBook(bookId, quality) {
+            addBookTemplate("{{ url_for('add_book') }}", bookId, quality)
         };
 
         function searchBook() {
             searchBookTemplate("{{ url_for('search_book') }}")
         };
+
+        function testHandler() {
+            alert('Success!');
+        }
     </script>
 
 

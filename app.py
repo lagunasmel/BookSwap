@@ -437,10 +437,12 @@ def add_book():
     """
     bsdb = get_bsdb()
     if req.get_json().get('request') == 'add':
-        isbn = req.get_json()["isbn"]
+        # isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
+        book_id = req.get_json()["bookId"]
         user_num = session["user_num"]
-        bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
+        # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
+
         rows = bsdb.get_listed_books(user_num)
         copyqualities = bsdb.get_book_qualities()
 
@@ -469,8 +471,10 @@ def search_book():
         author = req.get_json()["author"]
         title = req.get_json()["title"]
         # TODO magic number here - number of search results
-        search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=5)
-        return render_template("snippets/external_search_results.html", search_results=search_results)
+        search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=3)
+        copyqualities = bsdb.get_book_qualities()
+        return render_template("snippets/external_search_results.html", search_results=search_results,
+                               copyqualities=copyqualities)
 
 
 @app.route('/removeFromUserLibrary', methods=['GET'])
