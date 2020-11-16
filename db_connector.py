@@ -212,13 +212,20 @@ class BookSwapDatabase:
     def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
         """
         Searches for books that match the provided details, and then returns the results. The search is conducted on
-        the Open Library API. Open Library works by creating a 'Work' for each book, which has a 1:M relationship
+        the Open Library API. This method automatically searches for matching books and stores a local copy of the
+        details in the Books table if it does not exist. What is returned is easy to work with:
+        a list of sqlite.Row objects corresponding to selections from the Books table, so all the keys
+        are the names of attributes of the Books table.
+
+        Example:
+        result = search_books_openlibrary(title="Lord", author="Tolkien", num_results=1)
+        book_id = result[0]['id']
+        image_url = result[0]['coverImageUrl']
+
+        Open Library works by creating a 'Work' for each book, which has a 1:M relationship
         with 'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions'
         that come in different languages and formats. Here we fetch some details from the Work (author, title) and
         others from the Edition - using the first English paperback/hardback edition.
-
-         Note that cover art can be fetched using the returned edition id:
-            eg http://covers.openlibrary.org/b/olid/<edition_id>-<S/M/L>.jpg
 
         :param title: String, search is done for books whose title contains this
         :param author: Search is done for books whose author contains this string
