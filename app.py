@@ -30,7 +30,7 @@ def home():
 
 
 @app.route('/learn-how')
-def learnHow():
+def learn_how():
     return render_template('learn-how.html')
 
 
