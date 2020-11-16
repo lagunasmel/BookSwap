@@ -227,6 +227,7 @@ class BookSwapDatabase:
 
         :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
                     Each row has the following keys:
+                    'id' - from the Books table
                     'title'
                     'OLWorkKey' (a unique open library key for the work - not a specific edition)
                     'OLEditionKey' (as above, but for a specific edition - could be None if no suitable edition found)
