@@ -15,10 +15,6 @@ def get_db():
     return db
 
 
-def get_bsdb():
-    return BookSwapDatabase()
-
-
 class BookSwapDatabase:
     """
     This class is intended to deal with everything-SQL related:
@@ -634,6 +630,34 @@ class BookSwapDatabase:
                 print(f"\t\t {key}: {row[key]}")
             i += 1
         return
+
+    def get_wishlists_by_userid(self, user_id):
+        c = self.db.cursor()
+        c.execute("SELECT id, userId, dateCreated FROM Wishlists WHERE userId = ?",
+                  (session["user_num"],))
+        return c.fetchall()
+
+    def get_book_details_for_wishlists(self, wishlist_ids):
+        """
+        wishlist_ids is a list of Wishlists.id values
+        Returns a list of Rows, each one corresponding to a book in a given wishlist, with
+        the keys: 'wishlistId', 'bookTitle', 'dateCreated'
+        """
+        c = self.db.cursor()
+        values = ""
+        for id in wishlist_ids:
+            values += str(id) + ', '
+        values = values[:-2]
+        c.execute(
+            "SELECT wishlistId, Books.title bookTitle, dateCreated FROM WishlistsBooks w INNER JOIN Books ON w.bookId "
+            "= Books.id WHERE "
+            "wishlistId IN (?)",
+            (values,))
+        return c.fetchall()
+
+
+def get_bsdb() -> BookSwapDatabase:
+    return BookSwapDatabase()
 
 # @app.teardown_appcontext
 # def close_connection(exception):
