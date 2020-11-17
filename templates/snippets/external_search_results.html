@@ -3,7 +3,7 @@
         <h2 class="text-center">Search Results</h2>
         <table class="table table-hover">
             <thead>
-            <tr class="text-center">
+            <tr class="text-left">
                 <th scope="col">Book Title</th>
                 <th scope="col">Cover Image</th>
                 <th scope="col">Quality</th>
@@ -18,6 +18,8 @@
                         {% if result.coverImageUrl %}
                             <img src="{{ result.coverImageUrl }}" alt="Book Cover Image" class="img-thumbnail"
                                  style="max-width: 75%; max-height: 75%">
+                        {% else %}
+                            NO IMAGE AVAILABLE
                         {% endif %}
                     </td>
                     <td>
