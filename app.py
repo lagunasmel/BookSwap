@@ -214,53 +214,19 @@ def signup():
 @app.route('/wishlist')
 @login_required
 def wishlist():
-    db = get_db()
-    db.row_factory = sqlite3.Row
+    bsdb = BookSwapDatabase()
+    wishlists = bsdb.get_wishlists_by_userid(session['user_num'])
+    wishlist_ids = [row['id'] for row in wishlists]
+    book_details = bsdb.get_book_details_for_wishlists(wishlist_ids)
 
-    # Select user based on username, using generic for now
-    c = db.cursor()
-    # c.execute("SELECT id FROM Users WHERE username = ?", (session["user_num"],))
-
-    # Fetch the user's id
-    # userID = c.fetchall()[0]["id"]
-
-    # Using the user's id, select their wishlists
-    c.execute("SELECT * FROM Wishlists WHERE userId = ?",
-              (session["user_num"],))
-
-    wishlists = [row["id"] for row in c.fetchall()]
-
-    # Build IN query string
-    values = ""
-    for wish in wishlists:
-        values += str(wish) + ", "
-
-    values = values[:-2]
-
-    # Select book names per wishlist
-    c.execute(
-        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE "
-        "wishlistId IN (?)",
-        (values,))
-    for row in c.fetchall():
-        print([i for i in row])
-    # Map wishlists to books for user
-    c.execute(
-        "SELECT wishlistId, Books.title FROM WishlistsBooks w INNER JOIN Books ON w.bookId = Books.id WHERE "
-        "wishlistId IN (?)",
-        (values,))
-    wishBooks = {}
-    for row in c.fetchall():
-        if row[0] in wishBooks:
-            wishBooks[row[0]].append(row[1])
+    wishBooks = {}  # maps wishlist IDs to book titles
+    for row in book_details:
+        if row['wishlistId'] in wishBooks:
+            wishBooks[row['wishlistId']].append(row['bookTitle'])
         else:
-            wishBooks[row[0]] = [row[1]]
+            wishBooks[row['wishlistId']] = [row['bookTitle']]
 
-    db.close()
-
-    data = {}
-    data["table_content"] = wishBooks
-    data["headers"] = "Wishlists"
+    data = {"table_content": wishBooks, "headers": "Wishlists"}
     return render_template('user/wishlist.html', data=data)
 
 
