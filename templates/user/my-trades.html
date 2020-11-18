@@ -1,29 +1,26 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<div class="split left">
-    <div class="centered">
-        <h1> My Requests </h1>
-        <ul>
-            {% for trade in trade_info %}
-            <li>{{ trade["Title"], trade["Quality"], trade["Points"], trade["Owner"] }}</li>
-            {% endfor %}
-        </ul>
+<div class="container m-4">
+    <div class="row">
+        <div class="col-6">
+            <h1> My Requests </h1>
+            <ul>
+                {% for trade in trade_info %}
+                <li>{{ trade["Title"], trade["Quality"], trade["Points"], trade["Owner"] }}</li>
+                {% endfor %}
+            </ul>
+            <div class="col-6">
+                <h1> Pending Trades </h1>
+                <ul>
+                    {% for pend in pending %}
+                    <li>{{ pend }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="split right">
-    <div class="centered">
-        <h1> Pending Trades </h1>
-        <ul>
-            {% for pend in pending %}
-            <li>{{ pend }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-</div>
-
-
-{% endblock content %}
+    {% endblock content %}
 
 
