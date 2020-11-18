@@ -10,17 +10,18 @@
                 <li>{{ trade["Title"], trade["Quality"], trade["Points"], trade["Owner"] }}</li>
                 {% endfor %}
             </ul>
-            <div class="col-6">
-                <h1> Pending Trades </h1>
-                <ul>
-                    {% for pend in pending %}
-                    <li>{{ pend }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
+        </div>
+        <div class="col-6">
+            <h1> Pending Trades </h1>
+            <ul>
+                {% for pend in pending %}
+                <li>{{ pend }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
+</div>
 
-    {% endblock content %}
+{% endblock content %}
 
 
