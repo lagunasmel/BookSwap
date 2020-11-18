@@ -79,5 +79,7 @@ function addBookTemplate(url, bookId, quality) {
 }
 
 function confirmRemoveBook(bookID) {
-    $("#removeModal").show();
+    var x = document.getElementById(bookID);
+    console.log(x)
+    x.style.display = "block";
 }
