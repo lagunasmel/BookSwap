@@ -77,3 +77,7 @@ function addBookTemplate(url, bookId, quality) {
         }
     });
 }
+
+function confirmRemoveBook(bookID) {
+    $("#removeModal").show();
+}
