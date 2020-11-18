@@ -121,19 +121,20 @@ class BookSwapDatabase:
 
         c = self.db.cursor()
         c.execute("""
-        SELECT  Trades.statusId,
-                Trades.dateInitiated,
-                Books.title,
-                Books.author,
-                CopyQuality.qualityDescription,
-                UserBooks.points,
-                Users.username
+        SELECT  Trades.statusId StatusId,
+                Trades.dateInitiated AS StartDate,
+                Books.title AS Title,
+                Books.author AS Author,
+                CopyQualities.qualityDescription AS Quality,
+                UserBooks.points AS Points,
+                Users.username AS Owner
         FROM    Users INNER JOIN
                 UserBooks on Users.id = UserBooks.userId INNER JOIN
                 Trades on UserBooks.id = Trades.userBookId INNER JOIN
-                INNER JOIN Books on Books.id = UserBooks.bookId
+                Books on Books.id = UserBooks.bookId INNER JOIN
+                CopyQualities ON UserBooks.CopyQualityId = CopyQualities.Id
         WHERE
-                Users.id = ?
+                userRequestedId = ?
         """, (user_num,))
         rows = c.fetchall()
         self.db.commit()

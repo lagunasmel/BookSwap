@@ -107,7 +107,9 @@ def my_trades():
 
     pending = c.fetchall()
 
-    trade_info = db.get_trade_info(user)
+    bsdb = get_bsdb()
+    trade_info = bsdb.get_trade_info(user)
+    print(trade_info)
 
     return render_template('user/my-trades.html',
                            trades=trades,
