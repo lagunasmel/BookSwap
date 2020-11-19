@@ -198,7 +198,10 @@ VALUES (1, 1, 2, 1),
        (1, 2, 3, 3),
        (2, 3, 4, 4),
        (3, 1, 3, 2),
-       (3, 1, 1, 3);
+       (3, 1, 1, 3),
+       (1, 1, 1, 100),
+       (1, 2, 2, 200),
+       (1, 3, 3, 400);
 
 -- TradeStatus values
 INSERT INTO TradeStatuses (statusDescription)
@@ -209,3 +212,10 @@ VALUES ("No Current Trade"),
        ("Trade Rejected: Rejected By Inaction"),
        ("Trade Completed"),
        ("Trade Marked As Failed");
+
+-- Sample Trades
+-- First user has three trades going:  2 pending and 1 accepts:
+INSERT INTO Trades (userRequestedId, userBookId, statusId)
+VALUES  (2, 7, 2),
+        (3, 8, 2),
+        (4, 9, 3);

@@ -107,9 +107,13 @@ def my_trades():
 
     pending = c.fetchall()
 
+    bsdb = get_bsdb()
+    trade_info = bsdb.get_trade_info(user)
+
     return render_template('user/my-trades.html',
                            trades=trades,
-                           pending=pending)
+                           pending=pending,
+                           trade_info=trade_info)
 
 
 @app.route('/login', methods=['GET', 'POST'])

@@ -117,6 +117,32 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
+    def get_trade_info(self, user_num):
+
+        c = self.db.cursor()
+        c.execute("""
+                SELECT  Trades.statusId StatusId,
+                        Trades.dateInitiated AS StartDate,
+                        Books.title AS Title,
+                        Books.author AS Author,
+                        CopyQualities.qualityDescription AS Quality,
+                        UserBooks.points AS Points,
+                        U1.username AS Owner,
+                        U2.username AS Requester
+                FROM    Users U1 INNER JOIN
+                        UserBooks on U1.id = UserBooks.userId INNER JOIN
+                        Trades on UserBooks.id = Trades.userBookId INNER JOIN
+                        Books on Books.id = UserBooks.bookId INNER JOIN
+                        CopyQualities ON UserBooks.CopyQualityId = CopyQualities.Id INNER JOIN
+                        Users U2 on U2.id = Trades.userRequestedId
+                WHERE
+                        UserBooks.userId = ?
+                """, (user_num,))
+        rows = c.fetchall()
+        self.db.commit()
+
+        return rows
+
     def get_or_add_ol_book_details(self, search_result):
         """
         Does the same thing as get_ol_book_details, but if the book is not yet stored then finds the first english
