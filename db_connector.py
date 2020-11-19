@@ -418,6 +418,7 @@ class BookSwapDatabase:
                     CopyQualities.qualityDescription AS copyQuality,
                     Users.username AS listingUser,
                     UserBooks.id AS userBooksId,
+                    UserBooks.userId AS userId,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded
                     FROM Books 
@@ -459,7 +460,8 @@ class BookSwapDatabase:
                     CopyQualities.qualityDescription as copyQuality,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId
+                    UserBooks.id as UserBooksId,
+                    UserBooks.userId AS userId
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -504,7 +506,8 @@ class BookSwapDatabase:
                     CopyQualities.qualityDescription as copyQuality,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId
+                    UserBooks.id as UserBooksId,
+                    UserBooks.userId AS userId
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -551,6 +554,7 @@ class BookSwapDatabase:
                 ISBN, 
                 externalLink,
                 Users.username as listingUser,
+                UserBooks.userId AS userId,
                 CopyQualities.qualityDescription as copyQuality,
                 CAST 
                     ((julianday('now') - julianday(UserBooks.dateCreated)) 
@@ -691,8 +695,8 @@ class BookSwapDatabase:
         Returns:
             points left for requesting user (int)
         """
-        # Make sure user still has enough points
         c = self.db.cursor()
+        # Make sure user still has enough points
         try:
             points_available = self.get_current_user_points(user_num)
         except Exception:

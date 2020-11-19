@@ -43,7 +43,7 @@ function submitTradeRequest(book)
             }
             else
             {
-                $(window).open("/browse-books")
+                location.reload(true);
             }
         }
     });
