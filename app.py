@@ -100,12 +100,6 @@ def my_trades():
     c.execute("SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?", 
         (user,))
 
-    pending = c.fetchall()
-
-    return render_template('user/my-trades.html', 
-    trades=trades, 
-    pending=pending)
-
 
 @app.route('/login', methods=['GET', 'POST'])
 @guest_required
