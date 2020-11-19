@@ -677,9 +677,109 @@ class BookSwapDatabase:
                     (user_num, ))
             values = c.fetchone()
             return values[0]
-        except sqlie3.Error as e:
+        except sqlite3.Error as e:
             print(e)
             raise Exception
+
+    def request_book(self, book, user_num):
+        """
+        Request_book places a request on UserBook entry `book`, for user 
+            `user_num`.
+        Accepts:
+            book (dict):  UserBook information
+            user_num (int): User ID of requester
+        Returns:
+            points left for requesting user (int)
+        """
+        # Make sure user still has enough points
+        c = self.db.cursor()
+        try:
+            points_available = self.get_current_user_points(user_num)
+        except Exception:
+            print(f"DB_CONNECTOR: Request_book -- Error trying to confirm user {user_num} has sufficient points.")
+            raise Exception
+        if points_available < book['pointsNeeded']:
+            print(f"DB_CONNECTOR: Request_book -- Requesting user does not have sufficient points for the trade.")
+            raise Exception
+        # Make sure book is still available
+        try:
+            c.execute("""
+                    SELECT
+                        available
+                    FROM
+                        UserBooks
+                    WHERE
+                        id = ?
+                    """,
+                    (book['userBooksId'], ))
+            availability = c.fetchone()[0]
+            if availability != 1:
+                print(f"DB_CONNECTOR: Request_book -- Book with UserBooks id {book['userBooksId']} is not available.")
+                raise Exception
+        except sqlite3.Error as e:
+            print(e)
+            print(f"DB_CONNECTOR: Request_book -- Failed to see if book with UserBooks id {book['userBooksId']} is available or not")
+            raise Exception
+        # Insert trade
+        try:
+            c.execute("""
+                INSERT INTO Trades
+                    (userRequestedId, userBookId, statusId)
+                VALUES
+                    (?, ?, ?)
+                """,
+                (user_num, book['userBooksId'], 2))
+            self.db.commit()
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Request_book -- {e}")
+            raise Exception
+        # Update Requesting User's points
+        try:
+            c.execute("""
+                UPDATE
+                    Users
+                SET
+                    points = points - ?
+                WHERE
+                    id = ?
+                """,
+                (book['pointsNeeded'], user_num))
+            self.db.commit()
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Request_book -- {e}")
+            raise Exception
+        # Update availability of UserBook entry
+        try:
+            c.execute("""
+                UPDATE
+                    UserBooks
+                SET
+                    available = 0
+                WHERE
+                    id = ?
+                """,
+                (book['userBooksId'], ))
+            self.db.commit()
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Request_book -- {e}")
+            raise Exception
+        # Get current user's current point value
+        try:
+            c.execute("""
+                SELECT
+                    points
+                FROM
+                    Users
+                WHERE
+                    id = ?
+                """,
+                (user_num, ))
+            row = c.fetchone()
+            points_available = row[0]
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Request_book -- {e}")
+            raise Exception
+        return points_available
 
 
 def get_bsdb() -> BookSwapDatabase:

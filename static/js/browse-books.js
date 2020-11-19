@@ -1,3 +1,54 @@
+// Event Handler for the trade request confirmation button
+/*
+ * SubmitTradeRequest attempts to make the trade request.
+ * Accepts:
+ *  book (JSON object): UserBook object being requested
+ * Returns:
+ *  NULL, but database and page are updated
+ */
+function submitTradeRequest(book)
+{
+    event.preventDefault();
+    $.ajax({
+        url:'/request-book',
+        type: 'POST',
+        data: book,
+        dataType: 'json',
+        success: function (data){
+            if (data['success'] == "True")
+            {
+                $('#requestTradeSuccessModalTitle').text(data['book']['title']);
+                $('#requestTradeSuccessModalUsername').
+                    text(data['book']['username']);
+                var pointsNeeded = data['book']['pointsNeeded'];
+                if (pointsNeeded != 1)
+                    pointsNeeded += " points"
+                else
+                    pointsNeeded += " point"
+                $('#requestTradeSuccessModalPointsNeeded').
+                    text(pointsNeeded);
+                var pointsAvailable = data['points_available'];
+                if (pointsAvailable != 1)
+                    pointsAvailable += " points";
+                else
+                    pointsAvailable += " point";
+                $('#requestTradeSuccessModalPointsAvailable').
+                    text(pointsAvailable);
+                $('#requestTradeSuccessModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $('#requestTradeModal').modal("hide");
+                $('#requestTradeSuccessModal').modal("show");
+            }
+            else
+            {
+                $(window).open("/browse-books")
+            }
+        }
+    });
+}
+
 // Event handler for "add to wishlist"
 function addToWishlist(book)
 /* 
@@ -55,6 +106,9 @@ function requestTrade(book, points)
         else
             pointsRemaining += " point";
         $('#requestTradeModalPointsRemaining').text(pointsRemaining);
+        $('#requestTradeModalConfirmationButton').on('click', function() {
+            submitTradeRequest(JSON.stringify(book))
+        });
         $('#requestTradeModal').modal('show');
     }
     else
@@ -81,5 +135,4 @@ function requestTrade(book, points)
         $('#requestTradeInsufficientPointsModal').modal('show');
     }
 }
-
 
