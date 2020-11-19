@@ -143,9 +143,9 @@ VALUES ('Brand New'),
 
 -- Sample "admin" user, for easy login check
 INSERT INTO Users('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
-                  'city', 'state', 'postCode')
+                  'city', 'state', 'postCode', 'points')
 VALUES ('admin', 'password', 'admin@bookswap.com', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
-        'Oregon', '97475');
+        'Oregon', '97475', 2);
 
 -- Sample User data from mockaroo.com
 INSERT INTO Users ('username', 'password', 'email', 'fName', 'lName', 'streetAddress',

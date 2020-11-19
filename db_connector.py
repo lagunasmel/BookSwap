@@ -655,6 +655,32 @@ class BookSwapDatabase:
             (values,))
         return c.fetchall()
 
+    def get_current_user_points(self, user_num):
+        """
+        Get_current_user_points returns the number of points of the requested
+            user.
+        Accepts:
+            user_num (int): User ID number
+        Returns:
+            Number of points that user has (int)
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                    SELECT
+                        points
+                    FROM
+                        Users
+                    WHERE
+                        Users.id = ?
+                    """,
+                    (user_num, ))
+            values = c.fetchone()
+            return values[0]
+        except sqlie3.Error as e:
+            print(e)
+            raise Exception
+
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()

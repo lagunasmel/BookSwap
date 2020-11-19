@@ -64,6 +64,9 @@ def browse_books():
     form = BookSearchForm()
     bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(8)
+    recent_books_arr = []
+    for i in range(len(recent_books)):
+        recent_books_arr.append( {key:recent_books[i][key] for key in recent_books[i].keys()} )
     if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
@@ -77,17 +80,31 @@ def browse_books():
         show_search = True
         show_results = False
 
-    print("App.py: BrowseBooks:")
-    print(f"\t recent_books: {recent_books}")
+    # Load current user's points
+    if session.get('user_num'):
+        try:
+            points_available = bsdb.get_current_user_points(session['user_num'])
+            print(f"APP: Browse_books -- User {session['user_num']} has {points_available} points.")
+        except Exception:
+            print(f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
+            points_available = 0
+            flash("We could not load your points, so we assume you have 0 points. Feel free to browse for now, but we will need to fix this before you can make trade requests.", "warning")
+    else:
+        points_available = 0
+
+    print("APP: Browse_books:")
+    print(f"\t recent_books: {recent_books_arr}")
     print(f"\t book_results: {book_results}")
     print(f"\t form: {form}")
+    print(f"\t Visiting user has {points_available} points available.")
     return render_template('browse-books.html',
-                           recent_books=recent_books,
+                           recent_books=recent_books_arr,
                            book_results=book_results,
                            form=form,
                            show_recent=show_recent,
                            show_search=show_search,
-                           show_results=show_results
+                           show_results=show_results,
+                           points_available = points_available
                            )
 
 
@@ -245,10 +262,18 @@ def addToWish(isbn=None):
 
         c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?",
                   (session['user_num'], bookId))
+        
 
-        if not c.fetchall():
+        # if the book was already in the wishlist, don't add it
+        if c.fetchall():
+            flash("Book already in your wishlist", "warning")
+            print(f"APP: AddToWish -- Book {isbn} already in user {session['user_num']}'s wishlist")
+        # otherwise, add book to the wishlist
+        else: 
             c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
                       (session['user_num'], bookId))
+            flash("Book added to your wishlist", "success")
+            print(f"APP: AddToWish -- Book {isbn} successfully added to user {session['user_num']}'s wishlist")
 
         db.commit()
         db.close()
