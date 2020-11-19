@@ -132,11 +132,24 @@
                 </ul>
                 <div class="d-flex w-100 justify-content-between">
                     <small>Listing User: {{ book['listingUser'] }}</small>
-                    <form>
-                        <button type="submit" class="btn btn-primary btn-sm"
-                                              formaction="/addToWishlist/{{ book['ISBN'] }}">Add to Wishlist
-                        </button>
-                    </form>
+                    <div class="d-flex w-100 justify-content-end">
+                        <form>
+                            <input type="hidden" id="userBooksId" name="userBooksId"
+                                                                value="{{ book['userBooksId'] }}">
+                            <input type="hidden" id="listing_user" name="listing_user"
+                                                                value="{{ book['listingUser'] }}">
+                            <input type="hidden" id="requested_book" name="requested_book"
+                                                                    value="{{ book['ISBN'] }}">
+                            <button type="submit" class="btn btn-success btn-sm" onclick='requestTrade( {{book | tojson }}, {{ points_available }})'>
+                                Request Trade
+                            </button>
+                        </form>
+                        <form>
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                                formaction="/addToWishlist/{{ book['ISBN'] }}">Add to Wishlist
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
             {% endfor %}

@@ -122,8 +122,6 @@ def my_trades():
         "SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?",
         (user,))
 
-<<<<<<< HEAD
-=======
     pending = c.fetchall()
 
     bsdb = get_bsdb()
@@ -134,7 +132,6 @@ def my_trades():
                            pending=pending,
                            trade_info=trade_info)
 
->>>>>>> fdc8284292f26e6d07f9049d5431f60fef3a1142
 
 @app.route('/login', methods=['GET', 'POST'])
 @guest_required
