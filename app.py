@@ -1,7 +1,7 @@
 import sqlite3
 from book_search import BookSearch
 from account import AccountSettings
-from flask import Flask, render_template, url_for, flash, redirect, session, g
+from flask import Flask, render_template, url_for, flash, redirect, session, g, json
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
 from forms import (RegistrationForm, LoginForm, BookSearchForm,
@@ -39,8 +39,25 @@ def faq():
     return render_template('faq.html')
 
 
-@app.route('/request-book', methods=['GET'])
+@app.route('/request-book', methods=['GET', 'POST'])
 def requestBook():
+    bsdb = get_bsdb()
+    book = req.get_json(force=True)
+    print (f"APP: RequestBook -- Request incoming for book:  {book}")
+    try:
+        points_available = bsdb.request_book(book, session['user_num'])
+        success = "True"
+        print(f"APP: RequestBook -- Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
+    except Exception:
+        print(f"APP: RequestBook -- Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+        success = "False"
+        flash("There was an error in placing the trade request.  Feel free to try again", "warning")
+    return {
+            "book": book, 
+            "points_available": points_available, 
+            "success": success
+            }
+         
     db = get_db()
     db.row_factory = sqlite3.Row
 

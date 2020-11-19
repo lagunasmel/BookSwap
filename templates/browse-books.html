@@ -239,7 +239,6 @@
                         <span class='text-info' id="requestTradeModalPointsRemaining">  
                         </span>
                     </p>
-
                     <div class="col-12 mb-4">
                         <div class="card text-center h-100">
                             <div class="card-body">
@@ -251,9 +250,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <form id="requestTradeModalConfirm">
+                    <form id="requestTradeModalConfirmForm">
                         <div class="form-group">
-                            <button type="submit" class="btn btn-primary">
+                            <button id='requestTradeModalConfirmationButton' type="submit" class="btn btn-primary">
                                 Please Request This Book
                             </button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">
@@ -282,7 +281,7 @@
                         wants
                         <span class='text-info' id="requestTradeInsufficientPointsModalPointsNeeded"> 
                         </span> 
-                        for
+                        for this copy of 
                         <span class='text-info' id='requestTradeInsufficientPointsModalTitle'>
                         </span>
                     </p>
@@ -305,7 +304,6 @@
                     </a>
                     to find an alternative
                     </p>
-
                     <div class="col-12 mb-4">
                         <div class="card text-center h-100">
                             <div class="card-body">
@@ -327,6 +325,54 @@
         </div>
     </div>
 
+    <div class="modal" data-keyboard="false" data-backgrop="static" tabindex="-1" role="dialog" id="requestTradeSuccessModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book Request Sent!</h5>
+                </div>
+                <div class="modal-body text-left">
+                    <p> 
+                        Your request of 
+                        <span class="text-info"  id="requestTradeSuccessModalTitle"> 
+                        </span> 
+                        from
+                        <span class='text-info' id="requestTradeSuccessModalUsername"> 
+                        </span> 
+                        has been placed
+                    </p>
+                    <p> 
+                        This cost you 
+                        <span class='text-info' id="requestTradeSuccessModalPointsNeeded"> 
+                        </span>
+                        , leaving you with
+                        <span class='text-info' id='requestTradeSuccessModalPointsAvailable'>
+                        </span>
+                    </p>
+                    <br />
+                    <p> 
+                        If your request is rejected, the points will be returned to your balance.  A refund can also be procesed if the book is enver recieved.
+                    </p>
+                    <div class="col-12 mb-4">
+                        <div class="card text-center h-100">
+                            <div class="card-body">
+                                <img class="card-img-top img-fluid mx-auto"
+                                     src="{{ url_for('static', filename='images/book.png') }}"
+                                     style="max-width: 75%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form class="text-center" action="/browse-books">
+                    <button type="submit" class="btn btn-primary">
+                        Reload This Page
+                    </button>
+                </form>
+                <br />
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 
