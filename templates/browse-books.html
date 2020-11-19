@@ -140,12 +140,12 @@
                                                                 value="{{ book['listingUser'] }}">
                             <input type="hidden" id="requested_book" name="requested_book"
                                                                     value="{{ book['ISBN'] }}">
-                            <button type="submit" class="btn btn-success btn-sm" onclick='requestTrade( {{book | tojson }}, {{ points_available }})'>
+                            <button type="submit" class="btn btn-success btn-sm m-1" onclick='requestTrade( {{book | tojson }}, {{ points_available }})'>
                                 Request Trade
                             </button>
                         </form>
                         <form>
-                            <button type="submit" class="btn btn-primary btn-sm"
+                            <button type="submit" class="btn btn-primary btn-sm m-1"
                                                 formaction="/addToWishlist/{{ book['ISBN'] }}">Add to Wishlist
                             </button>
                         </form>
