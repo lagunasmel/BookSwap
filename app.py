@@ -44,37 +44,29 @@ def requestBook():
     bsdb = get_bsdb()
     book = req.get_json(force=True)
     print (f"APP: RequestBook -- Request incoming for book:  {book}")
-    try:
-        points_available = bsdb.request_book(book, session['user_num'])
-        success = "True"
-        print(f"APP: RequestBook -- Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
-    except Exception:
-        print(f"APP: RequestBook -- Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+    if (book['userId'] == session['user_num']):
+        flash("You tried to request your own book?  It would be easier to just pull it off the shelf and read...", "warning")
+        print(f"APP: Request_Book: User attempted to trade with themselves.  This leads to night blindness")
         success = "False"
-        flash("There was an error in placing the trade request.  Feel free to try again", "warning")
+        try:
+            points_available = bsdb.get_current_user_points(session["user_num"])
+        except Exception:
+            points_available = 0
+    else:
+        try:
+            points_available = bsdb.request_book(book, session['user_num'])
+            success = "True"
+            print(f"APP: RequestBook -- Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
+        except Exception:
+            print(f"APP: RequestBook -- Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+            success = "False"
+            flash("There was an error in placing the trade request.  Feel free to try again", "warning")
     return {
             "book": book, 
             "points_available": points_available, 
             "success": success
             }
          
-    db = get_db()
-    db.row_factory = sqlite3.Row
-
-    c = db.cursor()
-
-    userBooksId = req.args.get('userBooksId')
-    lister = req.args.get('listing_user')
-    isbn = req.args.get('requested_book')
-    requester = session['user_num']
-
-    c.execute("INSERT INTO Trades (userRequestedId, userBookId, statusId) VALUES (?, ?, ?)",
-              (requester, userBooksId, 2))
-
-    db.commit()
-
-    return redirect('/browse-books')
-
 
 @app.route('/browse-books', methods=['GET', 'POST'])
 def browse_books():
