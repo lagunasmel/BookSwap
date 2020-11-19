@@ -77,3 +77,16 @@ function addBookTemplate(url, bookId, quality) {
         }
     });
 }
+
+function confirmRemoveBook(bookID) {
+    var x = document.getElementById(bookID);
+    console.log(x)
+    x.style.display = "block";
+}
+
+function modalDismiss(bookID) {
+    var x = document.getElementById(bookID);
+    console.log(x)
+    x.style.display = "none";
+}
+
