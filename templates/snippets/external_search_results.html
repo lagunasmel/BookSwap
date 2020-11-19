@@ -1,0 +1,61 @@
+{% block body %}
+    {% if search_results|length > 0 %}
+        <h2 class="text-center">Search Results</h2>
+        <table class="table table-hover">
+            <thead>
+            <tr class="text-left">
+                <th scope="col">Book Title</th>
+                <th scope="col">Cover Image</th>
+                <th scope="col">Quality</th>
+                <th scope="col">Add Book</th>
+            </tr>
+            </thead>
+            {% for result in search_results %}
+                <tr class="search_result" id="{{ "bookId" ~ result.id }}">
+                    <td><h5>{{ result.title }}</h5> <br>
+                        by {{ result.author }}</td>
+                    <td>
+                        {% if result.coverImageUrl %}
+                            <img src="{{ result.coverImageUrl }}" alt="Book Cover Image" class="img-thumbnail"
+                                 style="max-width: 75%; max-height: 75%">
+                        {% else %}
+                            NO IMAGE AVAILABLE
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="form-group">
+                            <label class="pl-2">Quality of your copy?</label>
+                            <select class="form-control custom-select custom-select-sm new-book-quality"
+                                    id="{{ "copyQualityBookId" ~ result.id }}">
+                                {% for cq in copyqualities %}
+                                    <option value="{{ cq[0] }}">{{ cq[1] }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-primary btn-sm ml-2 mb-1 add-book-button"
+                                id="{{ "addBtnBookId" ~ result.id }}" data-bookid="{{ result.id }}">
+                            Add Book
+                        </button>
+                        <br>
+                        <button type="button" class="btn btn-primary btn-sm ml-2 mb-1 confirm-book-button"
+                                id="{{ "confirmBtnBookId" ~ result.id }}" data-bookid="{{ result.id }}">Confirm
+                        </button>
+                        <br>
+                        <button type="button"
+                                class="btn btn-danger btn-sm ml-2 cancel-book-button"
+                                id="{{ "cancelBtnBookId" ~ result.id }}"
+                                data-bookid="{{ result.id }}">Cancel
+                        </button>
+
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="w-100 p-3 mx-auto">
+            <h3 class="p1-2 text-center">Sorry, no matches found!</h3>
+        </div>
+    {% endif %}
+{% endblock %}

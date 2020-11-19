@@ -1,5 +1,6 @@
 import sqlite3
 from flask import g, session, redirect, url_for
+import requests
 
 DATABASE = 'DatabaseSpecs/test-db.db'
 
@@ -12,10 +13,6 @@ def get_db():
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
     return db
-
-
-def get_bsdb():
-    return BookSwapDatabase()
 
 
 class BookSwapDatabase:
@@ -103,8 +100,8 @@ class BookSwapDatabase:
                             userId = ?
                         AND
                             UB.available == 1
-                    """, 
-                    (user_num,))
+                    """,
+                  (user_num,))
         rows = c.fetchall()
         self.db.commit()
         return rows
@@ -120,10 +117,195 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
+    def get_trade_info(self, user_num):
+
+        c = self.db.cursor()
+        c.execute("""
+                SELECT  Trades.statusId StatusId,
+                        Trades.dateInitiated AS StartDate,
+                        Books.title AS Title,
+                        Books.author AS Author,
+                        CopyQualities.qualityDescription AS Quality,
+                        UserBooks.points AS Points,
+                        U1.username AS Owner,
+                        U2.username AS Requester
+                FROM    Users U1 INNER JOIN
+                        UserBooks on U1.id = UserBooks.userId INNER JOIN
+                        Trades on UserBooks.id = Trades.userBookId INNER JOIN
+                        Books on Books.id = UserBooks.bookId INNER JOIN
+                        CopyQualities ON UserBooks.CopyQualityId = CopyQualities.Id INNER JOIN
+                        Users U2 on U2.id = Trades.userRequestedId
+                WHERE
+                        UserBooks.userId = ?
+                """, (user_num,))
+        rows = c.fetchall()
+        self.db.commit()
+
+        return rows
+
+    def get_or_add_ol_book_details(self, search_result):
+        """
+        Does the same thing as get_ol_book_details, but if the book is not yet stored then finds the first english
+        language paperback/hardcover Edition of the Work corresponding to the given key in the Open Library API and
+        then inserts its details into the Books table.
+
+        To do this a dict called 'search result' corresponding to the JSON search result returned by Open Library is
+        required. To clarify: there is currently no way to add details for an Open Library Work, given a Work Key,
+        unless we have access to the information from the search result.  
+
+        :param editions: a list of Open Library keys for Editions corresponding to the given Work
+        :returns a dict of the attributes for the Books row
+        """
+        # Get the Work Key from the search result
+        work_key = search_result['key'].split('/')[2]
+
+        # First check if it exists
+        local = self.get_ol_book_details(work_key)
+        if local is not None:
+            return local
+
+        # Get the info of the first printed, english-language, edition, to store
+        d = {'title': search_result['title'], 'author': search_result['author_name'][0], 'OLWorkKey': work_key}
+        editions = search_result['edition_key']
+
+        # Check the editions 10 at a time
+        n = len(editions)
+        edition_key = None
+        isbn = None
+        i = 0
+        while (i < (n // 10) + 1) and (edition_key is None):
+            batch = editions[i:i + 10]
+            url = 'https://openlibrary.org/api/books'
+            payload = {'format': 'json',
+                       'jscmd': 'details',
+                       'bibkeys': ','.join(batch)}
+            r = requests.get(url, params=payload)
+            data = r.json()
+            for candidate in data.keys():
+                details = data[candidate]['details']
+                if 'languages' in details and 'covers' in details and 'isbn_13' in details:
+                    languages = details['languages']
+                    if len(languages) == 1 and languages[0]['key'] == '/languages/eng':
+                        edition_key = candidate
+                        isbn = int(details['isbn_13'][0])
+                        break
+            i += 10
+
+        # Note that edition_key could still be None if we didn't find a suitable one, that's fine
+        # Insert the book info now
+        d['OLEditionKey'] = edition_key
+        d['ISBN'] = isbn
+        if edition_key is not None:
+            d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
+        else:
+            d['coverImageUrl'] = None
+        c = self.db.cursor()
+        c.execute(
+            """INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl) VALUES (?, ?, ?, ?, ?, 
+            ?)""",
+            (d['title'], d['author'], isbn, work_key, edition_key, d['coverImageUrl']))
+        self.db.commit()
+        d['id'] = c.lastrowid  # ID of the recently inserted Books row
+        return d
+
+    def get_ol_book_details(self, work_key):
+        """
+        Returns the Books table attributes for a given Work, as defined by Open Library. If the volume has not yet
+        been locally stored in the database, None is returned, and 'get_or_add_ol_book_details' must be called instead.
+
+        :param work_key: the Open Library Works Key (eg 'OL27448W') associated with the volume.
+
+        :returns a sqlite Row or a dict of the Book's attributes, with the keys: 'id', 'title', 'author', 'isbn',
+        'OLEditionKey', 'OLWorkKey'
+        """
+        c = self.db.cursor()
+        c.execute(
+            """SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl FROM Books WHERE OLWorkKey=?""",
+            (work_key,))
+        rows = c.fetchall()
+        if len(rows) > 1:
+            # This should not happen!
+            raise LookupError(
+                "Multiple Books found to correspond to a single work key - this should never "
+                "happen!")
+        elif len(rows) == 1:
+            return rows[0]
+        elif len(rows) == 0:
+            # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
+            return None
+
+    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
+        """
+        Searches for books that match the provided details, and then returns the results. The search is conducted on
+        the Open Library API. This method automatically searches for matching books and stores a local copy of the
+        details in the Books table if it does not exist. What is returned is easy to work with:
+        a list of sqlite.Row objects corresponding to selections from the Books table, so all the keys
+        are the names of attributes of the Books table.
+
+        Example:
+        result = search_books_openlibrary(title="Lord", author="Tolkien", num_results=1)
+        book_id = result[0]['id']
+        image_url = result[0]['coverImageUrl']
+
+        Open Library works by creating a 'Work' for each book, which has a 1:M relationship
+        with 'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions'
+        that come in different languages and formats. Here we fetch some details from the Work (author, title) and
+        others from the Edition - using the first English paperback/hardback edition.
+
+        :param title: String, search is done for books whose title contains this
+        :param author: Search is done for books whose author contains this string
+        :param isbn: Must be a STRING
+        :param num_results: int, the number of results to return
+
+        :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
+                    Each row has the following keys:
+                    'id' - from the Books table
+                    'title'
+                    'OLWorkKey' (a unique open library key for the work - not a specific edition)
+                    'OLEditionKey' (as above, but for a specific edition - could be None if no suitable edition found)
+                    'author'
+                    'coverImageUrl'
+        """
+        # Get the search results
+        url = "http://openlibrary.org/search.json"
+        if title == '':
+            title = None
+        if author == '':
+            author = None
+        payload = {'title': title, 'author': author, 'isbn': isbn}
+        r = requests.get(url, params=payload)  # auto-ignores 'None' values
+        if r.status_code != 200:
+            results = []
+        else:
+            results = r.json()['docs'][:num_results]
+        out = []
+
+        # Return the book info
+        for result in results:
+            book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
+            out.append(book_info)
+
+        return out
+
+    def user_add_book_by_id(self, book_id, user_num, copyquality):
+        """
+        'user_id' user lists the book matching 'id' as available to swap.
+        Nothing happens on failure.
+        """
+        c = self.db.cursor()
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
+                  (user_num, book_id, copyquality))
+        self.db.commit()
+        return
+
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
         Nothing happens on failure.
+
+        This method delegates the job of getting the Books.id value for a given volume to another method,
+        and only deals with the job of creating the required UserBooks entry. It is that other method that interfaces
+        with the Google Books API.
 
         :param copyquality: ID corresponding to the quality of the book copy
         :param user_num: database ID of the user to add the book to
@@ -142,6 +324,7 @@ class BookSwapDatabase:
         book_id = rows[0]["id"]
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
                   (user_num, book_id, copyquality))
+        self.db.commit()
 
     def is_username_available(self, username):
         """
@@ -169,7 +352,7 @@ class BookSwapDatabase:
         Changes the user account information.
         Accepts:
             user_id (int): user id number
-            req (JSON): body of request from user 
+            req (JSON): body of request from user
         Returns:
             True if successful change, false if not
         """
@@ -202,48 +385,46 @@ class BookSwapDatabase:
                       )
                       )
             self.db.commit()
-            return True
         except sqlite3.Error as e:
             print(e)
-            return False
+            raise Exception
 
-    def is_password_correct(self, user_num, old_password):
+    def get_password(self, user_num):
         """
         Checks if the password is correct.
         Accepts:
             user_num (int): User id of logged in user
-            old_password (string): User-entered old password
         Returns:
-            True if old_password is correct, false if it is not
+            user's password
         """
         c = self.db.cursor()
         try:
             c.execute("SELECT password FROM Users WHERE id = ?",
                       (user_num,))
             results = c.fetchone()
-            return old_password == results[0]
+            return results[0]
         except sqlite3.Error as e:
             print(e)
-            return
+            raise Exception
 
-    def set_password(self, user_num, req):
+    def set_password(self, user_num, password):
         """
         Changes the user password.
         Accepts:
             user_num (int): Logged in user ID number in Users table
-            req (JSON): body of request from user
+            password (string): new password
         Returns:
-            True if successful chnage, false if not
+            None
         """
         c = self.db.cursor()
         try:
             c.execute("UPDATE Users SET password = ? WHERE id = ?",
-                      (req['newPassword'], user_num))
+                      (password, user_num))
             self.db.commit()
-            return True
+            return
         except sqlite3.Error as e:
             print(e)
-            return False
+            raise Exception
 
     def get_recent_additions(self, num):
         """
@@ -317,7 +498,7 @@ class BookSwapDatabase:
                     ORDER BY
                         UserBooks.dateCreated
                         """,
-                        (ISBN, ))
+                      (ISBN,))
             isbn_match = c.fetchall()
             print("BSDB: Get_Books_By_ISBN (local) Results")
             self.print_results(isbn_match)
@@ -368,7 +549,7 @@ class BookSwapDatabase:
                         author LIKE '%'||? DESC,
                         author
                         """,
-                        (author, title, author, title, author, author))
+                      (author, title, author, title, author, author))
             author_and_title_match = c.fetchall()
             print("BSDB: get_books_by_author_and_title (local) Results")
             self.print_results(author_and_title_match)
@@ -414,7 +595,7 @@ class BookSwapDatabase:
         query_end = " ORDER BY "
         params = []
         author_exists = title_exists = False
-        if len(author)> 0:
+        if len(author) > 0:
             author_exists = True
         if len(title) > 0:
             title_exists = True
@@ -428,7 +609,7 @@ class BookSwapDatabase:
             query_end += " title = ? DESC,"
             params += [title, title]
         if author_exists:
-            query_end +=" author = ? DESC,"
+            query_end += " author = ? DESC,"
             params.append(author)
         if title_exists:
             query_end += " title LIKE ?||'%' DESC,"
@@ -442,7 +623,7 @@ class BookSwapDatabase:
         if author_exists:
             query_end += " author LIKE '%'||? DESC,"
             params.append(author)
-        query_end +=" author"
+        query_end += " author"
         query = query_start + query_middle + query_end
         params = tuple(params)
         # print("\t Query:")
@@ -476,6 +657,59 @@ class BookSwapDatabase:
             i += 1
         return
 
+    def get_wishlists_by_userid(self, user_id):
+        c = self.db.cursor()
+        c.execute("SELECT id, userId, dateCreated FROM Wishlists WHERE userId = ?",
+                  (session["user_num"],))
+        return c.fetchall()
+
+    def get_book_details_for_wishlists(self, wishlist_ids):
+        """
+        wishlist_ids is a list of Wishlists.id values
+        Returns a list of Rows, each one corresponding to a book in a given wishlist, with
+        the keys: 'wishlistId', 'bookTitle', 'dateCreated'
+        """
+        c = self.db.cursor()
+        values = ""
+        for id in wishlist_ids:
+            values += str(id) + ', '
+        values = values[:-2]
+        c.execute(
+            "SELECT wishlistId, Books.title bookTitle, dateCreated FROM WishlistsBooks w INNER JOIN Books ON w.bookId "
+            "= Books.id WHERE "
+            "wishlistId IN (?)",
+            (values,))
+        return c.fetchall()
+
+    def get_current_user_points(self, user_num):
+        """
+        Get_current_user_points returns the number of points of the requested
+            user.
+        Accepts:
+            user_num (int): User ID number
+        Returns:
+            Number of points that user has (int)
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                    SELECT
+                        points
+                    FROM
+                        Users
+                    WHERE
+                        Users.id = ?
+                    """,
+                    (user_num, ))
+            values = c.fetchone()
+            return values[0]
+        except sqlie3.Error as e:
+            print(e)
+            raise Exception
+
+
+def get_bsdb() -> BookSwapDatabase:
+    return BookSwapDatabase()
 
 # @app.teardown_appcontext
 # def close_connection(exception):

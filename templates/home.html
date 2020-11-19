@@ -9,35 +9,32 @@
                     <img src="{{ url_for('static', filename='images/recycle.png') }}" alt=""
                          class="img-fluid col-6 mx-auto">
                     <p></p>
-                    <h3>PHRASE 1 HERE</h3>
-                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
-                        molestias! Quo expedita omnis aliquam placeat consequuntur deleniti doloribus!</p>
+                    <h3>REVITALIZE YOUR COLLECTION</h3>
+                    <p class="lead">Refresh your library by trading books you've already read for ones you haven't!</p>
                 </div>
                 <div class="col-md-4 p-3">
                     <img src="{{ url_for('static', filename='images/book.png') }}" alt=""
                          class="img-fluid col-6 mx-auto">
                     <p></p>
-                    <h3>PHRASE 2 HERE</h3>
-                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
-                        molestias!
-                        Quo expedita omnis aliquam
-                        placeat consequuntur deleniti doloribus!</p>
+                    <h3>DISCOVER NEW LITERARY WORLDS</h3>
+                    <p class="lead">See what books other users have available and open up a trade using a simple point
+                        system!
+                    </p>
                 </div>
                 <div class="col-md-4 p-3">
                     <img src="{{ url_for('static', filename='images/mail.png') }}" alt=""
                          class="img-fluid col-6 mx-auto">
                     <p></p>
-                    <h3>PHRASE 3 HERE</h3>
-                    <p class="lead">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ab incidunt cumque
-                        molestias!
-                        Quo expedita omnis aliquam
-                        placeat consequuntur deleniti doloribus!</p>
+                    <h3>EXCHANGE BOOKS BY MAIL</h3>
+                    <p class="lead">Gain points by sending books to others, and meanwhile, your books will come
+                        straight to you!
+                    </p>
                 </div>
             </div>
             <h5>Ready to get started?</h5>
             {% if session.user_num %}
                 <p>You can <a href="{{ url_for('my_trades') }}" class="text-info">list a book for trade</a>,
-                    or <a href="{{ url_for('browseBooks') }}" class="text-info">search for a book.</a></p>
+                    or <a href="{{ url_for('browse_books') }}" class="text-info">search for a book.</a></p>
             {% else %}
                 <p><a href="{{ url_for('signup') }}" class="text-info">Sign up today</a> or
                     <a href="{{ url_for('login') }}" class="text-info">login.</a>
