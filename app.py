@@ -12,6 +12,28 @@ app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
+# Code automatically created with each request
+@app.before_request
+def populate_g():
+    bsdb = get_bsdb()
+    user_num = session.get("user_num")
+    if user_num is not None:
+        try:
+            user_info = bsdb.get_account_settings(user_num)
+            print("APP: Before_request")
+            g.username = user_info["username"]
+            print(f"\t g.username: {g.username}")
+            g.points = user_info["points"]
+            print(f"\t g.points: {g.points}")
+            g.num_trade_requests = bsdb.get_num_trade_requests(user_num)
+            print(f"\t g.num_trade_requests: {g.num_trade_requests}")
+            g.num_open_trades = bsdb.get_num_open_trades(user_num)
+            print(f"\t g.num_open_trades: {g.num_open_trades}")
+            
+        except Exception:
+            print(f"APP: App_context -- Error setting up g")
+            session['user_num'] = None
+
 
 # Auto-closes db connection at the end of each request
 @app.teardown_appcontext
