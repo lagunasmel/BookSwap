@@ -868,6 +868,17 @@ class BookSwapDatabase:
             raise Exception
         return points_available
 
+    def get_login_user(self, username):
+        self.db.row_factory = sqlite3.Row
+
+        # Username check
+        user = self.db.execute("SELECT * FROM Users WHERE username = ?",
+                            (username,)).fetchone()
+        if user is None:
+            user = self.db.execute("SELECT * FROM Users WHERE email = ?",
+                                (username,)).fetchone()
+
+        return user
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()

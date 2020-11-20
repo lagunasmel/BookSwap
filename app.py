@@ -174,16 +174,11 @@ def login():
         password = form.password.data
         error = None
 
-        db = get_db()
-        db.row_factory = sqlite3.Row
-        # Username check
-        user = db.execute("SELECT * FROM Users WHERE username = ?",
-                          (username,)).fetchone()
+        bsdb = get_bsdb()
+        
+        user = bsdb.get_login_user(username)
         if user is None:
-            user = db.execute("SELECT * FROM Users WHERE email = ?",
-                              (username,)).fetchone()
-            if user is None:
-                error = "Incorrect username."
+            error = "Incorrect username."
 
         # Password check
         elif user['password'] != password:
