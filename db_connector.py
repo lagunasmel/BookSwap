@@ -106,6 +106,63 @@ class BookSwapDatabase:
         self.db.commit()
         return rows
 
+    def get_num_open_trades(self, user_num: int) -> int:
+        """
+        Returns number of trade requests this user has agreed to, but are not 
+            yet completed.
+        """
+        try:
+            c = self.db.cursor()
+            c.execute("""
+                    SELECT
+                        COUNT (*)
+                    FROM
+                        Trades INNER JOIN
+                        UserBooks on Trades.userBookId = UserBooks.Id
+                    WHERE
+                        UserBooks.userId = ?
+                        AND
+                        Trades.statusId = 3
+                        """,
+                        (user_num, ))
+            rows = c.fetchall()
+            if len(rows) != 1:
+                print(f"DB_CONNECTOR: Get_num_open_trades -- Received wrong number of data from database")
+                raise Exception
+            return rows[0][0]
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Get_num_open_trades -- database error {e}")
+            raise Exception
+
+
+
+    def get_num_trade_requests(self, user_num: int) -> int:
+        """
+        Returns number of trade requests this user has, as the listing user.
+        """
+        try:
+            c = self.db.cursor()
+            c.execute("""
+                    SELECT
+                        COUNT (*)
+                    FROM
+                        Trades INNER JOIN
+                        UserBooks on Trades.userBookId = UserBooks.Id
+                    WHERE
+                        UserBooks.userId = ?
+                        AND
+                        Trades.statusId = 2
+                        """,
+                        (user_num, ))
+            rows = c.fetchall()
+            if len(rows) != 1:
+                print(f"DB_CONNECTOR: Get_num_trade_requests -- Received wrong number of data from database")
+                raise Exception
+            return rows[0][0]
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Get_num_trade_requests -- database error {e}")
+            raise Exception
+
     def get_userBooksID(self, user_num):
         """
         Returns the UserBooks.id attribute for each of the user's books
