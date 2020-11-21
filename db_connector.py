@@ -1,5 +1,5 @@
 import sqlite3
-from flask import g, session, redirect, url_for
+from flask import g, session, redirect, url_for, flash
 import requests
 
 DATABASE = 'DatabaseSpecs/test-db.db'
@@ -182,10 +182,12 @@ class BookSwapDatabase:
                         Trades.dateInitiated AS StartDate,
                         Books.title AS Title,
                         Books.author AS Author,
+                        Books.isbn AS ISBN,
                         CopyQualities.qualityDescription AS Quality,
                         UserBooks.points AS Points,
                         U1.username AS Owner,
-                        U2.username AS Requester
+                        U2.username AS Requester,
+                        UserBooks.id AS userBooksId
                 FROM    Users U1 INNER JOIN
                         UserBooks on U1.id = UserBooks.userId INNER JOIN
                         Trades on UserBooks.id = Trades.userBookId INNER JOIN
@@ -868,6 +870,89 @@ class BookSwapDatabase:
             raise Exception
         return points_available
 
+
+    def reject_trade(self, user_books_id):
+        """
+        Reject_Trade performs the database work necessary for rejecting the trade:
+            Listing user has book removed from their pending trades list
+            Requesting user has their points restored
+            Book marked as available once more
+        Accepts:
+            user_books_id (int):  UserBooksId number of requested book
+        Returns:
+            None
+        """
+        c = self.db.cursor()
+        # Change Trade state
+        try:
+            c.execute("""
+                    UPDATE
+                        Trades
+                    SET
+                        statusId = 4
+                    WHERE
+                        userBookId = ?
+                        """,
+                        (user_books_id, ))
+            self.db.commit()
+            print(f"DB_CONNECTOR: Reject_trade -- trade for book {user_books_id} changed to 'rejected by user'")
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
+            flash("Error marking trade as rejected", "warning")
+            raise Exception
+
+        # Return points to requesting User
+        try:
+            c.execute("""
+                    UPDATE
+                        Users
+                    SET
+                        points = points + (
+                            SELECT 
+                                points
+                            FROM 
+                                UserBooks 
+                            WHERE
+                                id = ?
+                                )
+                    WHERE
+                        id =  (
+                            SELECT
+                                userRequestedId
+                            FROM
+                                Trades
+                            WHERE
+                                userBookId = ?
+                                )
+                    """,
+                    (user_books_id, user_books_id))
+            self.db.commit()
+            print(f"DB_CONNECTOR: Reject_trade -- User received their points back")
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to return points to the requesting user for book number {user_books_id}")
+            flash("Error returning points to requesting user", "warning")
+            raise Exception
+
+        # Set book as available
+        try:
+            c.execute("""
+                    UPDATE
+                        UserBooks
+                    SET
+                        available = 1
+                    WHERE
+                        id = ?
+                    """,
+                    (user_books_id, ))
+            self.db.commit()
+            print(f"DB_CONNECTOR: Reject_trade -- Book {user_books_id} set as avialable again")
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to set the book number {user_books_id} as available.")
+            flash("Error marking the book as available", "warning")
+            raise Exception
+        return
+
+
     def get_login_user(self, username):
         self.db.row_factory = sqlite3.Row
 
@@ -879,6 +964,7 @@ class BookSwapDatabase:
                                 (username,)).fetchone()
 
         return user
+                  
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()

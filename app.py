@@ -140,12 +140,32 @@ def browse_books():
 
 
 @app.route('/my-trades')
+@login_required
 def my_trades():
     user = session["user_num"]
     bsdb = get_bsdb()
     trade_info = bsdb.get_trade_info(user)
-    return render_template('user/my-trades.html', trade_info=trade_info)
+    trade_info_dicts = [dict(row) for row in trade_info]
 
+    return render_template('user/my-trades.html',
+                           trades=trades,
+                           pending=pending,
+                           trade_info=trade_info_dicts)
+
+@app.route('/reject-trade/<user_books_id>')
+@login_required
+def reject_trade(user_books_id):
+    print(f"APP: Reject_trade -- Incoming trade rejection from user {session['user_num']} for book {user_books_id}")
+    bsdb = get_bsdb()
+    try:
+        bsdb.reject_trade(user_books_id)
+        print(f"APP: Reject_trade -- Trade successfully rejected.  UserBooks number {user_books_id} is available again.")
+        flash("Trade successfully rejected", "success")
+    except Exception:
+        print(f"APP: Reject-trade -- There was an error in rejecting the trade.")
+        flash("There was an error in deleting your trade", "warning")
+    return redirect(url_for('my_trades'))
+        
 
 @app.route('/login', methods=['GET', 'POST'])
 @guest_required
