@@ -2,6 +2,7 @@
 {% set active_page = 'browse-books' %}
 {% block content %}
 
+
 {% if show_recent %}
 <div class="container mt-4 text-center mx-auto">
     <h1>Browse Books</h1>
@@ -163,28 +164,30 @@
         </div>
 
     </div>
-    {% endif %}
-    <div class="modal" tabindex="-1" role="dialog" id="addToWishlistModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Adding Book To Wishlist</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p> Please confirm that you would like to add the following book to your wishist. </p>
-                    <div class="col-12 mb-4">
-                        <div class="card text-center h-100">
-                            <div class="card-body">
-                                <img class="card-img-top img-fluid mx-auto"
-                                     src="{{ url_for('static', filename='images/book.png') }}"
-                                     style="max-width: 75%">
-                            </div>
-                            <div class="card-body">
-                                <h5 class="card-title" id='addToWishlistModalTitle'> Sample Book Title</h5>
-                                <p class="card-text text-left">
+
+{% endif %}
+<div class="modal" tabindex="-1" role="dialog" id="addToWishlistModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Adding Book To Wishlist</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p> Please confirm that you would like to add the following book to your wishlist. </p>
+                <div class="col-12 mb-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 src="{{ url_for('static', filename='images/book.png') }}"
+                                 style="max-width: 50%">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title" id='addToWishlistModalTitle'> Sample Book Title</h5>
+                            <p class="card-text text-left">
+
                                 <span class="text-info">Author:</span> <strong id="addToWishlistModalAuthor"> </strong>
                                 <br><span class="text-info" id="addToWishlistModalAuthor">ISBN:</span> <strong
                                                             id="addToWishlistModalISBN"> </strong>
@@ -195,12 +198,9 @@
                                 </p>
                                 <p class="card-text text-center">
                                 <small>Listing User: <strong id="addToWishlistModalListingUser"> </strong></small>
-                                </p>
 
-                            </div>
-                            <div class="card-footer text-muted text-center">
-                                listed <strong id="addToWishlistModalTimeHere"> </strong> days ago
-                            </div>
+                            </p>
+
                         </div>
                     </div>
                 </div>
@@ -247,15 +247,15 @@
                     </p>
                     <p> This will leave you with
                     <span class='text-info' id="requestTradeModalPointsRemaining">
-                    </span>
-                    </p>
-                    <div class="col-12 mb-4">
-                        <div class="card text-center h-100">
-                            <div class="card-body">
-                                <img class="card-img-top img-fluid mx-auto"
-                                     src="{{ url_for('static', filename='images/book.png') }}"
-                                     style="max-width: 75%">
-                            </div>
+
+                        </span>
+                </p>
+                <div class="col-12 mb-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 src="{{ url_for('static', filename='images/book.png') }}"
+                                 style="max-width: 60%">
                         </div>
                     </div>
                 </div>
@@ -275,44 +275,81 @@
         </div>
     </div>
 
-    <div class="modal" tabindex="-1" role="dialog" id="requestTradeInsufficientPointsModal">
+
+<div class="modal" tabindex="-1" role="dialog" id="requestTradeInsufficientPointsModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Insufficient Points For Book Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-left">
+                <p><span class="text-info" id="requestTradeInsufficientPointsModalUsername"></span>
+                    wants
+                    <span class='text-info' id="requestTradeInsufficientPointsModalPointsNeeded"></span>
+                    for this copy of
+                    <span class='text-info' id='requestTradeInsufficientPointsModalTitle'></span>.
+                </p>
+                <p> Unfortunately, you only have <span class='text-info' id="requestTradeInsufficientPointsAvailable">
+                        </span> available to use.
+                </p>
+                <p> You can earn more points by <a href="/my-books" class='text-info'>listing books</a>
+                    for others to request.</p>
+                <p> Or, <a href="/browse-books" class="text-info">browse other books</a> to find an alternative.
+                </p>
+
+                <div class="col-12 mb-2">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <img class="card-img-bottom img-fluid mx-auto"
+                                 src="{{ url_for('static', filename='images/book.png') }}"
+                                 style="max-width: 60%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <form>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">
+                    Cancel
+                </button>
+            </form>
+            <br/>
+        </div>
+    </div>
+</div>
+</div>
+
+    <div class="modal" data-keyboard="false" data-backgrop="static" tabindex="-1" role="dialog"
+         id="requestTradeSuccessModal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Insufficient Points For Book Request</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title">Book Request Sent!</h5>
                 </div>
                 <div class="modal-body text-left">
                     <p>
-                    <span class="text-info" id="requestTradeInsufficientPointsModalUsername">
-                    </span>
-                    wants
-                    <span class='text-info' id="requestTradeInsufficientPointsModalPointsNeeded">
-                    </span>
-                    for this copy of
-                    <span class='text-info' id='requestTradeInsufficientPointsModalTitle'>
-                    </span>
+                        Your request of
+                        <span class="text-info" id="requestTradeSuccessModalTitle">
+                        </span>
+                        from
+                        <span class='text-info' id="requestTradeSuccessModalUsername"> 
+                        </span>
+                        has been placed
                     </p>
-                    <p> Unfortunately, you only have
-                    <span class='text-info' id="requestTradeInsufficientPointsAvailable">
-                        available to use.
-                    </span>
+                    <p>
+                        This cost you
+                        <span class='text-info' id="requestTradeSuccessModalPointsNeeded"> 
+                        </span>
+                        , leaving you with
+                        <span class='text-info' id='requestTradeSuccessModalPointsAvailable'>
+                        </span>
                     </p>
                     <br/>
                     <p>
-                    You can earn more points by
-                    <a href="/my-books" class='text-info'>
-                        listing books
-                    </a>
-                    for others to request
-                    </p>
-                    <p> Or,
-                    <a href="/browse-books" class="text-info">
-                        browse other books
-                    </a>
-                    to find an alternative
+                        If your request is rejected, the points will be returned to your balance. A refund can also be
+                        procesed if the book is enver recieved.
                     </p>
                     <div class="col-12 mb-4">
                         <div class="card text-center h-100">

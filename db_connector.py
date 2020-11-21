@@ -870,6 +870,7 @@ class BookSwapDatabase:
             raise Exception
         return points_available
 
+
     def reject_trade(self, user_books_id):
         """
         Reject_Trade performs the database work necessary for rejecting the trade:
@@ -949,7 +950,21 @@ class BookSwapDatabase:
             print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to set the book number {user_books_id} as available.")
             flash("Error marking the book as available", "warning")
             raise Exception
+        return
 
+
+    def get_login_user(self, username):
+        self.db.row_factory = sqlite3.Row
+
+        # Username check
+        user = self.db.execute("SELECT * FROM Users WHERE username = ?",
+                            (username,)).fetchone()
+        if user is None:
+            user = self.db.execute("SELECT * FROM Users WHERE email = ?",
+                                (username,)).fetchone()
+
+        return user
+                  
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()

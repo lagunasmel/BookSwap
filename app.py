@@ -142,20 +142,7 @@ def browse_books():
 @app.route('/my-trades')
 @login_required
 def my_trades():
-    db = get_db()
-    c = db.cursor()
-
     user = session["user_num"]
-    c.execute("SELECT * FROM Trades WHERE userRequestedId = ?", (user,))
-
-    trades = c.fetchall()
-
-    c.execute(
-        "SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?",
-        (user,))
-
-    pending = c.fetchall()
-
     bsdb = get_bsdb()
     trade_info = bsdb.get_trade_info(user)
     trade_info_dicts = [dict(row) for row in trade_info]
@@ -190,16 +177,11 @@ def login():
         password = form.password.data
         error = None
 
-        db = get_db()
-        db.row_factory = sqlite3.Row
-        # Username check
-        user = db.execute("SELECT * FROM Users WHERE username = ?",
-                          (username,)).fetchone()
+        bsdb = get_bsdb()
+        
+        user = bsdb.get_login_user(username)
         if user is None:
-            user = db.execute("SELECT * FROM Users WHERE email = ?",
-                              (username,)).fetchone()
-            if user is None:
-                error = "Incorrect username."
+            error = "Incorrect username."
 
         # Password check
         elif user['password'] != password:
