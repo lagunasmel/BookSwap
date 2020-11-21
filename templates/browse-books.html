@@ -5,7 +5,7 @@
     {% if show_recent %}
         <div class="container mt-4 text-center mx-auto">
             <h1>Browse Books</h1>
-            <h6>Browse through our book selection or search for a book below.</h6>
+            <p class="lead">Browse through our current book selection or search for a book below.</p>
             <p></p>
             <br>
             <h3 class="text-info">Our most recent additions</h3>
@@ -174,13 +174,13 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p> Please confirm that you would like to add the following book to your wishist. </p>
+                <p> Please confirm that you would like to add the following book to your wishlist. </p>
                 <div class="col-12 mb-4">
                     <div class="card text-center h-100">
                         <div class="card-body">
                             <img class="card-img-top img-fluid mx-auto"
                                  src="{{ url_for('static', filename='images/book.png') }}"
-                                 style="max-width: 75%">
+                                 style="max-width: 50%">
                         </div>
                         <div class="card-body">
                             <h5 class="card-title" id='addToWishlistModalTitle'> Sample Book Title</h5>
@@ -196,10 +196,6 @@
                             <p class="card-text text-center">
                                 <small>Listing User: <strong id="addToWishlistModalListingUser"> </strong></small>
                             </p>
-
-                        </div>
-                        <div class="card-footer text-muted text-center">
-                            listed <strong id="addToWishlistModalTimeHere"> </strong> days ago
                         </div>
                     </div>
                 </div>
@@ -254,7 +250,7 @@
                         <div class="card-body">
                             <img class="card-img-top img-fluid mx-auto"
                                  src="{{ url_for('static', filename='images/book.png') }}"
-                                 style="max-width: 75%">
+                                 style="max-width: 60%">
                         </div>
                     </div>
                 </div>
@@ -285,41 +281,26 @@
                 </button>
             </div>
             <div class="modal-body text-left">
-                <p>
-                        <span class="text-info" id="requestTradeInsufficientPointsModalUsername">
-                        </span>
+                <p><span class="text-info" id="requestTradeInsufficientPointsModalUsername"></span>
                     wants
-                    <span class='text-info' id="requestTradeInsufficientPointsModalPointsNeeded">
-                        </span>
+                    <span class='text-info' id="requestTradeInsufficientPointsModalPointsNeeded"></span>
                     for this copy of
-                    <span class='text-info' id='requestTradeInsufficientPointsModalTitle'>
-                        </span>
+                    <span class='text-info' id='requestTradeInsufficientPointsModalTitle'></span>.
                 </p>
-                <p> Unfortunately, you only have
-                    <span class='text-info' id="requestTradeInsufficientPointsAvailable">
-                            available to use.
-                        </span>
+                <p> Unfortunately, you only have <span class='text-info' id="requestTradeInsufficientPointsAvailable">
+                        </span> available to use.
                 </p>
-                <br/>
-                <p>
-                    You can earn more points by
-                    <a href="/my-books" class='text-info'>
-                        listing books
-                    </a>
-                    for others to request
+                <p> You can earn more points by <a href="/my-books" class='text-info'>listing books</a>
+                    for others to request.</p>
+                <p> Or, <a href="/browse-books" class="text-info">browse other books</a> to find an alternative.
                 </p>
-                <p> Or,
-                    <a href="/browse-books" class="text-info">
-                        browse other books
-                    </a>
-                    to find an alternative
-                </p>
-                <div class="col-12 mb-4">
+
+                <div class="col-12 mb-2">
                     <div class="card text-center h-100">
                         <div class="card-body">
-                            <img class="card-img-top img-fluid mx-auto"
+                            <img class="card-img-bottom img-fluid mx-auto"
                                  src="{{ url_for('static', filename='images/book.png') }}"
-                                 style="max-width: 75%">
+                                 style="max-width: 60%">
                         </div>
                     </div>
                 </div>
