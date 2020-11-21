@@ -482,15 +482,16 @@ def add_book():
     if req.get_json().get('request') == 'add':
         # isbn = req.get_json()["isbn"]
         copyquality = req.get_json()["quality"]
+        points = req.get_json()["points"]
         book_id = req.get_json()["bookId"]
         user_num = session["user_num"]
         # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
-        bsdb.user_add_book_by_id(book_id, user_num, copyquality)
+        bsdb.user_add_book_by_id(book_id, user_num, copyquality, points)
         rows = bsdb.get_listed_books(user_num)
         copyqualities = bsdb.get_book_qualities()
 
         # Build the data to be passed to Jinja
-        headers = ["Title", "Author", "Quality", "ISBN"]
+        headers = ["Title", "Author", "Quality", "Points", "ISBN"]
         table_content = [[row[header] for header in headers] for row in rows]
         data = {"headers": headers,
                 "rows": table_content,
@@ -547,7 +548,7 @@ def my_books():
     copyqualities = bsdb.get_book_qualities()
 
     # Build the data to be passed to Jinja
-    headers = ["Title", "Author", "Quality", "ISBN", "ID"]
+    headers = ["Title", "Author", "Quality", "Points", "ISBN", "ID"]
     table_content = [[row[header] for header in headers] for row in rows]
     data = {"headers": headers,
             "rows": table_content,

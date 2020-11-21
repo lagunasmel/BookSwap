@@ -10,7 +10,8 @@ function confirmBook(e, btnId) {
     });
     $('#confirmBtnBookId' + bookId).on('click', () => {
         let quality = $('#copyQualityBookId' + bookId).val();
-        addBook(bookId, quality);
+        let points = $('#pointsBookId' + bookId).val();
+        addBook(bookId, quality, points);
     });
     $('#confirmBtnBookId' + bookId).show();
     $('#cancelBtnBookId' + bookId).show();
@@ -60,13 +61,14 @@ function searchBookTemplate(url) {
     })
 }
 
-function addBookTemplate(url, bookId, quality) {
+function addBookTemplate(url, bookId, quality, points) {
     $.ajax(url, {
         contentType: "application/json",
         data: JSON.stringify({
             'isbn': $('#newBookISBN').val(),
             'quality': quality,
             'bookId': bookId,
+            'points': points,
             'request': 'add'
         }),
         type: 'POST',

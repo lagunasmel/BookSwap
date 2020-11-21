@@ -119,6 +119,7 @@ class BookSwapDatabase:
                         B.title AS Title, 
                         B.ISBN AS ISBN, 
                         B.author AS Author, 
+                        UB.points AS Points,
                         CQ.qualityDescription AS Quality,
                         UB.id AS id 
                         FROM 
@@ -377,14 +378,14 @@ class BookSwapDatabase:
 
         return out
 
-    def user_add_book_by_id(self, book_id, user_num, copyquality):
+    def user_add_book_by_id(self, book_id, user_num, copyquality, points):
         """
         'user_id' user lists the book matching 'id' as available to swap.
         Nothing happens on failure.
         """
         c = self.db.cursor()
-        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
-                  (user_num, book_id, copyquality))
+        c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId, points) VALUES (?, ?, ?, ?)""",
+                  (user_num, book_id, copyquality, points))
         self.db.commit()
         return
 
