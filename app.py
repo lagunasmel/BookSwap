@@ -141,27 +141,10 @@ def browse_books():
 
 @app.route('/my-trades')
 def my_trades():
-    db = get_db()
-    c = db.cursor()
-
     user = session["user_num"]
-    c.execute("SELECT * FROM Trades WHERE userRequestedId = ?", (user,))
-
-    trades = c.fetchall()
-
-    c.execute(
-        "SELECT * FROM Trades INNER JOIN UserBooks ON Trades.userBookId = UserBooks.id WHERE UserBooks.userId = ?",
-        (user,))
-
-    pending = c.fetchall()
-
     bsdb = get_bsdb()
     trade_info = bsdb.get_trade_info(user)
-
-    return render_template('user/my-trades.html',
-                           trades=trades,
-                           pending=pending,
-                           trade_info=trade_info)
+    return render_template('user/my-trades.html', trade_info=trade_info)
 
 
 @app.route('/login', methods=['GET', 'POST'])
