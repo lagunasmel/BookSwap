@@ -142,14 +142,12 @@ def browse_books():
 @app.route('/my-trades')
 @login_required
 def my_trades():
-    user = session["user_num"]
     bsdb = get_bsdb()
+    user = session['user_num']
     trade_info = bsdb.get_trade_info(user)
     trade_info_dicts = [dict(row) for row in trade_info]
 
     return render_template('user/my-trades.html',
-                           trades=trades,
-                           pending=pending,
                            trade_info=trade_info_dicts)
 
 @app.route('/reject-trade/<user_books_id>')
@@ -177,11 +175,16 @@ def login():
         password = form.password.data
         error = None
 
-        bsdb = get_bsdb()
-        
-        user = bsdb.get_login_user(username)
+        db = get_db()
+        db.row_factory = sqlite3.Row
+        # Username check
+        user = db.execute("SELECT * FROM Users WHERE username = ?",
+                          (username,)).fetchone()
         if user is None:
-            error = "Incorrect username."
+            user = db.execute("SELECT * FROM Users WHERE email = ?",
+                              (username,)).fetchone()
+            if user is None:
+                error = "Incorrect username."
 
         # Password check
         elif user['password'] != password:
