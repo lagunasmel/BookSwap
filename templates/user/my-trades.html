@@ -23,11 +23,10 @@ span {
                     <p><span>Points for Trade:</span> {{ trade["Points"] }}</p>
                     <p><span>Requesting User:</span> {{ trade["Requester"] }}</p>
                     <p><span>Requesting User Stats:</span></p>
-                    <!-- the below buttons are currently non-functional; update coming in sprint 5 -->
                     <div class="text-center">
                         <form>
                             <button type="submit" class="btn btn-primary btn-sm"
-                                                  formaction="***Add button functionality***">Accept
+                                                  onclick='acceptTradeRequest( {{ trade | tojson }})'>Accept
                             </button>
                             <button type="submit" class="btn btn-secondary btn-sm"
                                                   onclick='rejectTradeRequest( {{ trade | tojson }})'>Reject
@@ -51,10 +50,10 @@ span {
                     <p><span>Points for Trade:</span> {{ trade["Points"] }}</p>
                     <p><span>Requesting User:</span> {{ trade["Requester"] }}</p>
                     <p><span>Requesting User Stats:</span></p>
-                    <!-- the below button is currently non-functional; update coming in sprint 5 -->
                     <form>
                         <button type="submit" class="btn btn-primary btn-sm"
-                                              formaction="***Add button functionality in sprint 5***">Cancel Trade
+                              onclick='cancelTradeRequest( {{ trade | tojson }})'>
+                           Cancel 
                         </button>
                     </form>
                 </div>
@@ -117,6 +116,111 @@ span {
         </div>
     </div>
 </div>
+
+<div class="modal" tabindex="-1" role="dialog" id="acceptModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Accept Trade Request Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-left">
+                <p> You are about to accept the trade request for 
+                <span class="text-info" id="acceptModalTitle"> </span>
+                by
+                <span class='text-info' id="acceptModalAuthor"> </span>
+                (ISBN: 
+                <span class='text-info' id="acceptModalISBN"> </span>
+                ).  This request was made by user
+                <span class='text-info' id='acceptModalUsername'> </span>
+                </p>
+                <p> In exchange for helping this user read this desired book, 
+                you will earn
+                <span class='text-info' id="acceptModalPoints">
+                </span>.
+                </p>
+                <p> 
+                Are you certain you would like to accept the request?
+                </p>
+                <div class="col-12 mb-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 src="{{ url_for('static', filename='images/book.png') }}"
+                                 style="max-width: 75%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form id="acceptModalConfirmForm">
+                    <div class="form-group">
+                        <button id='acceptTradeModalConfirmationButton' type="submit" class="btn btn-primary">
+                            Yes, I Accept This Trade Request
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" role="dialog" id="cancelModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Trade Request Confirmation</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-left">
+                <p> You have previously accepted the trade request for 
+                <span class="text-info" id="cancelModalTitle"> </span>
+                by
+                <span class='text-info' id="cancelModalAuthor"> </span>
+                (ISBN: 
+                <span class='text-info' id="cancelModalISBN"> </span>
+                ).  This request was made by user
+                <span class='text-info' id='cancelModalUsername'> </span>
+                .
+                </p>
+                <p> Do you really want to cancel this trade, and not earn the
+                <span class='text-info' id="cancelModalPoints">
+                </span>?
+                </p>
+                <div class="col-12 mb-4">
+                    <div class="card text-center h-100">
+                        <div class="card-body">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 src="{{ url_for('static', filename='images/book.png') }}"
+                                 style="max-width: 75%">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form id="cancelModalConfirmForm">
+                    <div class="form-group">
+                        <button id='cancelTradeModalConfirmationButton' type="submit" class="btn btn-primary">
+                            Yes, Please Cancel This Trade
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                           Let's Keep This Trade 
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
     <script type="text/javascript" src="{{ url_for('static', filename='js/my-trades.js') }}">
     </script>

@@ -30,6 +30,37 @@ class BookSwapDatabase:
         self.db = get_db()
         self.db.row_factory = sqlite3.Row  # This allows us to access values by column name later on
 
+    def accept_trade(self, user_books_id):
+        """
+        Accept_Trade performs the database work necessary for accepting the trade:
+            Listing user has book moved from their pending trades list to their
+                active trades list
+        Accepts:
+            user_books_id (int):  UserBooksId number of requested book
+        Returns:
+            None
+        """
+        c = self.db.cursor()
+        # Change Trade state
+        try:
+            c.execute("""
+                    UPDATE
+                        Trades
+                    SET
+                        statusId = 3
+                    WHERE
+                        userBookId = ?
+                        """,
+                        (user_books_id, ))
+            self.db.commit()
+            print(f"DB_CONNECTOR: Accept_trade -- trade for book {user_books_id} changed to 'accepted by user'")
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Accept_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
+            flash("Error marking trade as accepted", "warning")
+            raise Exception
+        return
+
+
     def close(self):
         """
         Closes the db connection

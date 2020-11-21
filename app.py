@@ -150,6 +150,22 @@ def my_trades():
     return render_template('user/my-trades.html',
                            trade_info=trade_info_dicts)
 
+
+@app.route('/accept-trade/<user_books_id>')
+@login_required
+def accept_trade(user_books_id):
+    print(f"APP: Accept_trade -- Incoming trade acceptance from user {session['user_num']} for book {user_books_id}")
+    bsdb = get_bsdb()
+    try:
+        bsdb.accept_trade(user_books_id)
+        print(f"APP: Accept_trade -- Trade successfully accepted.") 
+        flash("Trade successfully accepted", "success")
+    except Exception:
+        print(f"APP: Accept_trade -- There was an error in accepting the trade.")
+        flash("There was an error in accepting your trade", "warning")
+    return redirect(url_for('my_trades'))
+
+ 
 @app.route('/reject-trade/<user_books_id>')
 @login_required
 def reject_trade(user_books_id):
@@ -158,7 +174,7 @@ def reject_trade(user_books_id):
     try:
         bsdb.reject_trade(user_books_id)
         print(f"APP: Reject_trade -- Trade successfully rejected.  UserBooks number {user_books_id} is available again.")
-        flash("Trade successfully rejected", "success")
+        flash("Trade successfully removed", "success")
     except Exception:
         print(f"APP: Reject-trade -- There was an error in rejecting the trade.")
         flash("There was an error in deleting your trade", "warning")
