@@ -92,3 +92,32 @@ function modalDismiss(bookID) {
     x.style.display = "none";
 }
 
+function confirmChangePoints(title, points, id)
+/*
+ * ConfirmChangePoints brings up modal asking user if they want to change
+ *  points, or not.
+ * Accepts:
+ *  title (string): Book title
+ *  points (int): Current book points value
+ *  id (int): UserBooks id value
+ */
+{
+    $('#changePointsModalTitle').text('title');
+    var newPoints = points;
+    if (newPoints == 1)
+        newPoints += " point";
+    else
+        newPoints += " points";
+    $('#changePointsModalNewPoints').val(points);
+    $('#changePointsModalPoints').text(newPoints);
+    $('#changePointsModalForm').attr('submit', function() {
+        changePoints(points, id);
+    });
+    $('#changePointsModal').modal("show");
+
+}
+
+function changePoints(points, id)
+{
+}
+
