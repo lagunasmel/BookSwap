@@ -8,8 +8,8 @@
     </script>
 
     <script type="text/javascript">
-        function addBook(bookId, quality) {
-            addBookTemplate("{{ url_for('add_book') }}", bookId, quality)
+        function addBook(bookId, quality, points) {
+            addBookTemplate("{{ url_for('add_book') }}", bookId, quality, points)
         };
 
         function searchBook() {
@@ -70,6 +70,7 @@
             <ul>
                 <li id="confirmBookISBN"></li>
                 <li id='confirmBookcopyQuality'></li>
+                <li id="confirmBookpoints"></li>
             </ul>
             <button type="button" class="btn btn-primary ml-2"
                     onclick="addBook()"> Yes, Add This Book
@@ -81,7 +82,7 @@
 
         </div>
         <div class="w-75 p-3 mx-auto">
-            <h4 class="pl-2 py-4">Books You've Listed</h4>
+            <h4 class="pl-2 py-4">Books You Have Listed</h4>
             {{ macros.book_list_table(data.caption, data.headers, data.rows) }}
         </div>
     </div>

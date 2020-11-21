@@ -134,12 +134,12 @@ VALUES ('Yellow River', 'Freely, I.P.', '99999'),
 
 -- Sample Copy Qualities
 INSERT INTO CopyQualities ('qualityDescription')
-VALUES ('Brand New'),
-       ('Mint -- Like New'),
+VALUES ('New'),
+       ('Like New'),
        ('Very Good'),
-       ('Useable'),
-       ('Tattered'),
-       ('Dust');
+       ('Good'),
+       ('Fair'),
+       ('Poor');
 
 -- Sample "admin" user, for easy login check
 INSERT INTO Users('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
