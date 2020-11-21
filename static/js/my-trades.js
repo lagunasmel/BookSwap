@@ -18,10 +18,62 @@ function rejectTradeRequest(book)
     if (points == 1)
         points += " point";
     else
-        points == ' points';
-    $('#rejectModalPoints').text(book['Points']);
+        points += ' points';
+    $('#rejectModalPoints').text(points);
     $('#rejectModalConfirmForm').attr('action', '/reject-trade/' + book['userBooksId']);
     $('#rejectModal').modal('show');
+}
+
+// event handler for "accept request" button
+function acceptTradeRequest(book)
+/*
+ * accepttraderequest displays the modal asking for confirmation that the
+ *  user wants to cancel the trade.
+ * acepts:
+ *  book (object):  userbooks book in question
+ * returns:
+ *  null
+ */
+{
+    event.preventDefault();
+    $('#acceptModalTitle').text(book['Title']);
+    $('#acceptModalAuthor').text(book['Author']);
+    $('#acceptModalISBN').text(book['ISBN']);
+    $('#acceptModalUsername').text(book['Requester']);
+    points = book['Points'];
+    if (points == 1)
+        points += " point";
+    else
+        points += ' points';
+    $('#acceptModalPoints').text(points);
+    $('#acceptModalConfirmForm').attr('action', '/accept-trade/' + book['userBooksId']);
+    $('#acceptModal').modal('show');
+}
+
+// event handler for "accept request" button
+function cancelTradeRequest(book)
+/*
+ * CancelTradeRequest displays the modal asking for confirmation that the
+ *  user wants to cancel the trade.
+ * acepts:
+ *  book (object):  userbooks book in question
+ * returns:
+ *  null
+ */
+{
+    event.preventDefault();
+    $('#cancelModalTitle').text(book['Title']);
+    $('#cancelModalAuthor').text(book['Author']);
+    $('#cancelModalISBN').text(book['ISBN']);
+    $('#cancelModalUsername').text(book['Requester']);
+    points = book['Points'];
+    if (points == 1)
+        points += " point";
+    else
+        points += ' points';
+    $('#cancelModalPoints').text(points);
+    $('#cancelModalConfirmForm').attr('action', '/reject-trade/' + book['userBooksId']);
+    $('#cancelModal').modal('show');
 }
 
 
