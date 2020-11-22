@@ -36,8 +36,8 @@
                     </td>
                     <td>
                         <div class="form-group">
-                            <label class="pl-2">Point Value?</label>
-                            <input class="form-control form-control-sm" id="{{ "pointsBookId" ~ result.id }}" type="number" placeholder="1", step="1", min="0">
+                            <label class="pl-2">Point Value? (Maximum is 10 points)</label>
+                            <input class="form-control form-control-sm" id="{{ "pointsBookId" ~ result.id }}" type="number" placeholder="1", step="1", min="0" max='10' onkeyup="if(parseInt(this.value)>10){ this.value =10; return false; }">
                             </input>
                         </div>
                     </td>

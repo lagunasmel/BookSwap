@@ -249,16 +249,13 @@ class BookSwapDatabase:
         """
         # Get the Work Key from the search result
         work_key = search_result['key'].split('/')[2]
-
         # First check if it exists
         local = self.get_ol_book_details(work_key)
         if local is not None:
             return local
-
         # Get the info of the first printed, english-language, edition, to store
         d = {'title': search_result['title'], 'author': search_result['author_name'][0], 'OLWorkKey': work_key}
         editions = search_result['edition_key']
-
         # Check the editions 10 at a time
         n = len(editions)
         edition_key = None
@@ -281,7 +278,6 @@ class BookSwapDatabase:
                         isbn = int(details['isbn_13'][0])
                         break
             i += 10
-
         # Note that edition_key could still be None if we didn't find a suitable one, that's fine
         # Insert the book info now
         d['OLEditionKey'] = edition_key
@@ -324,7 +320,7 @@ class BookSwapDatabase:
         elif len(rows) == 0:
             # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
             return None
-
+    
     def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
         """
         Searches for books that match the provided details, and then returns the results. The search is conducted on
@@ -332,22 +328,18 @@ class BookSwapDatabase:
         details in the Books table if it does not exist. What is returned is easy to work with:
         a list of sqlite.Row objects corresponding to selections from the Books table, so all the keys
         are the names of attributes of the Books table.
-
-        Example:
-        result = search_books_openlibrary(title="Lord", author="Tolkien", num_results=1)
-        book_id = result[0]['id']
-        image_url = result[0]['coverImageUrl']
-
-        Open Library works by creating a 'Work' for each book, which has a 1:M relationship
+            Example:
+            result = search_books_openlibrary(title="Lord", author="Tolkien", num_results=1)
+            book_id = result[0]['id']
+            image_url = result[0]['coverImageUrl']
+            Open Library works by creating a 'Work' for each book, which has a 1:M relationship
         with 'Editions'. For example, the first Harry Potter book is a single 'Work' corresponding to 191 'Editions'
         that come in different languages and formats. Here we fetch some details from the Work (author, title) and
         others from the Edition - using the first English paperback/hardback edition.
-
         :param title: String, search is done for books whose title contains this
         :param author: Search is done for books whose author contains this string
         :param isbn: Must be a STRING
         :param num_results: int, the number of results to return
-
         :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
                     Each row has the following keys:
                     'id' - from the Books table
@@ -375,7 +367,6 @@ class BookSwapDatabase:
         for result in results:
             book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
             out.append(book_info)
-
         return out
 
     def user_add_book_by_id(self, book_id, user_num, copyquality, points):
@@ -496,6 +487,29 @@ class BookSwapDatabase:
             return results[0]
         except sqlite3.Error as e:
             print(e)
+            raise Exception
+
+    def set_book_points(self, book_id, points):
+        """
+        Changes the number of points for book
+        Accepts:
+            book_id (int): UserBooks.id
+            points (int): UserBooks.points
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                    UPDATE
+                        UserBooks
+                    SET
+                        points = ?
+                    WHERE
+                        id = ?
+                    """,
+                    ( points, book_id) )
+            self.db.commit()
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Set_book_points -- Error changing points of book.  Error {e}")
             raise Exception
 
     def set_password(self, user_num, password):
@@ -932,7 +946,6 @@ class BookSwapDatabase:
             print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
             flash("Error marking trade as rejected", "warning")
             raise Exception
-
         # Return points to requesting User
         try:
             c.execute("""
@@ -964,7 +977,6 @@ class BookSwapDatabase:
             print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to return points to the requesting user for book number {user_books_id}")
             flash("Error returning points to requesting user", "warning")
             raise Exception
-
         # Set book as available
         try:
             c.execute("""
@@ -997,6 +1009,36 @@ class BookSwapDatabase:
 
         return user
                   
+
+    def is_user_book_owner(self, user_num, user_books_id):
+        """
+        Is_user_book_owner confirms that the user is the owner of the book.
+        Accepts:
+            user_num (int): Users.id
+            user_books_id: UserBooks.id
+        Returns:
+            True if the user is the book owner, false otherwise
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                    SELECT
+                        userId
+                    FROM
+                        UserBooks
+                    WHERE
+                        id = ?
+                    """,
+                    (user_books_id, ))
+            rows = c.fetchall()
+            if len(rows) != 1:
+                print(f"DB_CONNECTOR: Is_user_book_owner -- Wrong number of book owners for UserBooks number {user_books_id}")
+                raise Exception
+            owner = rows[0]
+            return owner[0] == user_num
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Is_user_book_owner -- Wrong book owner for UserBooks number {user_books_id}")
+            raise Exception
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()

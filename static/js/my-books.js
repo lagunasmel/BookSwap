@@ -90,8 +90,9 @@ function confirmChangePoints(title, points, id)
  *  title (string): Book title
  *  points (int): Current book points value
  *  id (int): UserBooks id value
- */ {
-    $('#changePointsModalTitle').text('title');
+ */
+{
+    $('#changePointsModalTitle').text(title);
     var newPoints = points;
     if (newPoints == 1)
         newPoints += " point";
@@ -99,13 +100,26 @@ function confirmChangePoints(title, points, id)
         newPoints += " points";
     $('#changePointsModalNewPoints').val(points);
     $('#changePointsModalPoints').text(newPoints);
-    $('#changePointsModalForm').attr('submit', function () {
-        changePoints(points, id);
+
+    $('#changePointsModalButton').on('click', function() {
+        changePoints($('#changePointsModalNewPoints').val(), id);
+
     });
     $('#changePointsModal').modal("show");
-
 }
 
-function changePoints(points, id) {
-}
 
+function changePoints(points, id)
+{
+    $.ajax('/change-points', {
+        contentType: "application/json",
+        data: JSON.stringify({
+            'id': id,
+            'points': points
+        }),
+        type: 'POST',
+        success: function (data) {
+            location.reload(true);
+        }
+    });
+}
