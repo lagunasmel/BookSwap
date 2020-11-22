@@ -199,9 +199,9 @@ VALUES (1, 1, 2, 1),
        (2, 3, 4, 4),
        (3, 1, 3, 2),
        (3, 1, 1, 3),
-       (1, 1, 1, 100),
-       (1, 2, 2, 200),
-       (1, 3, 3, 400);
+       (1, 1, 1, 10),
+       (1, 2, 2, 10),
+       (1, 3, 3, 10);
 
 -- TradeStatus values
 INSERT INTO TradeStatuses (statusDescription)

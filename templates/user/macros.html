@@ -68,15 +68,14 @@
               </span>
               for 
               <span class='text-info' id='changePointsModalPoints'>
-              </span>
-              .  How many points would you like to set it to now?
+              </span>.  How many points would you like to set it to now? (Maximum is 10 points)
               </p>
             </div>
             <div class='container align-self-center'>
                 <div class='col-lg-4 offset-4'>
                   <form>
                     <div class='form-group'>
-                      <input id='changePointsModalNewPoints' class='form-control form-control-sm' type='number' step='1', min='0'> 
+                      <input id='changePointsModalNewPoints' class='form-control form-control-sm' type='number' step='1', min='0' max='10' onkeyup="if(parseInt(this.value)>10){ this.value =10; return false; }"> 
                       </input>
                     </div>
                   </form>
@@ -85,7 +84,7 @@
 
             <div class="modal-footer">
               <form id='changePointsModalForm'>
-                <button type='button' class="btn btn-primary">
+                <button id='changePointsModalButton' type='button' class="btn btn-primary">
                   Change Points
                 </button>
               </form>

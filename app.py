@@ -139,6 +139,41 @@ def browse_books():
                            )
 
 
+@app.route('/change-points', methods=['GET', 'POST'])
+@login_required
+def change_points():
+    """
+    Change_points changes the point value assigned to the UserBooks entry.
+    """    
+    bsdb = get_bsdb()
+    points = req.get_json().get('points')
+    user_num = session['user_num']
+    book_id = req.get_json().get('id')
+    print(f"APP: Change_points -- UserBooks id {book_id} trying to change it to {points} points.  Current user is {session['user_num']}")
+    # Confirm that the requesting user owns the book
+    try:
+        if bsdb.is_user_book_owner(user_num, book_id):
+            print(f"APP: Change_points -- Correct user for the book detected.")
+        else:
+            print(f"APP: Change_points -- Incorrect user for the book detected.")
+            flash("Wrong uesr for that book.  Log out, log in, and try again?", "warning")
+            return redirect(url_for('my_books'))
+    except Exception:
+        print(f"APP: Change_points -- Error checking user validity.")
+        flash("We had an error trying to verify your identity.  Sorry about that.  Perhaps try again?", "warning")
+        return redirect(url_for('my_books'))
+    #Change the points
+    try:
+        bsdb.set_book_points(book_id, points)
+        print(f"APP: Change_points -- Book points changed.")
+        flash("Book points successfully changed.", "success")
+    except Exception:
+        print(f"APP: Change_points -- Error changing book points.")
+        flash("We had an error trying to change your book points.  Sorry about that.  Perhaps try again?", "warning")
+    return redirect(url_for('my_books'))
+
+
+
 @app.route('/my-trades')
 @login_required
 def my_trades():
