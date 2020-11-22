@@ -306,10 +306,10 @@ def wishlist():
     return render_template('user/wishlist.html', data=data)
 
 
-@app.route('/addToWishlist/<isbn>', methods=['GET'])
-@app.route('/addToWishlist', methods=['GET'])
+@app.route('/add-to-wishlist/<isbn>', methods=['GET'])
+@app.route('/add-to-wishlist', methods=['GET'])
 @login_required
-def addToWish(isbn=None):
+def add_to_wish(isbn=None):
     db = get_db()
     db.row_factory = sqlite3.Row
 
@@ -362,14 +362,14 @@ def addToWish(isbn=None):
     return redirect('/wishlist')
 
 
-@app.route('/removeFromWishlist', methods=['GET'])
+@app.route('/remove-from-wishlist', methods=['GET'])
 @login_required
-def removeWish():
+def remove_wish():
     db = get_db()
     db.row_factory = sqlite3.Row
 
     c = db.cursor()
-
+    
     wishID = req.args.get("wishlistRem")
     bookID = req.args.get("bookRem")
     print(wishID, bookID)
@@ -432,7 +432,7 @@ def account():
             flash("Username is already taken", "warning")
 
     # Check against request to change password
-    elif (req.method == 'POST' and password_change_form.submit.data):
+    elif req.method == 'POST' and password_change_form.submit.data:
         show_password_modal = True
         print(f"App.py: Account -- request received to change password for user {session['user_num']}")
         if not password_change_form.validate_on_submit():
