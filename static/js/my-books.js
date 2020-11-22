@@ -16,16 +16,6 @@ function confirmBook(e, btnId) {
     $('#confirmBtnBookId' + bookId).show();
     $('#cancelBtnBookId' + bookId).show();
     console.log(bookId);
-
-
-    // $("#listBook").hide();
-    // $("#confirmBook").show();
-    // $("#confirmBookISBN").html(
-    //     "ISBN: " + $("#newBookISBN").val()
-    // );
-    // $("#confirmBookcopyQuality").html(
-    //     "Copy Quality: " + $("#newBookQuality option:selected").text()
-    // );
 }
 
 function cancelAddBook() {
@@ -100,8 +90,7 @@ function confirmChangePoints(title, points, id)
  *  title (string): Book title
  *  points (int): Current book points value
  *  id (int): UserBooks id value
- */
-{
+ */ {
     $('#changePointsModalTitle').text('title');
     var newPoints = points;
     if (newPoints == 1)
@@ -110,14 +99,13 @@ function confirmChangePoints(title, points, id)
         newPoints += " points";
     $('#changePointsModalNewPoints').val(points);
     $('#changePointsModalPoints').text(newPoints);
-    $('#changePointsModalForm').attr('submit', function() {
+    $('#changePointsModalForm').attr('submit', function () {
         changePoints(points, id);
     });
     $('#changePointsModal').modal("show");
 
 }
 
-function changePoints(points, id)
-{
+function changePoints(points, id) {
 }
 
