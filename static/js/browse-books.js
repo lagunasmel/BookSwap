@@ -6,43 +6,36 @@
  * Returns:
  *  NULL, but database and page are updated
  */
-function submitTradeRequest(book)
-{
+function submitTradeRequest(book) {
     event.preventDefault();
     $.ajax({
-        url:'/request-book',
+        url: '/request-book',
         type: 'POST',
         data: book,
         dataType: 'json',
-        success: function (data){
-            if (data['success'] == "True")
-            {
+        success: function (data) {
+            if (data['success'] == "True") {
                 $('#requestTradeSuccessModalTitle').text(data['book']['title']);
-                $('#requestTradeSuccessModalUsername').
-                    text(data['book']['username']);
+                $('#requestTradeSuccessModalUsername').text(data['book']['username']);
                 var pointsNeeded = data['book']['pointsNeeded'];
                 if (pointsNeeded != 1)
                     pointsNeeded += " points"
                 else
                     pointsNeeded += " point"
-                $('#requestTradeSuccessModalPointsNeeded').
-                    text(pointsNeeded);
+                $('#requestTradeSuccessModalPointsNeeded').text(pointsNeeded);
                 var pointsAvailable = data['points_available'];
                 if (pointsAvailable != 1)
                     pointsAvailable += " points";
                 else
                     pointsAvailable += " point";
-                $('#requestTradeSuccessModalPointsAvailable').
-                    text(pointsAvailable);
+                $('#requestTradeSuccessModalPointsAvailable').text(pointsAvailable);
                 $('#requestTradeSuccessModal').modal({
                     backdrop: 'static',
                     keyboard: false
                 });
                 $('#requestTradeModal').modal("hide");
                 $('#requestTradeSuccessModal').modal("show");
-            }
-            else
-            {
+            } else {
                 location.reload(true);
             }
         }
@@ -58,8 +51,7 @@ function addToWishlist(book)
  *  book (object):  Book in question
  * Returns:
  *  Null
- */
-{
+ */ {
     event.preventDefault();
     // Fill book info
     $('#addToWishlistModalTitle').text(book['title']);
@@ -73,7 +65,7 @@ function addToWishlist(book)
 
     // craete event handler attribute for "Confirm Button"
     var ISBN = book["ISBN"];
-    $("#addToWishlistModalConfirmAddToWishlist").attr('action', '/addToWishlist/' + ISBN);
+    $("#addToWishlistModalConfirmAddToWishlist").attr('action', '/add-to-wishlist/' + ISBN);
 }
 
 
@@ -86,11 +78,9 @@ function requestTrade(book, points)
  *  book (object):  Book in question
  * Returns:
  *  Null
- */
-{
+ */ {
     event.preventDefault();
-    if (points - book['pointsNeeded'] >= 0)
-    {
+    if (points - book['pointsNeeded'] >= 0) {
         $('#requestTradeModalTitle').text(book['title']);
         $('#requestTradeModalAuthor').text(book['author']);
         $('#requestTradeModalUsername').text(book['listingUser']);
@@ -106,32 +96,26 @@ function requestTrade(book, points)
         else
             pointsRemaining += " point";
         $('#requestTradeModalPointsRemaining').text(pointsRemaining);
-        $('#requestTradeModalConfirmationButton').on('click', function() {
+        $('#requestTradeModalConfirmationButton').on('click', function () {
             submitTradeRequest(JSON.stringify(book))
         });
         $('#requestTradeModal').modal('show');
-    }
-    else
-    {
-        $('#requestTradeInsufficientPointsModalUsername').
-            text(book['listingUser']);
+    } else {
+        $('#requestTradeInsufficientPointsModalUsername').text(book['listingUser']);
         var pointsNeeded = book['pointsNeeded'];
         if (pointsNeeded != 1)
             pointsNeeded += " points"
         else
             pointsNeeded += " point"
-        $('#requestTradeInsufficientPointsModalPointsNeeded').
-            text(pointsNeeded);
-        $('#requestTradeInsufficientPointsModalTitle').
-            text(book['title']);
+        $('#requestTradeInsufficientPointsModalPointsNeeded').text(pointsNeeded);
+        $('#requestTradeInsufficientPointsModalTitle').text(book['title']);
         var pointsAvailable = points;
         if (pointsAvailable != 1)
             pointsAvailable += " points"
         else
             pointsAvailable += " point"
-        $('#requestTradeInsufficientPointsAvailable').
-            text(pointsAvailable)
-        
+        $('#requestTradeInsufficientPointsAvailable').text(pointsAvailable)
+
         $('#requestTradeInsufficientPointsModal').modal('show');
     }
 }
