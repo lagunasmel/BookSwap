@@ -44,11 +44,11 @@
                                         </button>
                                     </form>
                                 {% else %}
-                                    <a class="btn btn-primary btn-sm" href="/signup">
+                                    <a class="btn btn-primary btn-sm" href="{{ url_for('signup') }}">
                                         Sign Up to get started
                                     </a>
                                     <p></p>
-                                    <a class="btn btn-success btn-sm" href="/login">
+                                    <a class="btn btn-success btn-sm" href="{{ url_for('login') }}">
                                         Login to use your points
                                     </a>
                                 {% endif %}
@@ -160,7 +160,7 @@
                 {% endfor %}
                 <br>
                 <form action="{{ url_for('browse_books') }}">
-                    <input type="submit" class="btn btn-info" value="Back to Browsing Books"/>
+                    <input type="submit" class="btn btn-info mb-4" value="Back to Browsing Books"/>
                 </form>
             </div>
         </div>
@@ -295,9 +295,11 @@
                                                            id="requestTradeInsufficientPointsAvailable">
                 </span> available to use.
                     </p>
-                    <p> You can earn more points by <a href="/my-books" class='text-info'>listing books</a>
+                    <p> You can earn more points by <a href="{{ url_for('my_books') }}" class='text-info'>listing
+                        books</a>
                         for others to request.</p>
-                    <p> Or, <a href="/browse-books" class="text-info">browse other books</a> to find an alternative.
+                    <p> Or, <a href="{{ url_for('browse_books') }}" class="text-info">browse other books</a> to find an
+                        alternative.
                     </p>
                     <div class="col-12 mb-2">
                         <div class="card text-center h-100">
@@ -361,8 +363,8 @@
                         </div>
                     </div>
                 </div>
-                <form class="text-center" action="/browse-books">
-                    <button type="submit" class="btn btn-primary">
+                <form class="text-center" action="{{ url_for('browse_books') }}">
+                    <button type="submit" class="btn btn-primary mb-4">
                         Reload This Page
                     </button>
                 </form>
