@@ -12,6 +12,7 @@ app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
+
 # Code automatically created with each request
 @app.before_request
 def populate_g():
@@ -29,7 +30,7 @@ def populate_g():
             print(f"\t g.num_trade_requests: {g.num_trade_requests}")
             g.num_open_trades = bsdb.get_num_open_trades(user_num)
             print(f"\t g.num_open_trades: {g.num_open_trades}")
-            
+
         except Exception:
             print(f"APP: App_context -- Error setting up g")
             session['user_num'] = None
@@ -65,9 +66,10 @@ def faq():
 def requestBook():
     bsdb = get_bsdb()
     book = req.get_json(force=True)
-    print (f"APP: RequestBook -- Request incoming for book:  {book}")
+    print(f"APP: RequestBook -- Request incoming for book:  {book}")
     if (book['userId'] == session['user_num']):
-        flash("You tried to request your own book?  It would be easier to just pull it off the shelf and read...", "warning")
+        flash("You tried to request your own book?  It would be easier to just pull it off the shelf and read...",
+              "warning")
         print(f"APP: Request_Book: User attempted to trade with themselves.  This leads to night blindness")
         success = "False"
         try:
@@ -78,17 +80,19 @@ def requestBook():
         try:
             points_available = bsdb.request_book(book, session['user_num'])
             success = "True"
-            print(f"APP: RequestBook -- Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
+            print(
+                f"APP: RequestBook -- Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
         except Exception:
-            print(f"APP: RequestBook -- Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+            print(
+                f"APP: RequestBook -- Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
             success = "False"
             flash("There was an error in placing the trade request.  Feel free to try again", "warning")
     return {
-            "book": book, 
-            "points_available": points_available, 
-            "success": success
-            }
-         
+        "book": book,
+        "points_available": points_available,
+        "success": success
+    }
+
 
 @app.route('/browse-books', methods=['GET', 'POST'])
 def browse_books():
@@ -97,7 +101,7 @@ def browse_books():
     recent_books = bsdb.get_recent_additions(8)
     recent_books_arr = []
     for i in range(len(recent_books)):
-        recent_books_arr.append( {key:recent_books[i][key] for key in recent_books[i].keys()} )
+        recent_books_arr.append({key: recent_books[i][key] for key in recent_books[i].keys()})
     if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
@@ -119,7 +123,9 @@ def browse_books():
         except Exception:
             print(f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
             points_available = 0
-            flash("We could not load your points, so we assume you have 0 points. Feel free to browse for now, but we will need to fix this before you can make trade requests.", "warning")
+            flash(
+                "We could not load your points, so we assume you have 0 points. Feel free to browse for now, but we will need to fix this before you can make trade requests.",
+                "warning")
     else:
         points_available = 0
 
@@ -135,7 +141,7 @@ def browse_books():
                            show_recent=show_recent,
                            show_search=show_search,
                            show_results=show_results,
-                           points_available = points_available
+                           points_available=points_available
                            )
 
 
@@ -158,14 +164,14 @@ def accept_trade(user_books_id):
     bsdb = get_bsdb()
     try:
         bsdb.accept_trade(user_books_id)
-        print(f"APP: Accept_trade -- Trade successfully accepted.") 
+        print(f"APP: Accept_trade -- Trade successfully accepted.")
         flash("Trade successfully accepted", "success")
     except Exception:
         print(f"APP: Accept_trade -- There was an error in accepting the trade.")
         flash("There was an error in accepting your trade", "warning")
     return redirect(url_for('my_trades'))
 
- 
+
 @app.route('/reject-trade/<user_books_id>')
 @login_required
 def reject_trade(user_books_id):
@@ -173,13 +179,14 @@ def reject_trade(user_books_id):
     bsdb = get_bsdb()
     try:
         bsdb.reject_trade(user_books_id)
-        print(f"APP: Reject_trade -- Trade successfully rejected.  UserBooks number {user_books_id} is available again.")
+        print(
+            f"APP: Reject_trade -- Trade successfully rejected.  UserBooks number {user_books_id} is available again.")
         flash("Trade successfully removed", "success")
     except Exception:
         print(f"APP: Reject-trade -- There was an error in rejecting the trade.")
         flash("There was an error in deleting your trade", "warning")
     return redirect(url_for('my_trades'))
-        
+
 
 @app.route('/login', methods=['GET', 'POST'])
 @guest_required
@@ -306,23 +313,27 @@ def addToWish(isbn=None):
     db = get_db()
     db.row_factory = sqlite3.Row
 
+    # Queries used for SELECTing and INSERTing
+    get_books_isbn_query = 'SELECT * FROM Books WHERE ISBN = ?'
+    get_wishlist_books_query = 'SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?'
+    insert_wishlist_query = 'INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)'
+
     # Special path for browse-books route
     if isbn:
         c = db.cursor()
-        c.execute("SELECT * FROM Books WHERE ISBN = ?", (isbn,))
+        c.execute(get_books_isbn_query, (isbn,))
         bookId = c.fetchall()[0]['id']
 
-        c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?",
+        c.execute(get_wishlist_books_query,
                   (session['user_num'], bookId))
-        
 
         # if the book was already in the wishlist, don't add it
         if c.fetchall():
             flash("Book already in your wishlist", "warning")
             print(f"APP: AddToWish -- Book {isbn} already in user {session['user_num']}'s wishlist")
         # otherwise, add book to the wishlist
-        else: 
-            c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
+        else:
+            c.execute(insert_wishlist_query,
                       (session['user_num'], bookId))
             flash("Book added to your wishlist", "success")
             print(f"APP: AddToWish -- Book {isbn} successfully added to user {session['user_num']}'s wishlist")
@@ -336,14 +347,14 @@ def addToWish(isbn=None):
         return redirect('/wishlist')
 
     c = db.cursor()
-    c.execute("SELECT * FROM Books WHERE ISBN = ?", (data,))
+    c.execute(get_books_isbn_query, (data,))
     bookId = c.fetchall()[0]['id']
 
-    c.execute("SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?",
+    c.execute(get_wishlist_books_query,
               (session['user_num'], bookId))
 
     if not c.fetchall():
-        c.execute("INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)",
+        c.execute(insert_wishlist_query,
                   (req.args.get("wishlist"), bookId))
     db.commit()
     db.close()
