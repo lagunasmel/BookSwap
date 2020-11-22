@@ -567,7 +567,7 @@ def search_book():
                                copyqualities=copyqualities)
 
 
-@app.route('/removeFromUserLibrary', methods=['GET'])
+@app.route('/remove-from-user-library', methods=['GET'])
 @login_required
 def removeBook():
     db = get_db()
