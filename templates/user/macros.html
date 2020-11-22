@@ -43,7 +43,7 @@
               <p>Are you sure you wish to remove {{ row[0] }}?</p>
             </div>
             <div class="modal-footer">
-              <form action="/removeFromUserLibrary" method="GET">
+              <form action="/remove-from-user-library" method="GET">
                 <input type="hidden" id="bookRem" name="bookRem" value="{{ row[5] }}">
                 <input type="submit" value="Yes, Remove" class="btn btn-primary">
               </form>
