@@ -2,8 +2,11 @@
 {% set active_page = 'learn-how' %}
 {% block content %}
 
-<h1> Learn How</h1>
+    <div class="container w-75 m-4">
+        <h1> Learn How</h1>
 
-<p> Still have questions? Check our <a href="/faq">FAQs</a>. </p>
+        <p class="lead"> Still have questions? Check out our <a href="{{ url_for('faq') }}">FAQs</a>. </p>
+    </div>
+
 
 {% endblock content %}

@@ -16,16 +16,6 @@ function confirmBook(e, btnId) {
     $('#confirmBtnBookId' + bookId).show();
     $('#cancelBtnBookId' + bookId).show();
     console.log(bookId);
-
-
-    // $("#listBook").hide();
-    // $("#confirmBook").show();
-    // $("#confirmBookISBN").html(
-    //     "ISBN: " + $("#newBookISBN").val()
-    // );
-    // $("#confirmBookcopyQuality").html(
-    //     "Copy Quality: " + $("#newBookQuality option:selected").text()
-    // );
 }
 
 function cancelAddBook() {
@@ -110,12 +100,14 @@ function confirmChangePoints(title, points, id)
         newPoints += " points";
     $('#changePointsModalNewPoints').val(points);
     $('#changePointsModalPoints').text(newPoints);
+
     $('#changePointsModalButton').on('click', function() {
         changePoints($('#changePointsModalNewPoints').val(), id);
+
     });
     $('#changePointsModal').modal("show");
-
 }
+
 
 function changePoints(points, id)
 {
@@ -131,5 +123,3 @@ function changePoints(points, id)
         }
     });
 }
-
-

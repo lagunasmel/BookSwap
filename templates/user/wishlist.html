@@ -2,66 +2,70 @@
 {% set active_page = 'wishlist' %}
 {% block content %}
 
-<!--Scripts for Book Removal-->
-<script type="text/javascript" src="{{ url_for('static', filename='js/my-wishlist.js') }}">
-</script>
+    <!--Scripts for Book Removal-->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/my-wishlist.js') }}">
+    </script>
 
-<div class="container mt-5">
-    <div class="w-50 p-3 mx-auto">
-        <h1 class="text-center">My Wishlist</h1>
-        <p></p>
-        {% if data.table_content %}
-        {% for wish in data.table_content %}
-        <ul class="list-group">
-            {% for book in data.table_content[wish] %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">{{book}}
-            <div id="removeBook">
-                <button type="button" class="btn btn-primary ml-2"
-                        onclick="confirmRemoveBook({{ wish }})"> Remove
-                </button>
-            </div>
-            <div class="modal" id="{{ wish }}">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">Confirm Removal</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="modalDismiss({{ wish }})">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <p>Are you sure you wish to remove {{ book }}?</p>
-                  </div>
-                  <div class="modal-footer">
-                    <form action="/removeFromWishlist" method="GET">
-                        <input type="hidden" id="wishlistRem" name="wishlistRem" value="{{ wish }}">
-                        <input type="hidden" id="bookRem" name="bookRem" value="{{ book }}">
-                        <input type="submit" value="Remove" class="btn btn-primary">
-                    </form>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="modalDismiss({{ wish }})">
-                      Never mind</button>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div class="container mt-5">
+        <div class="w-50 p-3 mx-auto">
+            <h1 class="text-center">My Wishlist</h1>
+            <p></p>
+            {% if data.table_content %}
+                {% for wish in data.table_content %}
+                    <ul class="list-group">
+                        {% for book in data.table_content[wish] %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">{{ book }}
+                                <div id="removeBook">
+                                    <button type="button" class="btn btn-primary ml-2"
+                                            onclick="confirmRemoveBook({{ wish }})"> Remove
+                                    </button>
+                                </div>
+                                <div class="modal" id="{{ wish }}">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirm Removal</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close" onclick="modalDismiss({{ wish }})">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Are you sure you wish to remove {{ book }}?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form action="{{ url_for('remove_wish') }}" method="GET">
+                                                    <input type="hidden" id="wishlistRem" name="wishlistRem"
+                                                           value="{{ wish }}">
+                                                    <input type="hidden" id="bookRem" name="bookRem" value="{{ book }}">
+                                                    <input type="submit" value="Remove" class="btn btn-primary">
+                                                </form>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                                        onclick="modalDismiss({{ wish }})">
+                                                    Never mind
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-            </li>
-            {% endfor %}
-        </ul>
-        {% endfor %}
-        {% endif %}
-        <p></p>
-        {% if not data.table_content %}
-            <h5 class="text-center">You don't have anything in your wishlist</h5>
-        {% endif %}
-        <div class="form-group">
-            <form action="/addToWishlist" method="GET">
-                <label for="isbn">Book ISBN number: </label>
-                <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control sm">
-                <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}"> <br>
-                <input type="submit" class="btn btn-info btn-sm">
-            </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endfor %}
+            {% endif %}
+            <p></p>
+            {% if not data.table_content %}
+                <h5 class="text-center">You don't have anything in your wishlist</h5>
+            {% endif %}
+            <div class="form-group">
+                <form action="{{ url_for('add_to_wish') }}" method="GET">
+                    <label for="isbn">Book ISBN number: </label>
+                    <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control sm">
+                    <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}"> <br>
+                    <input type="submit" class="btn btn-info btn-sm">
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock content %}
