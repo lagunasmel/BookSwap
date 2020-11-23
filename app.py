@@ -613,43 +613,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-@app.route('/demo-users')
-def demo_users():
-    db = get_db()
-    # This allows us to access values by column name later on
-    db.row_factory = sqlite3.Row
-    """
-    Step 1: run the SQL query
-    Avoid Python's string operations when putting together SQL queries 
-    Instead use '?' as a placeholder for each parameter then pass a tuple of parameters as the second argument
-    """
-    c = db.cursor()
-    c.execute("SELECT * FROM Users WHERE city != ?", ("Nashville",))
-    """
-    Step 2: fetch the results from the SQL query.
-    You can treat the cursor as an iterator or call .fetchall() to get a list of all matching rows
-    
-    Since we set the row factory above, we can access values by index (row[0]) or 
-    by column name, case insensitively (row["uSErNAmE"])
-    
-    Accessing values by column name is useful if we move around columns later on
-    """
-    rows = c.fetchall()
-    table_content = [[row["username"], row["fname"], row["lname"]]
-                     for row in rows]
-    # Don't forget to close the connection when done with the SQL
-    db.close()
-    """
-    Step 3: pass the data to a jinja template to be rendered
-    Here I passed the info as a list of lists,
-    and used a loop in the jinja template to create the table
-    """
-    data = {}
-    data["table_content"] = table_content
-    data["headers"] = ["Username", "First Name", "Last Name"]
-    return render_template("demos/demo-users.html", data=data)
-
-
 @app.route('/reset-db')
 def reset_db():
     """
