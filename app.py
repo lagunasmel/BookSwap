@@ -9,6 +9,7 @@ from forms import (RegistrationForm, LoginForm, BookSearchForm,
 from auth import login_required, guest_required
 
 app = Flask(__name__)
+
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
@@ -21,18 +22,19 @@ def populate_g():
     if user_num is not None:
         try:
             user_info = bsdb.get_account_settings(user_num)
-            print("APP: Before_request")
             g.username = user_info["username"]
-            print(f"\t g.username: {g.username}")
             g.points = user_info["points"]
-            print(f"\t g.points: {g.points}")
             g.num_trade_requests = bsdb.get_num_trade_requests(user_num)
-            print(f"\t g.num_trade_requests: {g.num_trade_requests}")
             g.num_open_trades = bsdb.get_num_open_trades(user_num)
-            print(f"\t g.num_open_trades: {g.num_open_trades}")
+            app.logger.info(f"Request made.  Current user status:" 
+                    f"\t g.username: {g.username}" + 
+                    f"\t g.points: {g.points}"
+                    f"\t g.num_trade_requests: {g.num_trade_requests}" + 
+                    f"\t g.num_open_trades: {g.num_open_trades}")
+
 
         except Exception:
-            print(f"APP: App_context -- Error setting up g")
+            app.logger.error(f"Error setting up g")
             session['user_num'] = None
 
 
@@ -66,11 +68,11 @@ def faq():
 def requestBook():
     bsdb = get_bsdb()
     book = req.get_json(force=True)
-    print(f"APP: RequestBook -- Request incoming for book:  {book}")
+    app.logger.info('Request incoming for book: %s', book)
     if (book['userId'] == session['user_num']):
         flash("You tried to request your own book?  It would be easier to just pull it off the shelf and read...",
               "warning")
-        print(f"APP: Request_Book: User attempted to trade with themselves.  This leads to night blindness")
+        app.logger.warning(f"User {session['user_num']} attempted to trade with themselves.  This leads to night blindness")
         success = "False"
         try:
             points_available = bsdb.get_current_user_points(session["user_num"])
@@ -80,11 +82,9 @@ def requestBook():
         try:
             points_available = bsdb.request_book(book, session['user_num'])
             success = "True"
-            print(
-                f"APP: RequestBook -- Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
+            app.logger.info(f"Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
         except Exception:
-            print(
-                f"APP: RequestBook -- Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+            app.logger.error(f"Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
             success = "False"
             flash("There was an error in placing the trade request.  Feel free to try again", "warning")
     return {
@@ -119,9 +119,9 @@ def browse_books():
     if session.get('user_num'):
         try:
             points_available = bsdb.get_current_user_points(session['user_num'])
-            print(f"APP: Browse_books -- User {session['user_num']} has {points_available} points.")
+            app.logger.info(f"User {session['user_num']} has {points_available} points.")
         except Exception:
-            print(f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
+            app.logger.error(f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
             points_available = 0
             flash(
                 "We could not load your points, so we assume you have 0 points. Feel free to browse for now, but we will need to fix this before you can make trade requests.",
@@ -129,11 +129,10 @@ def browse_books():
     else:
         points_available = 0
 
-    print("APP: Browse_books:")
-    print(f"\t recent_books: {recent_books_arr}")
-    print(f"\t book_results: {book_results}")
-    print(f"\t form: {form}")
-    print(f"\t Visiting user has {points_available} points available.")
+    app.logger.info(f"\n\t recent_books: {recent_books_arr}" +
+                    f"\t book_results: {book_results}" + 
+                    f"\t form: {form}" +
+                    f"\t Visiting user has {points_available} points available.")
     return render_template('browse-books.html',
                            recent_books=recent_books_arr,
                            book_results=book_results,
@@ -155,26 +154,26 @@ def change_points():
     points = req.get_json().get('points')
     user_num = session['user_num']
     book_id = req.get_json().get('id')
-    print(f"APP: Change_points -- UserBooks id {book_id} trying to change it to {points} points.  Current user is {session['user_num']}")
+    app.logger.info(f"UserBooks id {book_id} trying to change it to {points} points.  Current user is {session['user_num']}")
     # Confirm that the requesting user owns the book
     try:
         if bsdb.is_user_book_owner(user_num, book_id):
-            print(f"APP: Change_points -- Correct user for the book detected.")
+            app.logger.info(f"Correct user for the book detected.")
         else:
-            print(f"APP: Change_points -- Incorrect user for the book detected.")
+            app.logger.warning(f"Incorrect user for the book detected.")
             flash("Wrong uesr for that book.  Log out, log in, and try again?", "warning")
             return redirect(url_for('my_books'))
     except Exception:
-        print(f"APP: Change_points -- Error checking user validity.")
+        app.logger.error("Error checking user validity.")
         flash("We had an error trying to verify your identity.  Sorry about that.  Perhaps try again?", "warning")
         return redirect(url_for('my_books'))
     #Change the points
     try:
         bsdb.set_book_points(book_id, points)
-        print(f"APP: Change_points -- Book points changed.")
+        app.logger.info(f"Book points changed.")
         flash("Book points successfully changed.", "success")
     except Exception:
-        print(f"APP: Change_points -- Error changing book points.")
+        app.logger.error(f"Error changing book points.")
         flash("We had an error trying to change your book points.  Sorry about that.  Perhaps try again?", "warning")
     return redirect(url_for('my_books'))
 
@@ -195,14 +194,14 @@ def my_trades():
 @app.route('/accept-trade/<user_books_id>')
 @login_required
 def accept_trade(user_books_id):
-    print(f"APP: Accept_trade -- Incoming trade acceptance from user {session['user_num']} for book {user_books_id}")
+    app.logger.info(f"Incoming trade acceptance from user {session['user_num']} for book {user_books_id}")
     bsdb = get_bsdb()
     try:
         bsdb.accept_trade(user_books_id)
-        print(f"APP: Accept_trade -- Trade successfully accepted.")
+        app.logger.info(f"Trade successfully accepted.")
         flash("Trade successfully accepted", "success")
     except Exception:
-        print(f"APP: Accept_trade -- There was an error in accepting the trade.")
+        app.logger.info(f"There was an error in accepting the trade.")
         flash("There was an error in accepting your trade", "warning")
     return redirect(url_for('my_trades'))
 
@@ -210,15 +209,14 @@ def accept_trade(user_books_id):
 @app.route('/reject-trade/<user_books_id>')
 @login_required
 def reject_trade(user_books_id):
-    print(f"APP: Reject_trade -- Incoming trade rejection from user {session['user_num']} for book {user_books_id}")
+    app.logger.info(f"Incoming trade rejection from user {session['user_num']} for book {user_books_id}")
     bsdb = get_bsdb()
     try:
         bsdb.reject_trade(user_books_id)
-        print(
-            f"APP: Reject_trade -- Trade successfully rejected.  UserBooks number {user_books_id} is available again.")
+        app.logger.info(f"Trade successfully rejected.  UserBooks number {user_books_id} is available again.")
         flash("Trade successfully removed", "success")
     except Exception:
-        print(f"APP: Reject-trade -- There was an error in rejecting the trade.")
+        app.logger.error(f"There was an error in rejecting the trade.")
         flash("There was an error in deleting your trade", "warning")
     return redirect(url_for('my_trades'))
 
@@ -233,35 +231,33 @@ def login():
         username = form.username.data
         password = form.password.data
         error = None
+        app.logger.info(f'Login attempt incoming for user {username}')
         id = None
         # Username check
         try:
             id = bsdb.get_username_id(username)
-            if id is None:
-                print(f"APP: Login -- Incorrect username ( {username} ) entered.")
-                error = "Incorrect username.  We do not have record of this username."
         except Exception:
-            print(f"APP: Login -- Error checking username ( {username} ).")
+            app.logger.error(f"Error checking username ( {username} ).")
             error = "We had an error checking your username.  Please try again."
 
         if id is None:
-            print(f"APP: Login -- Incorrect username ( {username} ) entered.")
+            app.logger.error(f"Login -- Incorrect username ( {username} ) entered.")
             error = "Incorrect username.  We do not have record of this username."
         # Password check
         else:
             try:
                 if password != bsdb.get_password(id):
-                    print(f"APP: Login -- Incorrect password entered for {username}.")
+                    app.logger.warning(f"Incorrect password entered for {username}.")
                     error = "Incorrect password."
             except Exception:
-                    print(f"APP: Login -- Error checking password for {username}.")
+                    app.logger.error(f"Error checking password for {username}.")
                     error = "We hada n error checking your password.  Please try again."
 
         # No errors, login proceeds
         if error is None:
             session.clear()
             session['user_num'] = id
-            print(f"APP: Login -- User {username} successfully logged in.")
+            app.logger.info(f"User {username} successfully logged in.")
             return redirect(url_for('home'))
 
         flash(error, 'warning')
@@ -278,7 +274,6 @@ def signup():
         # db.row_factory = sqlite3.Row
         c = db.cursor()
         error = None
-
         # (Redundant) check for uesrname and password entries
         if not form.username.data:
             error = "Username is required."
@@ -288,7 +283,6 @@ def signup():
                        (form.email.data,)).fetchone() is not None:
             error = 'User {} already exists.  Please try again with a different username, or log in.'.format(
                 form.username.data)
-
         if error is None:
             c.execute("""INSERT INTO Users (
             'username', 
@@ -310,9 +304,9 @@ def signup():
                        form.city.data,
                        form.state.data,
                        form.postCode.data))
-
-            print(
-                f"Signup: account created for {form.username.data}, with User id {c.lastrowid}")
+            app.logger.info(
+                f"Signup: account created for {form.username.data}, " +
+                f"with User id {c.lastrowid}")
             flash(f'Account created for {form.email.data}!', 'success')
             session['user_num'] = c.lastrowid
 
@@ -367,13 +361,15 @@ def add_to_wish(isbn=None):
         # if the book was already in the wishlist, don't add it
         if c.fetchall():
             flash("Book already in your wishlist", "warning")
-            print(f"APP: AddToWish -- Book {isbn} already in user {session['user_num']}'s wishlist")
+            app.logger.warning(f"Book {isbn} already in " +
+                                f"user {session['user_num']}'s wishlist")
         # otherwise, add book to the wishlist
         else:
             c.execute(insert_wishlist_query,
                       (session['user_num'], bookId))
             flash("Book added to your wishlist", "success")
-            print(f"APP: AddToWish -- Book {isbn} successfully added to user {session['user_num']}'s wishlist")
+            app.logger.info(f"Book {isbn} successfully added to " +
+                            f"user {session['user_num']}'s wishlist")
 
         db.commit()
         db.close()
@@ -409,7 +405,8 @@ def remove_wish():
     
     wishID = req.args.get("wishlistRem")
     bookID = req.args.get("bookRem")
-    print(wishID, bookID)
+    app.logger.info(f"Removing book {bookID} from wishlist {wishID} for " +
+                    f" user [session['user_num']")
     c.execute("DELETE FROM WishlistsBooks WHERE wishlistId = ? AND bookId = (SELECT id FROM Books WHERE title = ?)",
               (wishID, bookID))
     db.commit()
@@ -433,10 +430,11 @@ def account():
     if (req.method == 'POST' and
             account_settings_change_form.submit_account_change.data):
         show_account_modal = True
-        print(f"App: Account - request received to change user settings for user {session['user_num']}")
+        app.logger.info(f"request received to change user settings for " +
+                        f"user {session['user_num']}")
         # Check to make sure form was valid, return form if it was not
         if not account_settings_change_form.validate_on_submit():
-            print(f"App: Account -- Settings change form failed validation")
+            app.logger.warning(f"Settings change form failed validation")
             flash("Your information wouldn't work.  Try again?", "warning")
             return render_template(
                 'user/user-home.html',
@@ -449,17 +447,15 @@ def account():
         # Check that the username isn't changing or is available
         if acct.is_username_valid(session['user_num'],
                                   account_settings_change_form.username.data):
-            print("App: Account - username is valid")
+            app.logger.info("username is valid")
             try:
                 acct.set_account_information(
                     session['user_num'], account_settings_change_form)
                 flash("Account information updated.", "success")
-                print("App: Account - returning new account info:")
+                app.logger.info("returning new account info:")
                 account_settings = bsdb.get_account_settings(
                     session["user_num"])
                 show_account_modal = False
-                for key in account_settings.keys():
-                    print(f"\t {key}: {account_settings[key]}")
                 account_settings = bsdb.get_account_settings(
                     session["user_num"])
             except Exception:
@@ -471,9 +467,10 @@ def account():
     # Check against request to change password
     elif req.method == 'POST' and password_change_form.submit.data:
         show_password_modal = True
-        print(f"App.py: Account -- request received to change password for user {session['user_num']}")
+        app.logger.info(f"request received to change password for " +
+                        f"user {session['user_num']}")
         if not password_change_form.validate_on_submit():
-            print(f"App: Account -- Password change form failed verification")
+            app.logger.warning(f"Password change form failed verification")
             flash("Your infromation wouldn't work.  Try again?", "warning")
             return render_template(
                 'user/user-home.html',
@@ -487,22 +484,23 @@ def account():
             correct_password = acct.is_password_correct(session["user_num"],
                                                         password_change_form)
             if not correct_password:
-                flash("Original password was not correct.  Please try again.", "warning")
+                flash("Original password was not correct.  Please try again.", 
+                        "warning")
             else:
-                print("App.py: Account -- Original password was entered correctly.")
+                app.logger.info("Original password was entered correctly.")
                 try:
                     acct.set_password(session["user_num"],
                                       password_change_form)
-                    print("App.py: Account -- New Password set")
+                    app.logger.info("New Password set")
                     flash("New Password Sucessfully Set.", "success")
                     show_password_modal = False
                 except Exception:
-                    print("App.py: Account -- Error setting new password")
+                    app.logger.error("Error setting new password")
                     flash("Error setting new password.  Try again?", "warning")
 
         except Exception:
             flash("Error determining if the original password is correct.  Try again?", "warning")
-            print("App.py: Account -- Error checking original password.")
+            app.logger.error("Error checking original password.")
 
     # We got here either by being GET or succeeding making changes.
     # Refill account_setting and account_settings_change_form
@@ -578,7 +576,7 @@ def removeBook():
     c = db.cursor()
 
     bookID = req.args.get("bookRem")
-    print(bookID)
+    app.logger.info(f"Removing book {bookID}")
     c.execute("DELETE FROM UserBooks WHERE id = ?",
               (bookID,))
     db.commit()
