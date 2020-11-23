@@ -26,11 +26,11 @@ def populate_g():
             g.points = user_info["points"]
             g.num_trade_requests = bsdb.get_num_trade_requests(user_num)
             g.num_open_trades = bsdb.get_num_open_trades(user_num)
-            app.logger.info(f"Request made.  Current user status:" 
-                    f"\t g.username: {g.username}" + 
-                    f"\t g.points: {g.points}"
-                    f"\t g.num_trade_requests: {g.num_trade_requests}" + 
-                    f"\t g.num_open_trades: {g.num_open_trades}")
+            app.logger.info(f"Request made.  Current user status:"
+                            f"\t g.username: {g.username}" +
+                            f"\t g.points: {g.points}"
+                            f"\t g.num_trade_requests: {g.num_trade_requests}" +
+                            f"\t g.num_open_trades: {g.num_open_trades}")
 
 
         except Exception:
@@ -72,7 +72,8 @@ def requestBook():
     if (book['userId'] == session['user_num']):
         flash("You tried to request your own book?  It would be easier to just pull it off the shelf and read...",
               "warning")
-        app.logger.warning(f"User {session['user_num']} attempted to trade with themselves.  This leads to night blindness")
+        app.logger.warning(
+            f"User {session['user_num']} attempted to trade with themselves.  This leads to night blindness")
         success = "False"
         try:
             points_available = bsdb.get_current_user_points(session["user_num"])
@@ -82,9 +83,11 @@ def requestBook():
         try:
             points_available = bsdb.request_book(book, session['user_num'])
             success = "True"
-            app.logger.info(f"Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
+            app.logger.info(
+                f"Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
         except Exception:
-            app.logger.error(f"Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+            app.logger.error(
+                f"Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
             success = "False"
             flash("There was an error in placing the trade request.  Feel free to try again", "warning")
     return {
@@ -121,7 +124,8 @@ def browse_books():
             points_available = bsdb.get_current_user_points(session['user_num'])
             app.logger.info(f"User {session['user_num']} has {points_available} points.")
         except Exception:
-            app.logger.error(f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
+            app.logger.error(
+                f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
             points_available = 0
             flash(
                 "We could not load your points, so we assume you have 0 points. Feel free to browse for now, but we will need to fix this before you can make trade requests.",
@@ -130,7 +134,7 @@ def browse_books():
         points_available = 0
 
     app.logger.info(f"\n\t recent_books: {recent_books_arr}" +
-                    f"\t book_results: {book_results}" + 
+                    f"\t book_results: {book_results}" +
                     f"\t form: {form}" +
                     f"\t Visiting user has {points_available} points available.")
     return render_template('browse-books.html',
@@ -149,12 +153,13 @@ def browse_books():
 def change_points():
     """
     Change_points changes the point value assigned to the UserBooks entry.
-    """    
+    """
     bsdb = get_bsdb()
     points = req.get_json().get('points')
     user_num = session['user_num']
     book_id = req.get_json().get('id')
-    app.logger.info(f"UserBooks id {book_id} trying to change it to {points} points.  Current user is {session['user_num']}")
+    app.logger.info(
+        f"UserBooks id {book_id} trying to change it to {points} points.  Current user is {session['user_num']}")
     # Confirm that the requesting user owns the book
     try:
         if bsdb.is_user_book_owner(user_num, book_id):
@@ -167,7 +172,7 @@ def change_points():
         app.logger.error("Error checking user validity.")
         flash("We had an error trying to verify your identity.  Sorry about that.  Perhaps try again?", "warning")
         return redirect(url_for('my_books'))
-    #Change the points
+    # Change the points
     try:
         bsdb.set_book_points(book_id, points)
         app.logger.info(f"Book points changed.")
@@ -178,17 +183,25 @@ def change_points():
     return redirect(url_for('my_books'))
 
 
-
 @app.route('/my-trades')
 @login_required
 def my_trades():
     bsdb = get_bsdb()
     user = session['user_num']
-    trade_info = bsdb.get_trade_info(user)
-    trade_info_dicts = [dict(row) for row in trade_info]
 
-    return render_template('user/my-trades.html',
-                           trade_info=trade_info_dicts)
+    num_trade_reqs = bsdb.get_num_trade_requests(user)
+    num_open_trades = bsdb.get_num_open_trades(user)
+
+    if num_trade_reqs == 0 and num_open_trades == 0:
+        return render_template('user/no-trades.html')
+
+    else:
+        trade_info = bsdb.get_trade_info(user)
+        trade_info_dicts = [dict(row) for row in trade_info]
+        return render_template('user/my-trades.html',
+                               trade_info=trade_info_dicts,
+                               num_open_trades=num_open_trades,
+                               num_trade_reqs=num_trade_reqs)
 
 
 @app.route('/accept-trade/<user_books_id>')
@@ -250,8 +263,8 @@ def login():
                     app.logger.warning(f"Incorrect password entered for {username}.")
                     error = "Incorrect password."
             except Exception:
-                    app.logger.error(f"Error checking password for {username}.")
-                    error = "We hada n error checking your password.  Please try again."
+                app.logger.error(f"Error checking password for {username}.")
+                error = "We hada n error checking your password.  Please try again."
 
         # No errors, login proceeds
         if error is None:
@@ -362,7 +375,7 @@ def add_to_wish(isbn=None):
         if c.fetchall():
             flash("Book already in your wishlist", "warning")
             app.logger.warning(f"Book {isbn} already in " +
-                                f"user {session['user_num']}'s wishlist")
+                               f"user {session['user_num']}'s wishlist")
         # otherwise, add book to the wishlist
         else:
             c.execute(insert_wishlist_query,
@@ -402,7 +415,7 @@ def remove_wish():
     db.row_factory = sqlite3.Row
 
     c = db.cursor()
-    
+
     wishID = req.args.get("wishlistRem")
     bookID = req.args.get("bookRem")
     app.logger.info(f"Removing book {bookID} from wishlist {wishID} for " +
@@ -484,8 +497,8 @@ def account():
             correct_password = acct.is_password_correct(session["user_num"],
                                                         password_change_form)
             if not correct_password:
-                flash("Original password was not correct.  Please try again.", 
-                        "warning")
+                flash("Original password was not correct.  Please try again.",
+                      "warning")
             else:
                 app.logger.info("Original password was entered correctly.")
                 try:
