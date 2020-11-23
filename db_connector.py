@@ -199,7 +199,6 @@ class BookSwapDatabase:
         """
         Returns the UserBooks.id attribute for each of the user's books
         """
-
         c = self.db.cursor()
         c.execute("""SELECT id FROM UserBooks WHERE userId=?""", (user_num,))
         rows = c.fetchall()
@@ -207,7 +206,6 @@ class BookSwapDatabase:
         return rows
 
     def get_trade_info(self, user_num):
-
         c = self.db.cursor()
         c.execute("""
                 SELECT  Trades.statusId StatusId,
@@ -231,7 +229,6 @@ class BookSwapDatabase:
                 """, (user_num,))
         rows = c.fetchall()
         self.db.commit()
-
         return rows
 
     def get_or_add_ol_book_details(self, search_result):
@@ -239,11 +236,9 @@ class BookSwapDatabase:
         Does the same thing as get_ol_book_details, but if the book is not yet stored then finds the first english
         language paperback/hardcover Edition of the Work corresponding to the given key in the Open Library API and
         then inserts its details into the Books table.
-
         To do this a dict called 'search result' corresponding to the JSON search result returned by Open Library is
         required. To clarify: there is currently no way to add details for an Open Library Work, given a Work Key,
         unless we have access to the information from the search result.  
-
         :param editions: a list of Open Library keys for Editions corresponding to the given Work
         :returns a dict of the attributes for the Books row
         """
@@ -299,9 +294,7 @@ class BookSwapDatabase:
         """
         Returns the Books table attributes for a given Work, as defined by Open Library. If the volume has not yet
         been locally stored in the database, None is returned, and 'get_or_add_ol_book_details' must be called instead.
-
         :param work_key: the Open Library Works Key (eg 'OL27448W') associated with the volume.
-
         :returns a sqlite Row or a dict of the Book's attributes, with the keys: 'id', 'title', 'author', 'isbn',
         'OLEditionKey', 'OLWorkKey'
         """
@@ -362,7 +355,6 @@ class BookSwapDatabase:
         else:
             results = r.json()['docs'][:num_results]
         out = []
-
         # Return the book info
         for result in results:
             book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
@@ -407,6 +399,52 @@ class BookSwapDatabase:
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
                   (user_num, book_id, copyquality))
         self.db.commit()
+
+    def get_username_id(self, username):
+        """
+        Get_username_id checks to see if the user's entered username matches
+            a used username or a used email, and returns the user's id.
+        Accepts:
+            username (str): Users.username or Users.email
+        Returns:
+            Users.id if the user's username works, false otherwise
+        """
+        c= self.db.cursor()
+        try:
+            c.execute("""
+                    SELECT
+                        id
+                    FROM
+                        Users
+                    WHERE
+                        username = ?
+                    """,
+                    ( username, ))
+            rows = c.fetchall()
+            if len(rows) == 1:
+                return rows[0][0]
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Get_username_id -- Error checking username.  Error was {e}")
+            raise Exception
+        try:
+            c.execute("""
+                    SELECT
+                        id
+                    FROM
+                        Users
+                    WHERE
+                        email = ?
+                    """,
+                    ( username, ))
+            rows = c.fetchall()
+            if len(rows) == 1:
+                return rows[0][0]
+        except sqlite3.Error as e:
+            print(f"DB_CONNECTOR: Get_username_id -- Error checking email.  Error was {e}")
+            raise Exception
+        return None
+
+        return None
 
     def is_username_available(self, username):
         """

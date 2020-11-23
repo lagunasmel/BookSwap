@@ -229,29 +229,39 @@ def login():
     form = LoginForm()
     # Checks if input is valid
     if form.validate_on_submit():
+        bsdb = get_bsdb()
         username = form.username.data
         password = form.password.data
         error = None
-
-        db = get_db()
-        db.row_factory = sqlite3.Row
+        id = None
         # Username check
-        user = db.execute("SELECT * FROM Users WHERE username = ?",
-                          (username,)).fetchone()
-        if user is None:
-            user = db.execute("SELECT * FROM Users WHERE email = ?",
-                              (username,)).fetchone()
-            if user is None:
-                error = "Incorrect username."
+        try:
+            id = bsdb.get_username_id(username)
+            if id is None:
+                print(f"APP: Login -- Incorrect username ( {username} ) entered.")
+                error = "Incorrect username.  We do not have record of this username."
+        except Exception:
+            print(f"APP: Login -- Error checking username ( {username} ).")
+            error = "We had an error checking your username.  Please try again."
 
+        if id is None:
+            print(f"APP: Login -- Incorrect username ( {username} ) entered.")
+            error = "Incorrect username.  We do not have record of this username."
         # Password check
-        elif user['password'] != password:
-            error = "Incorrect password."
+        else:
+            try:
+                if password != bsdb.get_password(id):
+                    print(f"APP: Login -- Incorrect password entered for {username}.")
+                    error = "Incorrect password."
+            except Exception:
+                    print(f"APP: Login -- Error checking password for {username}.")
+                    error = "We hada n error checking your password.  Please try again."
 
         # No errors, login proceeds
         if error is None:
             session.clear()
-            session['user_num'] = user['id']
+            session['user_num'] = id
+            print(f"APP: Login -- User {username} successfully logged in.")
             return redirect(url_for('home'))
 
         flash(error, 'warning')
