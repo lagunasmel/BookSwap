@@ -145,7 +145,7 @@ VALUES ('New'),
 INSERT INTO Users('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
                   'city', 'state', 'postCode', 'points')
 VALUES ('admin', 'password', 'admin@bookswap.com', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
-        'Oregon', '97475', 2);
+        'Oregon', '97475', 10);
 
 -- Sample User data from mockaroo.com
 INSERT INTO Users ('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
