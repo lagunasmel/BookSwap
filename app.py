@@ -582,7 +582,7 @@ def search_book():
 
 @app.route('/remove-from-user-library', methods=['GET'])
 @login_required
-def removeBook():
+def remove_book():
     db = get_db()
     db.row_factory = sqlite3.Row
 
