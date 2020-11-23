@@ -266,14 +266,6 @@ def login():
 
         flash(error, 'warning')
 
-    """
-    # Simulation of a successful login - sample email and password
-    if form.email.data == 'admin@bookswap.com' and form.password.data == 'password':
-        flash('You have been logged in!', 'success')
-        return redirect(url_for('userHome'))
-    else:
-        flash('Login Unsuccessful. Please check username and password.', 'danger')
-    """
     return render_template('login.html', form=form)
 
 
