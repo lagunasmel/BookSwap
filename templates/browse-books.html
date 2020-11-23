@@ -333,42 +333,22 @@
                 <div class="modal-body text-left">
                     <p>
                         Your request of
-                        <span class="text-info" id="requestTradeSuccessModalTitle">
-                </span>
-                        from
-                        <span class='text-info' id="requestTradeSuccessModalUsername">
-                </span>
-                        has been placed
+                        <span class="text-info" id="requestTradeSuccessModalTitle"></span>
+                        from <span class='text-info' id="requestTradeSuccessModalUsername"></span>
+                        has been placed.
                     </p>
-                    <p>
-                        This cost you
-                        <span class='text-info' id="requestTradeSuccessModalPointsNeeded">
-                </span>
-                        , leaving you with
-                        <span class='text-info' id='requestTradeSuccessModalPointsAvailable'>
-                </span>
+                    <p> This has cost you
+                        <span class='text-info' id="requestTradeSuccessModalPointsNeeded"></span>, leaving you with
+                        <span class='text-info' id='requestTradeSuccessModalPointsAvailable'></span>.
                     </p>
-                    <br/>
-                    <p>
-                        If your request is rejected, the points will be returned to your balance. A refund can also be
-                        processed if the book is enver received.
+                    <p>If your request is rejected, the points will be returned to your balance. A refund can also be
+                        processed if the book is never received.
                     </p>
-                    <div class="col-12 mb-4">
-                        <div class="card text-center h-100">
-                            <div class="card-body">
-                                <img class="card-img-top img-fluid mx-auto"
-                                     src="{{ url_for('static', filename='images/book.png') }}"
-                                     style="max-width: 75%">
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <form class="text-center" action="{{ url_for('browse_books') }}">
-                    <button type="submit" class="btn btn-primary mb-4">
-                        Reload This Page
-                    </button>
-                </form>
-                <br/>
+                <div class="modal-footer">
+                    <a href="{{ url_for('browse_books') }}" class="btn btn-primary active" role="button"
+                       aria-pressed="true">Back to Browsing Books</a>
+                </div>
             </div>
         </div>
     </div>
