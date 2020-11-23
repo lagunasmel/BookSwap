@@ -7,17 +7,13 @@
              alt=""
              class="img-fluid col-2 mx-auto"/>
         <h3 class="mt-5">You have no active trade activity.</h3>
-        <p class="lead">Would you like to <a class="text-info" href="{{ url_for('browse_books') }}">browse through our
-            collection</a> to
-            find a book to swap?
-            <br>Or, you can <a class="text-info" href="{{ url_for('my_books') }}">list a book for trade. </a></p>
-        <footer>
-            <p></p>
-            <small class="mt-5">
-                Icon made by <a href="https://icon54.com/" title="Pixel perfect">Pixel perfect</a> from
-                <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-            </small>
-        </footer>
+        <p class="lead">Would you like to <a class="text-info" href="{{ url_for('my_books') }}">list more books</a>
+            for trade?
+        <p></p>
+        <small class="mt-5">
+            Icon made by <a href="https://icon54.com/" title="Pixel perfect">Pixel perfect</a> from
+            <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+        </small>
     </div>
 
 {% endblock content %}
