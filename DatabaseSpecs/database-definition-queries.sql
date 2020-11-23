@@ -52,8 +52,8 @@ CREATE TABLE IF NOT EXISTS CopyQualities
 CREATE TABLE IF NOT EXISTS Users
 (
     id            INTEGER      NOT NULL PRIMARY KEY,
-    username      VARCHAR(255) NOT NULL,
-    email         TEXT         NOT NULL,
+    username      VARCHAR(255) NOT NULL UNIQUE,
+    email         TEXT         NOT NULL UNIQUE,
     password      VARCHAR(255) NOT NULL,
     fName         VARCHAR(255) NOT NULL,
     lName         VARCHAR(255) NOT NULL,
@@ -216,6 +216,6 @@ VALUES ("No Current Trade"),
 -- Sample Trades
 -- First user has three trades going:  2 pending and 1 accepts:
 INSERT INTO Trades (userRequestedId, userBookId, statusId)
-VALUES  (2, 7, 2),
-        (3, 8, 2),
-        (4, 9, 3);
+VALUES (2, 7, 2),
+       (3, 8, 2),
+       (4, 9, 3);
