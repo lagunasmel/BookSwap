@@ -15,20 +15,26 @@
 
         {% for row in rows %}
             <tr>
+                <-! Cover Image ->
                 <td><img src="{{ row[6] }}" alt="Book Cover Image" class="img-fluid"></td>
+                <-! Book Title ->
                 <th scope="row">{{ row[0] }}</th>
+                <-! Author ->
                 <td>{{ row[1] }}</td>
+                <-! Quality ->
                 <td>{{ row[2] }}</td>
+                <-! Points ->
                 <td class='text-center'>{{ row[3] }}
                     <div id="changePoints">
                         <button type="button" class="badge badge-pill badge-primary"
                                 onclick="confirmChangePoints( '{{ row[0] }}', {{ row[3] }}, {{ row[5] }} )">
                             Change
                         </button>
-
                     </div>
                 </td>
+                <-! ISBN ->
                 <td>{{ row[4] }}</td>
+                <-! Remove Button ->
                 <td>
                     <button type="button" class="btn btn-primary btn-sm"
                             onclick="confirmRemoveBook({{ row[5] }})"> Remove
