@@ -128,12 +128,21 @@
                             <h5 class="mb-1">{{ book['title'] }}</h5>
                             <small>listed {{ book['timeHere'] }} days ago</small>
                         </div>
-                        <ul class="mb-1">
-                            <li>Author: {{ book['author'] }}</li>
-                            <li>ISBN: {{ book['ISBN'] }}</li>
-                            <li>Copy Quality: {{ book['copyQuality'] }}</li>
-                            <li>Points Needed: {{ book['pointsNeeded'] }}</li>
-                        </ul>
+                        <div class="row">
+                            <div class="card-body col-4">
+                                <img class="card-img-top img-fluid mx-auto"
+                                     src={{book['coverImageUrl']}}
+                                     style="max-width: 75%">
+                            </div>
+                            <div class="col-8">
+                                 <ul class="mb-1 mt-3">
+                                    <li>Author: {{ book['author'] }}</li>
+                                    <li>ISBN: {{ book['ISBN'] }}</li>
+                                    <li>Copy Quality: {{ book['copyQuality'] }}</li>
+                                    <li>Points Needed: {{ book['pointsNeeded'] }}</li>
+                                </ul>
+                            </div>
+                        </div>
                         <div class="d-flex w-100 justify-content-between">
                             <small>Listing User: {{ book['listingUser'] }}</small>
                             <div class="d-flex w-100 justify-content-end">

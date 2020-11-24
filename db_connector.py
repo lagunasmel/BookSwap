@@ -630,8 +630,9 @@ class BookSwapDatabase:
                     CopyQualities.qualityDescription as copyQuality,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId,
-                    UserBooks.userId AS userId
+                    UserBooks.id as userBooksId,
+                    UserBooks.userId AS userId,
+                    IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -640,7 +641,8 @@ class BookSwapDatabase:
                     INNER JOIN Users
                         on UserBooks.userId = Users.id
                     WHERE
-                        ISBN = ?
+                        ISBN = ? AND
+                        UserBooks.available == 1
                     ORDER BY
                         UserBooks.dateCreated
                         """,
@@ -676,8 +678,9 @@ class BookSwapDatabase:
                     CopyQualities.qualityDescription as copyQuality,
                     CAST ((julianday('now') - julianday(UserBooks.dateCreated)) AS INTEGER) AS timeHere,
                     UserBooks.points as pointsNeeded,
-                    UserBooks.id as UserBooksId,
-                    UserBooks.userId AS userId
+                    UserBooks.id as userBooksId,
+                    UserBooks.userId AS userId,
+                    IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
                     FROM Books
                     INNER JOIN UserBooks
                         on Books.id = UserBooks.bookId
@@ -689,6 +692,8 @@ class BookSwapDatabase:
                         author LIKE '%'||?||'%'
                     AND
                         title LIKE '%'||?||'%'
+                    AND
+                        UserBooks.available == 1
                     ORDER BY
                         author = ? DESC,
                         title = ? DESC,
@@ -730,7 +735,8 @@ class BookSwapDatabase:
                     ((julianday('now') - julianday(UserBooks.dateCreated)) 
                         AS INTEGER) AS timeHere,
                 UserBooks.points as pointsNeeded,
-                UserBooks.id as UserBooksId
+                UserBooks.id as userBooksId,
+                IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
             FROM Books
             INNER JOIN UserBooks
                 on Books.id = UserBooks.bookId
@@ -739,7 +745,7 @@ class BookSwapDatabase:
             INNER JOIN Users
                 on UserBooks.userId = Users.id
             """
-        query_middle = " WHERE "
+        query_middle = " WHERE UserBooks.available == 1 AND ("
         query_end = " ORDER BY "
         params = []
         author_exists = title_exists = False
@@ -771,6 +777,7 @@ class BookSwapDatabase:
         if author_exists:
             query_end += " author LIKE '%'||? DESC,"
             params.append(author)
+        query_middle += ")"
         query_end += " author"
         query = query_start + query_middle + query_end
         params = tuple(params)

@@ -43,8 +43,6 @@ class BookSearch:
         author_or_title = self._check_local_author_or_title()
         results = self._results_combine(results, author_or_title)
 
-        #Strip UserBooksId key,which is unnecessary and may be a security risk
-        #results = self._remove_unnecessary_keys(results)
         for result in results:
             print(result)
 
@@ -111,17 +109,4 @@ class BookSearch:
         for book in books_author_or_title:
             books_author_or_title_results.append(self._process_results_row(book))
         return books_author_or_title_results
-
-    def _remove_unnecessary_keys(self, results):
-        """
-        Removes keys we don't need, and shouldn't return: UserBooksId
-        Accepts:
-            results (list of dicts)
-        """
-        for result in results:
-            try:
-                del result['UserBooksId']
-            except KeyError:
-                pass
-        return results
 
