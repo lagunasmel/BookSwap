@@ -102,9 +102,7 @@ def browse_books():
     form = BookSearchForm()
     bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(8)
-    recent_books_arr = []
-    for i in range(len(recent_books)):
-        recent_books_arr.append({key: recent_books[i][key] for key in recent_books[i].keys()})
+    recent_books_arr = [dict(book) for book in recent_books]
     if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
@@ -159,18 +157,21 @@ def change_points():
     user_num = session['user_num']
     book_id = req.get_json().get('id')
     app.logger.info(
-        f"UserBooks id {book_id} trying to change it to {points} points.  Current user is {session['user_num']}")
+        f"UserBooks id {book_id} trying to change it to {points} points. " +
+        f"Current user is {session['user_num']}")
     # Confirm that the requesting user owns the book
     try:
         if bsdb.is_user_book_owner(user_num, book_id):
             app.logger.info(f"Correct user for the book detected.")
         else:
             app.logger.warning(f"Incorrect user for the book detected.")
-            flash("Wrong uesr for that book.  Log out, log in, and try again?", "warning")
+            flash("Wrong uesr for that book.  Log out, log in, and try again?", 
+                    "warning")
             return redirect(url_for('my_books'))
     except Exception:
         app.logger.error("Error checking user validity.")
-        flash("We had an error trying to verify your identity.  Sorry about that.  Perhaps try again?", "warning")
+        flash("We had an error trying to verify your identity. " +
+                "Sorry about that.  Perhaps try again?", "warning")
         return redirect(url_for('my_books'))
     # Change the points
     try:
@@ -179,7 +180,8 @@ def change_points():
         flash("Book points successfully changed.", "success")
     except Exception:
         app.logger.error(f"Error changing book points.")
-        flash("We had an error trying to change your book points.  Sorry about that.  Perhaps try again?", "warning")
+        flash("We had an error trying to change your book points. " +
+                "Sorry about that.  Perhaps try again?", "warning")
     return redirect(url_for('my_books'))
 
 

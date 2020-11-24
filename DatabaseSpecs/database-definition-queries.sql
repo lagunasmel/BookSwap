@@ -127,10 +127,10 @@ Inserting sample data
  */
 
 -- Sample Books
-INSERT INTO Books ('title', 'author', 'ISBN')
-VALUES ('Yellow River', 'Freely, I.P.', '99999'),
-       ('Forever A Loan', 'Nook, Tom', '1111111111111'),
-       ('Six of Crows', 'Bardugo, Leigh', '9781627795227');
+INSERT INTO Books ('title', 'author', 'ISBN', 'coverImageUrl')
+VALUES ("Harry Potter and the Sorcerer's Stone", 'J. K. Rowling', '9781338596700', 'https://covers.openlibrary.org/b/id/10447552-L.jpg'),
+       ('Sula', 'Toni Morrison', '0394480449', 'https://covers.openlibrary.org/b/id/8384008-L.jpg'),
+       ('Six of Crows', 'Leigh Bardugo', '9781627795227', 'https://covers.openlibrary.org/b/id/8736828-L.jpg');
 
 -- Sample Copy Qualities
 INSERT INTO CopyQualities ('qualityDescription')

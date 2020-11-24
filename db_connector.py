@@ -584,6 +584,7 @@ class BookSwapDatabase:
                     author,
                     ISBN,
                     externalLink,
+                    IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl,
                     CopyQualities.qualityDescription AS copyQuality,
                     Users.username AS listingUser,
                     UserBooks.id AS userBooksId,
