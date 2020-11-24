@@ -61,6 +61,7 @@ function addToWishlist(book)
     $('#addToWishlistModalPointsNeeded').text(book['pointsNeeded']);
     $('#addToWishlistModalListingUser').text(book['listingUser']);
     $('#addToWishlistModalTimeHere').text(book['timeHere']);
+    $('#addToWishlistModalCover').attr('src', book['coverImageUrl']);
     $('#addToWishlistModal').modal("show");
 
     // craete event handler attribute for "Confirm Button"
@@ -99,6 +100,7 @@ function requestTrade(book, points)
         $('#requestTradeModalConfirmationButton').on('click', function () {
             submitTradeRequest(JSON.stringify(book))
         });
+        $('#requestTradeModalCover').attr('src', book['coverImageUrl']);
         $('#requestTradeModal').modal('show');
     } else {
         $('#requestTradeInsufficientPointsModalUsername').text(book['listingUser']);
@@ -115,7 +117,7 @@ function requestTrade(book, points)
         else
             pointsAvailable += " point"
         $('#requestTradeInsufficientPointsAvailable').text(pointsAvailable)
-
+        $('#requestTradeInsufficientPointsModalCover').attr('src', book['coverImageUrl']);
         $('#requestTradeInsufficientPointsModal').modal('show');
     }
 }
