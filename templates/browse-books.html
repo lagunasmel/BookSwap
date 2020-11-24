@@ -6,7 +6,7 @@
     {% if show_recent %}
         <div class="container mt-4 text-center mx-auto">
             <h1>Browse Books</h1>
-            <h6>Browse through our book selection or search for a book below.</h6>
+            <p class="lead">Browse through our book selection or search for a book below.</p>
             <p></p>
             <br>
             <h3 class="text-info">Our most recent additions</h3>
@@ -16,8 +16,8 @@
                         <div class="card text-center h-100">
                             <div class="card-body">
                                 <img class="card-img-top img-fluid mx-auto"
-                                     src={{book['coverImageUrl']}}
-                                     style="max-width: 75%">
+                                     src={{ book['coverImageUrl'] }}
+                                             style="max-width: 75%">
                             </div>
                             <div class="card-body">
                                 <h5 class="card-title">{{ book['title'] }}</h5>
@@ -131,11 +131,11 @@
                         <div class="row">
                             <div class="card-body col-4">
                                 <img class="card-img-top img-fluid mx-auto"
-                                     src={{book['coverImageUrl']}}
-                                     style="max-width: 75%">
+                                     src={{ book['coverImageUrl'] }}
+                                             style="max-width: 75%">
                             </div>
                             <div class="col-8">
-                                 <ul class="mb-1 mt-3">
+                                <ul class="mb-1 mt-3">
                                     <li>Author: {{ book['author'] }}</li>
                                     <li>ISBN: {{ book['ISBN'] }}</li>
                                     <li>Copy Quality: {{ book['copyQuality'] }}</li>
@@ -238,26 +238,20 @@
                 </div>
                 <div class="modal-body text-left">
                     <p> You are about to request
-                        <span class="text-info" id="requestTradeModalTitle">
-                </span>
-                        by
-                        <span class='text-info' id="requestTradeModalAuthor">
-                </span>
+                        <span class="text-info" id="requestTradeModalTitle"></span>
+                        by <span class='text-info' id="requestTradeModalAuthor"></span>
                     </p>
                     <p> You will be requesting this book from user
-                        <span class='text-info' id="requestTradeModalUsername">
-                </span>
+                        <span class='text-info' id="requestTradeModalUsername"></span>
                     </p>
                     <p> This will cost you
-                        <span class='text-info' id="requestTradeModalPointsNeeded">
-                </span>
+                        <span class='text-info' id="requestTradeModalPointsNeeded"></span>
                     </p>
                     <p> This will leave you with
-                        <span class='text-info' id="requestTradeModalPointsRemaining">
-                </span>
+                        <span class='text-info' id="requestTradeModalPointsRemaining"></span>
                     </p>
                     <div class="col-12 mb-4">
-                        <div class="card text-center h-100">
+                        <div class="card text-center">
                             <div class="card-body">
                                 <img class="card-img-top img-fluid mx-auto"
                                      id='requestTradeModalCover'

@@ -128,7 +128,8 @@ Inserting sample data
 
 -- Sample Books
 INSERT INTO Books ('title', 'author', 'ISBN', 'coverImageUrl')
-VALUES ("Harry Potter and the Sorcerer's Stone", 'J. K. Rowling', '9781338596700', 'https://covers.openlibrary.org/b/id/10447552-L.jpg'),
+VALUES ("Harry Potter and the Sorcerer's Stone", 'J. K. Rowling', '9781338596700',
+        'https://covers.openlibrary.org/b/id/10447552-L.jpg'),
        ('Sula', 'Toni Morrison', '0394480449', 'https://covers.openlibrary.org/b/id/8384008-L.jpg'),
        ('Six of Crows', 'Leigh Bardugo', '9781627795227', 'https://covers.openlibrary.org/b/id/8736828-L.jpg');
 
@@ -145,7 +146,9 @@ VALUES ('New'),
 INSERT INTO Users('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
                   'city', 'state', 'postCode', 'points')
 VALUES ('admin', 'password', 'admin@bookswap.com', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
-        'Oregon', '97475', 10);
+        'Oregon', '97475', 10),
+       ('csearl2', 'nAvtnI', 'csearl2@cdc.gov', 'Cassey', 'Searl', '44681 Pearson Alley',
+        'Saint Louis', 'Missouri', '63131', 10);
 
 -- Sample User data from mockaroo.com
 INSERT INTO Users ('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
@@ -154,8 +157,6 @@ VALUES ('fpringle0', '5o6RPSL', 'fpringle0@archive.org', 'Filmore', 'Pringle', '
         'Knoxville', 'Tennessee', '37924'),
        ('khildrup1', 'IuYdId', 'khildrup1@pen.io', 'Kit', 'Hildrup', '82567 Onsgard Road',
         'Richmond', 'Virginia', '23203'),
-       ('csearl2', 'nAvtnI', 'csearl2@cdc.gov', 'Cassey', 'Searl', '44681 Pearson Alley',
-        'Saint Louis', 'Missouri', '63131'),
        ('esabates3', 'kydXrZxzz9Va', 'esabates3@samsung.com', 'Edward', 'Sabates', '63 Welch Court',
         'Spokane', 'Washington', '99215'),
        ('jextal4', 'DUwvKPx81Iji', 'jextal4@reference.com', 'Jason', 'Extal', '98 Sugar Alley',
