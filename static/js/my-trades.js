@@ -20,6 +20,7 @@ function rejectTradeRequest(book)
     else
         points += ' points';
     $('#rejectModalPoints').text(points);
+    $('#rejectModalCover').attr("src", book['coverImageUrl']);
     $('#rejectModalConfirmForm').attr('action', '/reject-trade/' + book['userBooksId']);
     $('#rejectModal').modal('show');
 }
@@ -46,6 +47,7 @@ function acceptTradeRequest(book)
     else
         points += ' points';
     $('#acceptModalPoints').text(points);
+    $('#acceptModalCover').attr("src", book['coverImageUrl']);
     $('#acceptModalConfirmForm').attr('action', '/accept-trade/' + book['userBooksId']);
     $('#acceptModal').modal('show');
 }
@@ -72,6 +74,7 @@ function cancelTradeRequest(book)
     else
         points += ' points';
     $('#cancelModalPoints').text(points);
+    $('#cancelModalCover').attr('src', book['coverImageUrl']);
     $('#cancelModalConfirmForm').attr('action', '/reject-trade/' + book['userBooksId']);
     $('#cancelModal').modal('show');
 }

@@ -216,7 +216,8 @@ class BookSwapDatabase:
                         UserBooks.points AS Points,
                         U1.username AS Owner,
                         U2.username AS Requester,
-                        UserBooks.id AS userBooksId
+                        UserBooks.id AS userBooksId,
+                        Books.coverImageUrl as coverImageUrl
                 FROM    Users U1 INNER JOIN
                         UserBooks on U1.id = UserBooks.userId INNER JOIN
                         Trades on UserBooks.id = Trades.userBookId INNER JOIN
