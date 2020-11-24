@@ -1,16 +1,21 @@
 {% macro book_list_table(caption, headers, rows, ids) %}
     <table class="table table-hover">
         <caption>{{ caption }}</caption>
+        <thead>
         <tr>
-            {% for header in headers %}
-                {% if header != "ID" %}
-                    <th scope="col">{{ header }}</th>
-                {% endif %}
-            {% endfor %}
+            <th scope="col">Cover</th>
+            <th scope="col">Title</th>
+            <th scope="col">Author</th>
+            <th scope="col">Quality</th>
+            <th scope="col">Points</th>
+            <th scope="col">ISBN</th>
             <th scope="col">Remove Book</th>
         </tr>
+        </thead>
+
         {% for row in rows %}
             <tr>
+                <td><img src="{{ row[6] }}" alt="Book Cover Image" class="img-fluid"></td>
                 <th scope="row">{{ row[0] }}</th>
                 <td>{{ row[1] }}</td>
                 <td>{{ row[2] }}</td>
@@ -25,11 +30,10 @@
                 </td>
                 <td>{{ row[4] }}</td>
                 <td>
-                    <div id="removeBook">
-                        <button type="button" class="btn btn-primary ml-2"
-                                onclick="confirmRemoveBook({{ row[5] }})"> Remove
-                        </button>
-                    </div>
+                    <button type="button" class="btn btn-primary btn-sm"
+                            onclick="confirmRemoveBook({{ row[5] }})"> Remove
+                    </button>
+
                     <div class="modal" id="{{ row[5] }}">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
@@ -49,8 +53,7 @@
                                         <input type="submit" value="Yes, Remove" class="btn btn-primary">
                                     </form>
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                                            onclick="modalDismiss({{ row[5] }})">
-                                        Cancel
+                                            onclick="modalDismiss({{ row[5] }})">Cancel
                                     </button>
                                 </div>
                             </div>
@@ -67,11 +70,9 @@
                                 </div>
                                 <div class="modal-body">
                                     <p>You listed this copy of
-                                        <span class='text-info' id='changePointsModalTitle'>
-              </span>
-                                        for
-                                        <span class='text-info' id='changePointsModalPoints'>
-              </span>. How many points would you like to set it to now? (Maximum is 10 points)
+                                        <span class='text-info' id='changePointsModalTitle'></span>
+                                        for <span class='text-info' id='changePointsModalPoints'></span>.
+                                        How many points would you like to set it to now? (Maximum is 10 points)
                                     </p>
                                 </div>
                                 <div class='container align-self-center'>

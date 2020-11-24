@@ -51,15 +51,15 @@ class BookSwapDatabase:
                     WHERE
                         userBookId = ?
                         """,
-                        (user_books_id, ))
+                      (user_books_id,))
             self.db.commit()
             print(f"DB_CONNECTOR: Accept_trade -- trade for book {user_books_id} changed to 'accepted by user'")
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Accept_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
+            print(
+                f"DB_CONNECTOR: Accept_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
             flash("Error marking trade as accepted", "warning")
             raise Exception
         return
-
 
     def close(self):
         """
@@ -121,7 +121,8 @@ class BookSwapDatabase:
                         B.author AS Author, 
                         UB.points AS Points,
                         CQ.qualityDescription AS Quality,
-                        UB.id AS id 
+                        UB.id AS id,
+                        B.coverImageUrl AS Cover 
                         FROM 
                             UserBooks UB 
                         INNER JOIN 
@@ -156,7 +157,7 @@ class BookSwapDatabase:
                         AND
                         Trades.statusId = 3
                         """,
-                        (user_num, ))
+                      (user_num,))
             rows = c.fetchall()
             if len(rows) != 1:
                 print(f"DB_CONNECTOR: Get_num_open_trades -- Received wrong number of data from database")
@@ -165,8 +166,6 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Get_num_open_trades -- database error {e}")
             raise Exception
-
-
 
     def get_num_trade_requests(self, user_num: int) -> int:
         """
@@ -185,7 +184,7 @@ class BookSwapDatabase:
                         AND
                         Trades.statusId = 2
                         """,
-                        (user_num, ))
+                      (user_num,))
             rows = c.fetchall()
             if len(rows) != 1:
                 print(f"DB_CONNECTOR: Get_num_trade_requests -- Received wrong number of data from database")
@@ -313,7 +312,7 @@ class BookSwapDatabase:
         elif len(rows) == 0:
             # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
             return None
-    
+
     def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
         """
         Searches for books that match the provided details, and then returns the results. The search is conducted on
@@ -409,7 +408,7 @@ class BookSwapDatabase:
         Returns:
             Users.id if the user's username works, false otherwise
         """
-        c= self.db.cursor()
+        c = self.db.cursor()
         try:
             c.execute("""
                     SELECT
@@ -419,7 +418,7 @@ class BookSwapDatabase:
                     WHERE
                         username = ?
                     """,
-                    ( username, ))
+                      (username,))
             rows = c.fetchall()
             if len(rows) == 1:
                 return rows[0][0]
@@ -435,7 +434,7 @@ class BookSwapDatabase:
                     WHERE
                         email = ?
                     """,
-                    ( username, ))
+                      (username,))
             rows = c.fetchall()
             if len(rows) == 1:
                 return rows[0][0]
@@ -544,7 +543,7 @@ class BookSwapDatabase:
                     WHERE
                         id = ?
                     """,
-                    ( points, book_id) )
+                      (points, book_id))
             self.db.commit()
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Set_book_points -- Error changing points of book.  Error {e}")
@@ -855,7 +854,7 @@ class BookSwapDatabase:
                     WHERE
                         Users.id = ?
                     """,
-                    (user_num, ))
+                      (user_num,))
             values = c.fetchone()
             return values[0]
         except sqlite3.Error as e:
@@ -892,14 +891,15 @@ class BookSwapDatabase:
                     WHERE
                         id = ?
                     """,
-                    (book['userBooksId'], ))
+                      (book['userBooksId'],))
             availability = c.fetchone()[0]
             if availability != 1:
                 print(f"DB_CONNECTOR: Request_book -- Book with UserBooks id {book['userBooksId']} is not available.")
                 raise Exception
         except sqlite3.Error as e:
             print(e)
-            print(f"DB_CONNECTOR: Request_book -- Failed to see if book with UserBooks id {book['userBooksId']} is available or not")
+            print(
+                f"DB_CONNECTOR: Request_book -- Failed to see if book with UserBooks id {book['userBooksId']} is available or not")
             raise Exception
         # Insert trade
         try:
@@ -909,7 +909,7 @@ class BookSwapDatabase:
                 VALUES
                     (?, ?, ?)
                 """,
-                (user_num, book['userBooksId'], 2))
+                      (user_num, book['userBooksId'], 2))
             self.db.commit()
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Request_book -- {e}")
@@ -924,7 +924,7 @@ class BookSwapDatabase:
                 WHERE
                     id = ?
                 """,
-                (book['pointsNeeded'], user_num))
+                      (book['pointsNeeded'], user_num))
             self.db.commit()
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Request_book -- {e}")
@@ -939,7 +939,7 @@ class BookSwapDatabase:
                 WHERE
                     id = ?
                 """,
-                (book['userBooksId'], ))
+                      (book['userBooksId'],))
             self.db.commit()
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Request_book -- {e}")
@@ -954,14 +954,13 @@ class BookSwapDatabase:
                 WHERE
                     id = ?
                 """,
-                (user_num, ))
+                      (user_num,))
             row = c.fetchone()
             points_available = row[0]
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Request_book -- {e}")
             raise Exception
         return points_available
-
 
     def reject_trade(self, user_books_id):
         """
@@ -985,11 +984,12 @@ class BookSwapDatabase:
                     WHERE
                         userBookId = ?
                         """,
-                        (user_books_id, ))
+                      (user_books_id,))
             self.db.commit()
             print(f"DB_CONNECTOR: Reject_trade -- trade for book {user_books_id} changed to 'rejected by user'")
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
+            print(
+                f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
             flash("Error marking trade as rejected", "warning")
             raise Exception
         # Return points to requesting User
@@ -1016,11 +1016,12 @@ class BookSwapDatabase:
                                 userBookId = ?
                                 )
                     """,
-                    (user_books_id, user_books_id))
+                      (user_books_id, user_books_id))
             self.db.commit()
             print(f"DB_CONNECTOR: Reject_trade -- User received their points back")
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to return points to the requesting user for book number {user_books_id}")
+            print(
+                f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to return points to the requesting user for book number {user_books_id}")
             flash("Error returning points to requesting user", "warning")
             raise Exception
         # Set book as available
@@ -1033,28 +1034,27 @@ class BookSwapDatabase:
                     WHERE
                         id = ?
                     """,
-                    (user_books_id, ))
+                      (user_books_id,))
             self.db.commit()
             print(f"DB_CONNECTOR: Reject_trade -- Book {user_books_id} set as avialable again")
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to set the book number {user_books_id} as available.")
+            print(
+                f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to set the book number {user_books_id} as available.")
             flash("Error marking the book as available", "warning")
             raise Exception
         return
-
 
     def get_login_user(self, username):
         self.db.row_factory = sqlite3.Row
 
         # Username check
         user = self.db.execute("SELECT * FROM Users WHERE username = ?",
-                            (username,)).fetchone()
+                               (username,)).fetchone()
         if user is None:
             user = self.db.execute("SELECT * FROM Users WHERE email = ?",
-                                (username,)).fetchone()
+                                   (username,)).fetchone()
 
         return user
-                  
 
     def is_user_book_owner(self, user_num, user_books_id):
         """
@@ -1075,16 +1075,18 @@ class BookSwapDatabase:
                     WHERE
                         id = ?
                     """,
-                    (user_books_id, ))
+                      (user_books_id,))
             rows = c.fetchall()
             if len(rows) != 1:
-                print(f"DB_CONNECTOR: Is_user_book_owner -- Wrong number of book owners for UserBooks number {user_books_id}")
+                print(
+                    f"DB_CONNECTOR: Is_user_book_owner -- Wrong number of book owners for UserBooks number {user_books_id}")
                 raise Exception
             owner = rows[0]
             return owner[0] == user_num
         except sqlite3.Error as e:
             print(f"DB_CONNECTOR: Is_user_book_owner -- Wrong book owner for UserBooks number {user_books_id}")
             raise Exception
+
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()

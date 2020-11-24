@@ -165,13 +165,13 @@ def change_points():
             app.logger.info(f"Correct user for the book detected.")
         else:
             app.logger.warning(f"Incorrect user for the book detected.")
-            flash("Wrong uesr for that book.  Log out, log in, and try again?", 
-                    "warning")
+            flash("Wrong uesr for that book.  Log out, log in, and try again?",
+                  "warning")
             return redirect(url_for('my_books'))
     except Exception:
         app.logger.error("Error checking user validity.")
         flash("We had an error trying to verify your identity. " +
-                "Sorry about that.  Perhaps try again?", "warning")
+              "Sorry about that.  Perhaps try again?", "warning")
         return redirect(url_for('my_books'))
     # Change the points
     try:
@@ -181,7 +181,7 @@ def change_points():
     except Exception:
         app.logger.error(f"Error changing book points.")
         flash("We had an error trying to change your book points. " +
-                "Sorry about that.  Perhaps try again?", "warning")
+              "Sorry about that.  Perhaps try again?", "warning")
     return redirect(url_for('my_books'))
 
 
@@ -601,7 +601,7 @@ def my_books():
     copyqualities = bsdb.get_book_qualities()
 
     # Build the data to be passed to Jinja
-    headers = ["Title", "Author", "Quality", "Points", "ISBN", "ID"]
+    headers = ["Title", "Author", "Quality", "Points", "ISBN", "ID", "Cover"]
     table_content = [[row[header] for header in headers] for row in rows]
     data = {"headers": headers,
             "rows": table_content,
