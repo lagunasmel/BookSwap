@@ -535,7 +535,7 @@ def add_book():
     """
     This method lists a book as available for trade by a user. It involves the following steps:
     - add the book to the backend DB as being available for trade
-    - then fetch all books available for trade and redraw the table - so that the new book is now included
+    - then, reload the page with an updated table
     """
     bsdb = get_bsdb()
     if req.get_json().get('request') == 'add':
@@ -546,18 +546,8 @@ def add_book():
         user_num = session["user_num"]
         # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
         bsdb.user_add_book_by_id(book_id, user_num, copyquality, points)
-        rows = bsdb.get_listed_books(user_num)
-        copyqualities = bsdb.get_book_qualities()
 
-        # Build the data to be passed to Jinja
-        headers = ["Title", "Author", "Quality", "Points", "ISBN"]
-        table_content = [[row[header] for header in headers] for row in rows]
-        data = {"headers": headers,
-                "rows": table_content,
-                "caption": "",
-                "copyqualities": copyqualities}
-
-        return render_template('user/my-books.html', data=data)
+        return redirect('/my-books')
 
 
 @app.route('/_search-book', methods=['POST'])
