@@ -546,6 +546,8 @@ def add_book():
         user_num = session["user_num"]
         # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
         bsdb.user_add_book_by_id(book_id, user_num, copyquality, points)
+        app.logger.info(f"Book {book_id} added by user {user_num}")
+        flash("Book successfully added to your BookSwap library.", "success")
 
         return redirect('/my-books')
 
@@ -579,12 +581,12 @@ def remove_book():
     c = db.cursor()
 
     bookID = req.args.get("bookRem")
-    app.logger.info(f"Removing book {bookID}")
     c.execute("DELETE FROM UserBooks WHERE id = ?",
               (bookID,))
     db.commit()
     db.close()
-
+    app.logger.info(f"Book {bookID} removed from user {session['user_num']}")
+    flash("Book removed from your BookSwap library.", "success")
     return redirect('/my-books')
 
 
