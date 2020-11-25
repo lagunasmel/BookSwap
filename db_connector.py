@@ -848,7 +848,8 @@ class BookSwapDatabase:
                             Books.author AS author,
                             Books.ISBN AS ISBN,
                             COUNT(*) AS numberAvailable,
-                            min(UserBooks.points) AS minPoints
+                            min(UserBooks.points) AS minPoints,
+                            WishlistsBooks.wishlistId AS wishlistId
                         FROM 
                             WishlistsBooks INNER JOIN 
                             Books ON WishlistsBooks.bookId=Books.id INNER JOIN
