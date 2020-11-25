@@ -1,5 +1,7 @@
+import sys
 import sqlite3
 from book_search import BookSearch
+from wishlists import Wishlists
 from account import AccountSettings
 from flask import Flask, render_template, url_for, flash, redirect, session, g, json
 from flask import request as req
@@ -7,11 +9,17 @@ from db_connector import get_db, BookSwapDatabase, get_bsdb
 from forms import (RegistrationForm, LoginForm, BookSearchForm,
                    AccountSettingsChangeForm, PasswordChangeForm)
 from auth import login_required, guest_required
+import logging
 
 app = Flask(__name__)
 
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter(
+    '[%(asctime)s] %(levelname)s - %(module)s: %(funcName)s -- %(message)s'))
+app.logger.addHandler(handler)
 
 
 # Code automatically created with each request
@@ -336,20 +344,17 @@ def signup():
 @app.route('/wishlist')
 @login_required
 def wishlist():
-    bsdb = BookSwapDatabase()
-    wishlists = bsdb.get_wishlists_by_userid(session['user_num'])
-    wishlist_ids = [row['id'] for row in wishlists]
-    book_details = bsdb.get_book_details_for_wishlists(wishlist_ids)
-
-    wishBooks = {}  # maps wishlist IDs to book titles
-    for row in book_details:
-        if row['wishlistId'] in wishBooks:
-            wishBooks[row['wishlistId']].append(row['bookTitle'])
-        else:
-            wishBooks[row['wishlistId']] = [row['bookTitle']]
-
-    data = {"table_content": wishBooks, "headers": "Wishlists"}
-    return render_template('user/wishlist.html', data=data)
+    bsdb = get_bsdb()
+    wishlists = Wishlists(session['user_num'], bsdb)
+    print("Wishlists object created")
+    try:
+        books = wishlists.get_all_wishlist_books_for_user()
+        app.logger.info(f"Made wishlists for user {session['user_num']}")
+    except Exception:
+        app.logger.error(f"Error making wishlists for user {session['user_num']}")
+        flash("We had an error fetching your wishlist", "warning")
+        books = []
+    return render_template('user/wishlist.html', books=books)
 
 
 @app.route('/add-to-wishlist/<isbn>', methods=['GET'])

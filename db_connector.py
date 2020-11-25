@@ -1,6 +1,9 @@
 import sqlite3
 from flask import g, session, redirect, url_for, flash
 import requests
+import logging
+
+log = logging.getLogger('app.sub')
 
 DATABASE = 'DatabaseSpecs/test-db.db'
 
@@ -53,10 +56,10 @@ class BookSwapDatabase:
                         """,
                       (user_books_id,))
             self.db.commit()
-            print(f"DB_CONNECTOR: Accept_trade -- trade for book {user_books_id} changed to 'accepted by user'")
+            log.info(f"trade for book {user_books_id} changed to 'accepted by user'")
         except sqlite3.Error as e:
-            print(
-                f"DB_CONNECTOR: Accept_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
+            log.error(
+                f"Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
             flash("Error marking trade as accepted", "warning")
             raise Exception
         return
@@ -160,11 +163,11 @@ class BookSwapDatabase:
                       (user_num,))
             rows = c.fetchall()
             if len(rows) != 1:
-                print(f"DB_CONNECTOR: Get_num_open_trades -- Received wrong number of data from database")
+                log.error(f"Received wrong number of data from database")
                 raise Exception
             return rows[0][0]
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Get_num_open_trades -- database error {e}")
+            log.error(f"database error {e}")
             raise Exception
 
     def get_num_trade_requests(self, user_num: int) -> int:
@@ -187,11 +190,11 @@ class BookSwapDatabase:
                       (user_num,))
             rows = c.fetchall()
             if len(rows) != 1:
-                print(f"DB_CONNECTOR: Get_num_trade_requests -- Received wrong number of data from database")
+                log.error(f"Received wrong number of data from database")
                 raise Exception
             return rows[0][0]
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Get_num_trade_requests -- database error {e}")
+            log.error(f"database error {e}")
             raise Exception
 
     def get_userBooksID(self, user_num):
@@ -393,7 +396,7 @@ class BookSwapDatabase:
         rows = c.fetchall()
         # TODO handle multiple matches better
         if len(rows) != 1:
-            print("Warning: no matching book found when trying to list a book")
+            log.warning("Warning: no matching book found when trying to list a book")
             return
         book_id = rows[0]["id"]
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId) VALUES (?, ?, ?)""",
@@ -424,7 +427,7 @@ class BookSwapDatabase:
             if len(rows) == 1:
                 return rows[0][0]
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Get_username_id -- Error checking username.  Error was {e}")
+            log.error(f"Error checking username.  Error was {e}")
             raise Exception
         try:
             c.execute("""
@@ -440,7 +443,7 @@ class BookSwapDatabase:
             if len(rows) == 1:
                 return rows[0][0]
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Get_username_id -- Error checking email.  Error was {e}")
+            log.error(f"Error checking email.  Error was {e}")
             raise Exception
         return None
 
@@ -460,10 +463,6 @@ class BookSwapDatabase:
                 """,
                   (username,))
         rows = c.fetchall()
-        for row in rows:
-            print(f"BSDB Username_Available:  Found user")
-            for key in rows[0].keys():
-                print(f"{key}: {rows[0][key]}")
         available = (len(rows) == 0)
         return available
 
@@ -506,7 +505,7 @@ class BookSwapDatabase:
                       )
             self.db.commit()
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             raise Exception
 
     def get_password(self, user_num):
@@ -524,7 +523,7 @@ class BookSwapDatabase:
             results = c.fetchone()
             return results[0]
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             raise Exception
 
     def set_book_points(self, book_id, points):
@@ -547,7 +546,7 @@ class BookSwapDatabase:
                       (points, book_id))
             self.db.commit()
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Set_book_points -- Error changing points of book.  Error {e}")
+            log.error(f"Error changing points of book.  Error {e}")
             raise Exception
 
     def set_password(self, user_num, password):
@@ -566,7 +565,7 @@ class BookSwapDatabase:
             self.db.commit()
             return
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             raise Exception
 
     def get_recent_additions(self, num):
@@ -604,10 +603,9 @@ class BookSwapDatabase:
                     LIMIT ?""",
                       (num,))
             recent_books = c.fetchall()
-            print(recent_books)
             return recent_books
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             return {}
 
     def get_books_by_ISBN(self, ISBN):
@@ -618,7 +616,6 @@ class BookSwapDatabase:
         Returns:
             Array of Row objects
         """
-        print(f"BSDB: Fetching local ISBN matches for {ISBN}")
         c = self.db.cursor()
         try:
             c.execute("""SELECT
@@ -648,11 +645,11 @@ class BookSwapDatabase:
                         """,
                       (ISBN,))
             isbn_match = c.fetchall()
-            print("BSDB: Get_Books_By_ISBN (local) Results")
+            log.info("BSDB: Get_Books_By_ISBN (local) Results")
             self.print_results(isbn_match)
             return isbn_match
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             return {}
 
     def get_books_by_author_and_title(self, author, title):
@@ -664,7 +661,6 @@ class BookSwapDatabase:
         Returns:
             Array of Row objects
         """
-        print(f"BSDB: Fetching local author and title matches for {author} and {title}")
         c = self.db.cursor()
         if len(author) == 0 or len(title) == 0:
             return {}
@@ -703,11 +699,11 @@ class BookSwapDatabase:
                         """,
                       (author, title, author, title, author, author))
             author_and_title_match = c.fetchall()
-            print("BSDB: get_books_by_author_and_title (local) Results")
+            log.info("BSDB: get_books_by_author_and_title (local) Results")
             self.print_results(author_and_title_match)
             return author_and_title_match
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             return {}
 
     def get_books_by_author_or_title(self, author, title):
@@ -719,7 +715,6 @@ class BookSwapDatabase:
         Returns:
             Array of Row objects
         """
-        print(f"BSDB: Fetching local author or title matches for {author} and {title}")
         if len(author) == len(title) == 0:
             return {}
         query_start = """
@@ -781,18 +776,15 @@ class BookSwapDatabase:
         query_end += " author"
         query = query_start + query_middle + query_end
         params = tuple(params)
-        # print("\t Query:")
-        # print(f"\t\t {query}")
-        # print(f"\t\t {params}")
         c = self.db.cursor()
         try:
             c.execute(query, params)
             author_or_title_match = c.fetchall()
-            print("BSDB: get_books_by_author_or_title (local) Results")
+            log.info("BSDB: get_books_by_author_or_title (local) Results")
             self.print_results(author_or_title_match)
             return author_or_title_match
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             return {}
 
     def print_results(self, rows):
@@ -813,28 +805,64 @@ class BookSwapDatabase:
         return
 
     def get_wishlists_by_userid(self, user_id):
+        """
+        Get_wishlists_by_userid returns all the wishlists associated with a
+            user.
+        Accepts:
+            user_id (int): Users.id
+        Returns:
+            List of sqlite3 Row objects
+        """
         c = self.db.cursor()
-        c.execute("SELECT id, userId, dateCreated FROM Wishlists WHERE userId = ?",
-                  (session["user_num"],))
-        return c.fetchall()
+        try:
+            c.execute("""
+                        SELECT 
+                            id
+                        FROM 
+                            Wishlists 
+                        WHERE 
+                            userId = ?""",
+                        ( user_id,))
+            rows =  c.fetchall()
+        except sqlite3.Error as e:
+            log.error(f"{e}")
+            log.error(f"Error getting wishlists for user {user_id}")
+            raise Exception
+        return rows
 
-    def get_book_details_for_wishlists(self, wishlist_ids):
+    def get_book_details_for_wishlist(self, wishlist_id):
         """
-        wishlist_ids is a list of Wishlists.id values
-        Returns a list of Rows, each one corresponding to a book in a given wishlist, with
-        the keys: 'wishlistId', 'bookTitle', 'dateCreated'
+        Get_book_details_for_wishlsts gets the necessary information for a row
+            on the `user/my-wishlist` page.
+        Accepts:
+            wishlist_id (int): Wishlists.id
+        Returns:
+            List of sqlite3 Row objects
         """
         c = self.db.cursor()
-        values = ""
-        for id in wishlist_ids:
-            values += str(id) + ', '
-        values = values[:-2]
-        c.execute(
-            "SELECT wishlistId, Books.title bookTitle, dateCreated FROM WishlistsBooks w INNER JOIN Books ON w.bookId "
-            "= Books.id WHERE "
-            "wishlistId IN (?)",
-            (values,))
-        return c.fetchall()
+        try:
+            c.execute("""
+                        SELECT
+                            Books.title AS title, 
+                            Books.coverImageUrl AS coverImageUrl,
+                            Books.author AS author,
+                            Books.ISBN AS ISBN,
+                            COUNT(*) AS numberAvailable,
+                            min(UserBooks.points) AS minPoints
+                        FROM 
+                            WishlistsBooks INNER JOIN 
+                            Books ON WishlistsBooks.bookId=Books.id INNER JOIN
+                            UserBooks ON Books.id = UserBooks.bookId
+                        WHERE
+                            WishlistsBooks.wishlistId = ?
+                        GROUP BY
+                            Books.id""", 
+                         (wishlist_id,))
+            rows = c.fetchall()
+        except sqlite3.Error as e:
+            log.error(f"Error getting books in wishlist {wishlist_id} -- {e}")
+            raise Exception
+        return rows 
 
     def get_current_user_points(self, user_num):
         """
@@ -859,7 +887,7 @@ class BookSwapDatabase:
             values = c.fetchone()
             return values[0]
         except sqlite3.Error as e:
-            print(e)
+            log.error(e)
             raise Exception
 
     def request_book(self, book, user_num):
@@ -876,11 +904,11 @@ class BookSwapDatabase:
         # Make sure user still has enough points
         try:
             points_available = self.get_current_user_points(user_num)
-        except Exception:
-            print(f"DB_CONNECTOR: Request_book -- Error trying to confirm user {user_num} has sufficient points.")
+        except sqlite3.Error as e:
+            log.error(f"Error trying to confirm user {user_num} has sufficient points. {e}")
             raise Exception
         if points_available < book['pointsNeeded']:
-            print(f"DB_CONNECTOR: Request_book -- Requesting user does not have sufficient points for the trade.")
+            log.warning(f"Requesting user does not have sufficient points for the trade.")
             raise Exception
         # Make sure book is still available
         try:
@@ -895,12 +923,11 @@ class BookSwapDatabase:
                       (book['userBooksId'],))
             availability = c.fetchone()[0]
             if availability != 1:
-                print(f"DB_CONNECTOR: Request_book -- Book with UserBooks id {book['userBooksId']} is not available.")
+                log.warning(f"Book with UserBooks id {book['userBooksId']} is not available.")
                 raise Exception
         except sqlite3.Error as e:
-            print(e)
-            print(
-                f"DB_CONNECTOR: Request_book -- Failed to see if book with UserBooks id {book['userBooksId']} is available or not")
+            log.error(
+                f"Failed to see if book with UserBooks id {book['userBooksId']} is available or not -- {e}")
             raise Exception
         # Insert trade
         try:
@@ -913,7 +940,7 @@ class BookSwapDatabase:
                       (user_num, book['userBooksId'], 2))
             self.db.commit()
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Request_book -- {e}")
+            log.error(f"{e}")
             raise Exception
         # Update Requesting User's points
         try:
@@ -928,7 +955,7 @@ class BookSwapDatabase:
                       (book['pointsNeeded'], user_num))
             self.db.commit()
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Request_book -- {e}")
+            log.error(f"{e}")
             raise Exception
         # Update availability of UserBook entry
         try:
@@ -943,7 +970,7 @@ class BookSwapDatabase:
                       (book['userBooksId'],))
             self.db.commit()
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Request_book -- {e}")
+            log.error(f"{e}")
             raise Exception
         # Get current user's current point value
         try:
@@ -959,7 +986,7 @@ class BookSwapDatabase:
             row = c.fetchone()
             points_available = row[0]
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Request_book -- {e}")
+            log.error(f"{e}")
             raise Exception
         return points_available
 
@@ -987,10 +1014,10 @@ class BookSwapDatabase:
                         """,
                       (user_books_id,))
             self.db.commit()
-            print(f"DB_CONNECTOR: Reject_trade -- trade for book {user_books_id} changed to 'rejected by user'")
+            log.info(f"trade for book {user_books_id} changed to 'rejected by user'")
         except sqlite3.Error as e:
-            print(
-                f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
+            log.error(
+                f"Error {e}.  Failed to change the trade status for UserBooks book number {user_books_id}")
             flash("Error marking trade as rejected", "warning")
             raise Exception
         # Return points to requesting User
@@ -1019,10 +1046,10 @@ class BookSwapDatabase:
                     """,
                       (user_books_id, user_books_id))
             self.db.commit()
-            print(f"DB_CONNECTOR: Reject_trade -- User received their points back")
+            log.info(f"User received their points back")
         except sqlite3.Error as e:
-            print(
-                f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to return points to the requesting user for book number {user_books_id}")
+            log.error(
+                f"Error {e}.  Failed to return points to the requesting user for book number {user_books_id}")
             flash("Error returning points to requesting user", "warning")
             raise Exception
         # Set book as available
@@ -1037,10 +1064,10 @@ class BookSwapDatabase:
                     """,
                       (user_books_id,))
             self.db.commit()
-            print(f"DB_CONNECTOR: Reject_trade -- Book {user_books_id} set as avialable again")
+            log.info(f" Book {user_books_id} set as avialable again")
         except sqlite3.Error as e:
-            print(
-                f"DB_CONNECTOR: Reject_trade -- Error {e}.  Failed to set the book number {user_books_id} as available.")
+            log.error(
+                f"Error {e}.  Failed to set the book number {user_books_id} as available.")
             flash("Error marking the book as available", "warning")
             raise Exception
         return
@@ -1079,25 +1106,16 @@ class BookSwapDatabase:
                       (user_books_id,))
             rows = c.fetchall()
             if len(rows) != 1:
-                print(
-                    f"DB_CONNECTOR: Is_user_book_owner -- Wrong number of book owners for UserBooks number {user_books_id}")
+                log.error(
+                    f"Wrong number of book owners for UserBooks number {user_books_id}")
                 raise Exception
             owner = rows[0]
             return owner[0] == user_num
         except sqlite3.Error as e:
-            print(f"DB_CONNECTOR: Is_user_book_owner -- Wrong book owner for UserBooks number {user_books_id}")
+            log.error(f"Wrong book owner for UserBooks number {user_books_id}")
             raise Exception
 
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()
 
-# @app.teardown_appcontext
-# def close_connection(exception):
-# """
-# When we teardown the app, we must close the database file.
-# ""
-# db = getattr(g, '_database', None)
-# if db is not None:
-# db.close()
-# """

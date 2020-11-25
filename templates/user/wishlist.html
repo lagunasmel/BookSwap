@@ -10,38 +10,62 @@
         <div class="w-50 p-3 mx-auto">
             <h1 class="text-center">My Wishlist</h1>
             <p></p>
-            {% if data.table_content %}
-                {% for wish in data.table_content %}
-                    <ul class="list-group">
-                        {% for book in data.table_content[wish] %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">{{ book }}
-                                <div id="removeBook">
-                                    <button type="button" class="btn btn-primary ml-2"
-                                            onclick="confirmRemoveBook({{ wish }})"> Remove
+            {% if books %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Cover</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Author</th>
+                        <th scope="col">ISBN</th>
+                        <th scope="col">Number Available</th>
+                        <th scope="col">Smallest Cost</th>
+                        <th scope="col">See Copies</th>
+                        <th scope="col">Remove Book</th>
+                    </tr>
+                </thead>
+                        {% for book in books %}
+                        <tr>
+                            <td><img src="{{book['coverImageUrl']}}" alt="Book Cover Image" class="img-fluid"></td>
+                            <th scope="row"> {{ book["title"]}}</th>
+                            <td> {{book["author"]}}</td>
+                            <td> {{book["ISBN"]}}</td>
+                            <td> {{book["numberAvailable"]}}</td>
+                            <td> {{book["minPoints"]}}</td>
+                            <td>
+                                <button type="button" 
+                                        class="btn btn-primary btn-sm"
+                                        onclick="requestBook({{book|tojson}})"> See Copies </button>
+                            </td>
+                            <td>
+                                    <button type="button" class="btn btn-secondary btn-sm"
+
+                                                          onclick="confirmRemoveBook({{ book | tojson }})"> Remove
                                     </button>
-                                </div>
+                            </td>>
+                        </tr>
                                 <div class="modal" id="{{ wish }}">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
                                             <div class="modal-header">
                                                 <h5 class="modal-title">Confirm Removal</h5>
                                                 <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close" onclick="modalDismiss({{ wish }})">
+                                                        aria-label="Close" onclick="modalDismiss({{ book | tojson }})">
                                                     <span aria-hidden="true">&times;</span>
                                                 </button>
                                             </div>
                                             <div class="modal-body">
-                                                <p>Are you sure you wish to remove {{ book }}?</p>
+                                                <p>Are you sure you wish to remove {{ book|tojson }}?</p>
                                             </div>
                                             <div class="modal-footer">
                                                 <form action="{{ url_for('remove_wish') }}" method="GET">
                                                     <input type="hidden" id="wishlistRem" name="wishlistRem"
-                                                           value="{{ wish }}">
-                                                    <input type="hidden" id="bookRem" name="bookRem" value="{{ book }}">
+                                                           value="{{ book | tojson }}">
+                                                    <input type="hidden" id="bookRem" name="bookRem" value="{{ book|tojson }}">
                                                     <input type="submit" value="Remove" class="btn btn-primary">
                                                 </form>
                                                 <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                                                        onclick="modalDismiss({{ wish }})">
+                                                        onclick="modalDismiss({{ book|tojson }})">
                                                     Never mind
                                                 </button>
                                             </div>
@@ -52,10 +76,10 @@
                             </li>
                         {% endfor %}
                     </ul>
-                {% endfor %}
+            </table>
             {% endif %}
             <p></p>
-            {% if not data.table_content %}
+            {% if not books %}
                 <h5 class="text-center">You don't have anything in your wishlist</h5>
             {% endif %}
             <div class="form-group">
