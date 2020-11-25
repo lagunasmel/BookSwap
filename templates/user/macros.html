@@ -27,7 +27,7 @@
                 <td class='text-center'>{{ row[3] }}
                     <div id="changePoints">
                         <button type="button" class="badge badge-pill badge-primary"
-                                onclick="confirmChangePoints( '{{ row[0] }}', {{ row[3] }}, {{ row[5] }} )">
+                                onclick='confirmChangePoints( {{ row[0]|tojson }}, {{ row[3] }}, {{ row[5] }} )'>
                             Change
                         </button>
                     </div>
