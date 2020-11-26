@@ -949,7 +949,7 @@ class BookSwapDatabase:
                             Books.coverImageUrl AS coverImageUrl,
                             Books.author AS author,
                             Books.ISBN AS ISBN,
-                            COUNT(*) AS numberAvailable,
+                            COUNT(UserBooks.id) AS numberAvailable,
                             min(UserBooks.points) AS minPoints,
                             WishlistsBooks.wishlistId AS wishlistId,
                             Books.id AS bookId
