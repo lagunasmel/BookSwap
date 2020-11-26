@@ -2,132 +2,135 @@
 {% set active_page = 'wishlist' %}
 {% block content %}
 
-<!--Scripts for Book Removal-->
-<script type="text/javascript" src="{{ url_for('static', filename='js/my-wishlist.js') }}">
-</script>
+    <!--Scripts for Book Removal-->
+    <script type="text/javascript" src="{{ url_for('static', filename='js/my-wishlist.js') }}">
+    </script>
 
-<div class="container mt-5">
-    <div class="p-3 mx-auto">
-        <h1 class="text-center">My Wishlist</h1>
-        <br />
-        {% if books %}
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th scope="col">Cover</th>
-                    <th scope="col">Title</th>
-                    <th scope="col">Author</th>
-                    <th scope="col">ISBN</th>
-                    <th scope="col">Number Available</th>
-                    <th scope="col">Lowest Cost</th>
-                    <th scope="col">See Copies</th>
-                    <th scope="col">Remove Book</th>
-                </tr>
-            </thead>
-            {% for book in books %}
-            <tr>
-                <td><img src="{{book['coverImageUrl']}}" alt="Book Cover Image" class="w-75 img-fluid"></td>
-                <th scope="row"> {{ book["title"]}}</th>
-                <td> {{book["author"]}}</td>
-                <td> {{book["ISBN"]}}</td>
-                <td> {{book["numberAvailable"]}}</td>
-                <td> {{book["minPoints"]}}</td>
-                <td>
-                    <button type="button" 
-                            class="btn btn-primary btn-sm"
-                            onclick='seeCopies({{book|tojson}})'
-                            {% if book["numberAvailable"] == 0 %}
-                            disabled
-                            {% endif %}
-                            > 
-                            Show Copies 
-                    </button>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-secondary btn-sm"
-                                          onclick='confirmRemoveBook({{ book | tojson }})'> Remove
-                    </button>
-                </td>
-            </tr>
-            <div class="modal" id="removeBookModal">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Confirm Removal</h5>
-                            <button type="button" class="close" data-dismiss="modal"
-                                                                aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Are you sure you wish to remove 
-                            <span class="text-info" id="removeBookModalTitle">
+    <div class="container mt-5">
+        <div class="p-3 mx-auto">
+            <h1 class="text-center">My Wishlist</h1>
+            <br/>
+            {% if books %}
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">Cover</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Author</th>
+                        <th scope="col">ISBN</th>
+                        <th scope="col">Number Available</th>
+                        <th scope="col">Lowest Cost</th>
+                        <th scope="col">See Copies</th>
+                        <th scope="col">Remove Book</th>
+                    </tr>
+                    </thead>
+                    {% for book in books %}
+                        <tr>
+                            <td><img src="{{ book['coverImageUrl'] }}" alt="Book Cover Image"
+                                     class="w-75 img-fluid">
+                            </td>
+                            <th scope="row"> {{ book["title"] }}</th>
+                            <td> {{ book["author"] }}</td>
+                            <td> {{ book["ISBN"] }}</td>
+                            <td> {{ book["numberAvailable"] }}</td>
+                            <td> {{ book["minPoints"] }}</td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-primary btn-sm"
+                                        onclick='seeCopies({{ book|tojson }})'
+                                        {% if book["numberAvailable"] == 0 %}
+                                        disabled
+                                        {% endif %}
+                                >
+                                    Show Copies
+                                </button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-secondary btn-sm"
+                                        onclick='confirmRemoveBook({{ book | tojson }})'> Remove
+                                </button>
+                            </td>
+                        </tr>
+                        <div class="modal" id="removeBookModal">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirm Removal</h5>
+                                        <button type="button" class="close" data-dismiss="modal"
+                                                aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Are you sure you wish to remove
+                                            <span class="text-info" id="removeBookModalTitle">
                             </span>
-                            ?
-                            </p>
+                                            ?
+                                        </p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form action="{{ url_for('remove_wish') }}" method="GET">
+                                            <input type="hidden" id="wishlistRem" name="wishlistRem">
+                                            <input type="hidden" id="bookRem" name="bookRem">
+                                            <input type="submit" value="Remove" class="btn btn-primary">
+                                        </form>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                            Never mind
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="modal-footer">
-                            <form action="{{ url_for('remove_wish') }}" method="GET">
-                                <input type="hidden" id="wishlistRem" name="wishlistRem">
-                                <input type="hidden" id="bookRem" name="bookRem">
-                                <input type="submit" value="Remove" class="btn btn-primary">
-                            </form>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                Never mind
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    {% endfor %}
+                </table>
+            {% endif %}
+            <br/>
+            {% if not books %}
+                <h5 class="text-center">You don't have anything in your wishlist</h5>
+            {% endif %}
+            <div class="form-group w-50 mx-auto mb-5">
+                <h5 class="mt-2 text-center">Add Book to Wishlist</h5>
+                <form action="{{ url_for('add_to_wish') }}" method="GET">
+                    <br><label for="isbn">Book ISBN number: </label>
+                    <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control">
+                    <input type="hidden" id="wishlist" name="wishlist"> <br>
+                    <input type="submit" class="btn btn-info btn-sm">
+                </form>
             </div>
-            {% endfor %}
-        </table>
-        {% endif %}
-        <br />
-        {% if not books %}
-        <h5 class="text-center">You don't have anything in your wishlist</h5>
-        {% endif %}
-        <div class="form-group">
-            <form action="{{ url_for('add_to_wish') }}" method="GET">
-                <label for="isbn">Book ISBN number: </label>
-                <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control sm">
-                <input type="hidden" id="wishlist" name="wishlist"> <br>
-                <input type="submit" class="btn btn-info btn-sm">
-            </form>
         </div>
-    </div>
-    <div class="modal" id="showCopiesModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="row">
-                        <div class="col-8">
-                            <h5 class="modal-title">Copies of 
-                                <span class='text-info' id="showCopiesModalTitle"> 
+        <div class="modal" id="showCopiesModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="row">
+                            <div class="col-8">
+                                <h5 class="modal-title">Copies of
+                                    <span class='text-info' id="showCopiesModalTitle">
                                 </span>
-                            </h5>
+                                </h5>
+                            </div>
+                            <div class="col-4">
+                                <img id="showCopiesModalCover" alt="Book Cover Image" class="w-75 img-fluid">
+                            </div>
                         </div>
-                        <div class="col-4">
-                            <img id="showCopiesModalCover" alt="Book Cover Image" class="w-75 img-fluid">
-                        </div>
-                    </div>
-                    <button type="button" class="close" data-dismiss="modal"
-                                                        aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="showCopiesModalBody">
-               </div>
-                <div class="modal-footer">
-                    <div class="row">
-                        <div class="col-8" id="showCopiesModalFooterLeft">
-                        </div>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            Close 
+                        <button type="button" class="close" data-dismiss="modal"
+                                aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+                    <div class="modal-body" id="showCopiesModalBody">
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-8" id="showCopiesModalFooterLeft">
+                            </div>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                Close
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock content %}
