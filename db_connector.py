@@ -18,6 +18,11 @@ def get_db():
     return db
 
 
+class EditionDuplicationError(Exception):
+    """Raised when we are about to insert an entry into the Books table with an OLEditionKey that already exists"""
+    pass
+
+
 class BookSwapDatabase:
     """
     This class is intended to deal with everything-SQL related:
@@ -242,7 +247,7 @@ class BookSwapDatabase:
         To do this a dict called 'search result' corresponding to the JSON search result returned by Open Library is
         required. To clarify: there is currently no way to add details for an Open Library Work, given a Work Key,
         unless we have access to the information from the search result.  
-        :param editions: a list of Open Library keys for Editions corresponding to the given Work
+
         :returns a dict of the attributes for the Books row
         """
         # Get the Work Key from the search result
@@ -282,9 +287,16 @@ class BookSwapDatabase:
         d['ISBN'] = isbn
         if edition_key is not None:
             d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
+            # Check if we are about to duplicate an edition key
+            local_edition = self.get_ol_edition_details(edition_key)
+            if local_edition is not None:
+                raise EditionDuplicationError()
         else:
             d['coverImageUrl'] = None
         c = self.db.cursor()
+        print(
+            f'About to insert Books row with OLWorkKey value {work_key} and OLEditionKey value {edition_key} - the '
+            f'book is {d["title"]} by {d["author"]}')
         c.execute(
             """INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl) VALUES (?, ?, ?, ?, ?, 
             ?)""",
@@ -310,6 +322,31 @@ class BookSwapDatabase:
             # This should not happen!
             raise LookupError(
                 "Multiple Books found to correspond to a single work key - this should never "
+                "happen!")
+        elif len(rows) == 1:
+            return rows[0]
+        elif len(rows) == 0:
+            # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
+            return None
+
+    def get_ol_edition_details(self, edition_key):
+        """
+        Returns the Books table attributes for a given Edition, as defined by Open Library. If the volume has not yet
+        been locally stored in the database, None is returned, and 'get_or_add_ol_book_details' must be called instead.
+        :param edition_key: the Open Library Editions Key associated with the volume.
+        :returns a sqlite Row or a dict of the Book's attributes, with the keys: 'id', 'title', 'author', 'isbn',
+        'OLEditionKey', 'OLWorkKey'
+        """
+        c = self.db.cursor()
+        c.execute(
+            """SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl FROM Books WHERE 
+            OLEditionKey=?""",
+            (edition_key,))
+        rows = c.fetchall()
+        if len(rows) > 1:
+            # This should not happen!
+            raise LookupError(
+                "Multiple Books found to correspond to a single edition key - this should never "
                 "happen!")
         elif len(rows) == 1:
             return rows[0]
@@ -359,7 +396,8 @@ class BookSwapDatabase:
             results = r.json()['docs'][:num_results]
         out = []
         # Return the book info
-        for result in results:
+        for idx, result in enumerate(results):
+            print(f'Processing search result number {idx}')
             book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
             out.append(book_info)
         return out
@@ -445,8 +483,6 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             log.error(f"Error checking email.  Error was {e}")
             raise Exception
-        return None
-
         return None
 
     def is_username_available(self, username):
@@ -840,14 +876,13 @@ class BookSwapDatabase:
                         UserBooks.available = 1 AND
                         UserBooks.userId != ?
                         """,
-                        (book_id, user_num) )
+                      (book_id, user_num))
             rows = c.fetchall()
             log.info(f"Fetched all available books for Book {book_id} that are not owned by {user_num}")
         except sqlite3.Error as e:
             log.error(f"Error fetching available books for Book {book_id} that are not owned by{user_num} -- {e}")
             raise Exception
         return rows
-
 
     def get_wishlists_by_userid(self, user_id):
         """
@@ -867,8 +902,8 @@ class BookSwapDatabase:
                             Wishlists 
                         WHERE 
                             userId = ?""",
-                        ( user_id,))
-            rows =  c.fetchall()
+                      (user_id,))
+            rows = c.fetchall()
         except sqlite3.Error as e:
             log.error(f"{e}")
             log.error(f"Error getting wishlists for user {user_id}")
@@ -915,13 +950,13 @@ class BookSwapDatabase:
                                 AND
                             UserBooks.userId != Wishlists.userId
                         GROUP BY
-                            Books.id""", 
-                         (wishlist_id,))
+                            Books.id""",
+                      (wishlist_id,))
             rows = c.fetchall()
         except sqlite3.Error as e:
             log.error(f"Error getting books in wishlist {wishlist_id} -- {e}")
             raise Exception
-        return rows 
+        return rows
 
     def get_current_user_points(self, user_num):
         """
@@ -1170,11 +1205,10 @@ class BookSwapDatabase:
                 raise Exception
             owner = rows[0]
             return owner[0] == user_num
-        except sqlite3.Error as e:
+        except sqlite3.Error:
             log.error(f"Wrong book owner for UserBooks number {user_books_id}")
             raise Exception
 
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()
-
