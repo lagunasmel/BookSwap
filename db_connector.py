@@ -804,6 +804,51 @@ class BookSwapDatabase:
             i += 1
         return
 
+    def get_available_copies(self, book_id, user_num):
+        """
+        Get_copies returns the available copies of the requested book that are
+            not in the library of the given user.
+        Accepts:
+            book_id (int): Books.id
+            user_num (int): Users.id
+        Returns:
+            List of Rows
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                    SELECT
+                        UserBooks.id as userBooksId,
+                        UserBooks.points as points,
+                        CAST 
+                            ((julianday('now') - 
+                                    julianday(UserBooks.dateCreated)) 
+                                AS INTEGER) AS timeHere,
+                        Books.title AS title,
+                        Books.author AS author,
+                        Books.coverImageUrl AS coverImageUrl,
+                        Users.username AS username,
+                        CopyQualities.qualityDescription AS qualityDescription
+                    FROM
+                        UserBooks INNER JOIN 
+                        Books on UserBooks.bookId = Books.id INNER JOIN
+                        CopyQualities on UserBooks.copyQualityId = 
+                                    CopyQualities.id INNER JOIN
+                        Users on UserBooks.userId = Users.id
+                    WHERE
+                        Books.id = ? AND
+                        UserBooks.available = 1 AND
+                        UserBooks.userId != ?
+                        """,
+                        (book_id, user_num) )
+            rows = c.fetchall()
+            log.info(f"Fetched all available books for Book {book_id} that are not owned by {user_num}")
+        except sqlite3.Error as e:
+            log.error(f"Error fetching available books for Book {book_id} that are not owned by{user_num} -- {e}")
+            raise Exception
+        return rows
+
+
     def get_wishlists_by_userid(self, user_id):
         """
         Get_wishlists_by_userid returns all the wishlists associated with a
@@ -849,7 +894,8 @@ class BookSwapDatabase:
                             Books.ISBN AS ISBN,
                             COUNT(*) AS numberAvailable,
                             min(UserBooks.points) AS minPoints,
-                            WishlistsBooks.wishlistId AS wishlistId
+                            WishlistsBooks.wishlistId AS wishlistId,
+                            Books.id AS bookId
                         FROM 
                             WishlistsBooks INNER JOIN 
                             Books ON WishlistsBooks.bookId=Books.id INNER JOIN

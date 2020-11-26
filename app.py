@@ -16,11 +16,6 @@ app = Flask(__name__)
 # Secret Key for Flask Forms security
 app.config['SECRET_KEY'] = '31c46d586e5489fa9fbc65c9d8fd21ed'
 
-handler = logging.StreamHandler(sys.stdout)
-handler.setFormatter(logging.Formatter(
-    '[%(asctime)s] %(levelname)s - %(module)s: %(funcName)s -- %(message)s'))
-app.logger.addHandler(handler)
-
 
 # Code automatically created with each request
 @app.before_request
@@ -341,12 +336,30 @@ def signup():
     return render_template('signup.html', form=form)
 
 
-@app.route('/wishlist')
+@app.route('/wishlist', methods=['GET','POST'])
 @login_required
 def wishlist():
     bsdb = get_bsdb()
     wishlists = Wishlists(session['user_num'], bsdb)
-    print("Wishlists object created")
+    data = req.get_json()
+    # User asks to see copies of a book
+    if req.method=="POST" and data.get("request") == "copiesModal":
+        book = eval(data['book'])
+        app.logger.info(f"Request incoming for copies of book {book} from user {session['user_num']}")
+        try:
+            copies = bsdb.get_available_copies(book["bookId"], session["user_num"])
+            copies_arr = [dict(copy) for copy in copies]
+            app.logger.info(f"Copies available: {copies_arr}")
+        except Exception:
+            app.logger.error(f"Error retrieving copies of {book} for user {session['user_num']}")
+            flash("Error retrieving copies of the book.  Maybe try again?", "warning")
+            return redirect('/wishlist')
+        return {
+                "title": copies_arr[0]['title'], 
+                "copies": copies_arr,
+                "count": len(copies_arr)
+                }
+    # Page load
     try:
         books = wishlists.get_all_wishlist_books_for_user()
         app.logger.info(f"Made wishlists for user {session['user_num']}")
