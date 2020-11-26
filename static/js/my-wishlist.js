@@ -53,6 +53,11 @@ function seeCopies(book)
                         })
                         .text("Request This Book")
                         .appendTo(col4);
+                    if (data['points_available'] < copies[i]['points'])
+                    {
+                        button.prop('disabled', true);
+                        button.html("Need More Points");
+                    }
                 });
 
             $('#showCopiesModal').modal("show");
