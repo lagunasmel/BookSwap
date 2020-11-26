@@ -26,7 +26,7 @@
             </thead>
             {% for book in books %}
             <tr>
-                <td><img src="{{book['coverImageUrl']}}" alt="Book Cover Image" class="w-50 img-fluid"></td>
+                <td><img src="{{book['coverImageUrl']}}" alt="Book Cover Image" class="w-75 img-fluid"></td>
                 <th scope="row"> {{ book["title"]}}</th>
                 <td> {{book["author"]}}</td>
                 <td> {{book["ISBN"]}}</td>
@@ -35,7 +35,7 @@
                 <td>
                     <button type="button" 
                             class="btn btn-primary btn-sm"
-                            onclick="requestBook({{book|tojson}})"> See Copies </button>
+                            onclick='seeCopies({{book|tojson}})'> Show Copies </button>
                 </td>
                 <td>
                     <button type="button" class="btn btn-secondary btn-sm"
@@ -55,9 +55,9 @@
                         </div>
                         <div class="modal-body">
                             <p>Are you sure you wish to remove 
-                                <span class="text-info" id="removeBookModalTitle">
-                                </span>
-                                ?
+                            <span class="text-info" id="removeBookModalTitle">
+                            </span>
+                            ?
                             </p>
                         </div>
                         <div class="modal-footer">
@@ -87,6 +87,53 @@
                 <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}"> <br>
                 <input type="submit" class="btn btn-info btn-sm">
             </form>
+        </div>
+    </div>
+    <div class="modal" id="showCopiesModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="row">
+                        <div class="col-8">
+                            <h5 class="modal-title">Copies of 
+                                <span class='text-info' id="showCopiesModalTitle"> 
+                                </span>
+                            </h5>
+                        </div>
+                        <div class="col-4">
+                            <img id="showCopiesModalCover" alt="Book Cover Image" class="w-75 img-fluid">
+                        </div>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="showCopiesModalBody">
+                    <p>These are the 
+                        <span id="showCopiesModalNumber"> 
+                        </span>
+                        copies our users currently have on offer:
+                    </p>
+                    <table id="showCopiesModalTable" class='table table-hover'>
+                        <thead>
+                            <tr>
+                                <th scope="col">Username</th>
+                                <th scope="col">Copy Quality</th>
+                                <th scope="col">Point Cost</th>
+                                <th scope="col">Request Trade?</th>
+                            </tr>
+                        </thead>
+                        <tbody id='showCopiesModalTableBody'>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                       Close 
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
