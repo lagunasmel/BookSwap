@@ -118,9 +118,10 @@
     {% if show_results %}
         <div id="bookSearchResults" class="container w-50 mt-4">
             <h2 class="text-center">Book Search Results</h2>
-            <p class="text-center">This is what we found. Time to get your read on!</p>
+            <!-- Local results - listed by users on the site -->
+            <p class="text-center">This is what users on our site have listed for trade. Time to get your read on!</p>
             <div class="list-group">
-                {% for book in book_results %}
+                {% for book in local_results %}
                     <div class="list-group-item list-group-item-action flex-column align-items-start">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">{{ book['title'] }}</h5>
@@ -154,6 +155,44 @@
                                             onclick='requestTrade( {{ book | tojson }}, {{ points_available }})'>
                                         Request Trade
                                     </button>
+                                </form>
+                                <form>
+                                    <button type="submit" class="btn btn-primary btn-sm m-1"
+                                            formaction="/add-to-wishlist/{{ book['ISBN'] }}">Add to Wishlist
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <br>
+            </div>
+            <!-- External results - from open library API, not listed by any user -->
+            <p class="text-center">Here are some matches that no-one has listed yet. Add them to your wishlist, maybe
+                someone will list them!</p>
+            <div class="list-group">
+                {% for book in external_results %}
+                    <div class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ book['title'] }}</h5>
+                        </div>
+                        <div class="row">
+                            <div class="card-body col-4">
+                                <img class="card-img-top img-fluid mx-auto" src="{{ book['coverImageUrl'] }}"
+                                     style="max-width: 75%">
+                            </div>
+                            <div class="col-8">
+                                <ul class="mb-1 mt-3">
+                                    <li>Author: {{ book['author'] }}</li>
+                                    <li>ISBN: {{ book['ISBN'] }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="d-flex w-100 justify-content-between">
+                            <div class="d-flex w-100 justify-content-end">
+                                <form>
+                                    <input type="hidden" id="requested_book" name="requested_book"
+                                           value="{{ book['ISBN'] }}">
                                 </form>
                                 <form>
                                     <button type="submit" class="btn btn-primary btn-sm m-1"

@@ -354,7 +354,7 @@ class BookSwapDatabase:
             # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
             return None
 
-    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
+    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1, book_id_ignorelist=[]):
         """
         Searches for books that match the provided details, and then returns the results. The search is conducted on
         the Open Library API. This method automatically searches for matching books and stores a local copy of the
@@ -373,7 +373,9 @@ class BookSwapDatabase:
         :param author: Search is done for books whose author contains this string
         :param isbn: Must be a STRING
         :param num_results: int, the number of results to return
-        :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
+        :param book_id_ignorelist: a list of book IDs to not include in the results
+
+        :return: A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
                     Each row has the following keys:
                     'id' - from the Books table
                     'title'
@@ -399,7 +401,8 @@ class BookSwapDatabase:
         for idx, result in enumerate(results):
             print(f'Processing search result number {idx}')
             book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
-            out.append(book_info)
+            if book_info['id'] not in book_id_ignorelist:
+                out.append(book_info)
         return out
 
     def user_add_book_by_id(self, book_id, user_num, copyquality, points):
@@ -687,6 +690,7 @@ class BookSwapDatabase:
                     UserBooks.points as pointsNeeded,
                     UserBooks.id as userBooksId,
                     UserBooks.userId AS userId,
+                    Books.id AS booksId,
                     IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
                     FROM Books
                     INNER JOIN UserBooks
@@ -734,6 +738,7 @@ class BookSwapDatabase:
                     UserBooks.points as pointsNeeded,
                     UserBooks.id as userBooksId,
                     UserBooks.userId AS userId,
+                    Books.id AS booksId,
                     IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
                     FROM Books
                     INNER JOIN UserBooks
@@ -784,6 +789,7 @@ class BookSwapDatabase:
                 Users.username as listingUser,
                 UserBooks.userId AS userId,
                 CopyQualities.qualityDescription as copyQuality,
+                Books.id AS booksId,
                 CAST 
                     ((julianday('now') - julianday(UserBooks.dateCreated)) 
                         AS INTEGER) AS timeHere,
