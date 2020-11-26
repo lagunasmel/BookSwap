@@ -35,7 +35,13 @@
                 <td>
                     <button type="button" 
                             class="btn btn-primary btn-sm"
-                            onclick='seeCopies({{book|tojson}})'> Show Copies </button>
+                            onclick='seeCopies({{book|tojson}})'
+                            {% if book["numberAvailable"] == 0 %}
+                                disabled
+                            {% endif %}
+                            > 
+                            Show Copies 
+                    </button>
                 </td>
                 <td>
                     <button type="button" class="btn btn-secondary btn-sm"
@@ -84,7 +90,7 @@
             <form action="{{ url_for('add_to_wish') }}" method="GET">
                 <label for="isbn">Book ISBN number: </label>
                 <input type="text" id="isbn" name="isbn" placeholder="Add by ISBN" class="form-control sm">
-                <input type="hidden" id="wishlist" name="wishlist" value="{{ wish }}"> <br>
+                <input type="hidden" id="wishlist" name="wishlist"> <br>
                 <input type="submit" class="btn btn-info btn-sm">
             </form>
         </div>

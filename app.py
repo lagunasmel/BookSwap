@@ -357,7 +357,8 @@ def wishlist():
         return {
                 "title": copies_arr[0]['title'], 
                 "copies": copies_arr,
-                "count": len(copies_arr)
+                "count": len(copies_arr),
+                "points_available": g.points
                 }
     # Page load
     try:
@@ -403,25 +404,35 @@ def add_to_wish(isbn=None):
             flash("Book added to your wishlist", "success")
             app.logger.info(f"Book {isbn} successfully added to " +
                             f"user {session['user_num']}'s wishlist")
-
         db.commit()
         db.close()
-        return redirect('/browse-books')
-
     data = req.args.get("isbn")
     if data == "":
         return redirect('/wishlist')
-
     c = db.cursor()
     c.execute(get_books_isbn_query, (data,))
     bookId = c.fetchall()[0]['id']
-
+    # need to get Users Wishlist.id number
+    c.execute("""
+                SELECT
+                    id
+                FROM 
+                    Wishlists
+                WHERE
+                    Wishlists.userId = ?
+                """,
+                (session['user_num'], ))
+    wishlist = c.fetchone()['id']
     c.execute(get_wishlist_books_query,
-              (session['user_num'], bookId))
-
+              (wishlist, bookId))
     if not c.fetchall():
+        flash("Book successfully added to your wishlist", "success")
+        app.logger.info(f"Book {bookId} added to wishlist {wishlist}")
         c.execute(insert_wishlist_query,
-                  (req.args.get("wishlist"), bookId))
+                  (wishlist, bookId))
+    else:
+        flash("Book already in your wishlist.", "warning")
+        app.logger.warning(f"Book {bookId} attempted to add to wishlist {wishlist}, but it was already in that list.")
     db.commit()
     db.close()
 
