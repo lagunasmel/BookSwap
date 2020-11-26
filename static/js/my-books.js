@@ -33,7 +33,7 @@ function searchBookTemplate(url) {
             'isbn': $('#newBookISBN').val(),
             'author': $('#newBookAuthor').val(),
             'title': $('#newBookTitle').val(),
-            'request': 'search'
+            'request': 'my-books'
         }),
         type: 'POST',
         success: function (data) {
@@ -59,7 +59,7 @@ function addBookTemplate(url, bookId, quality, points) {
             'quality': quality,
             'bookId': bookId,
             'points': points,
-            'request': 'add'
+            'request': 'my-books'
         }),
         type: 'POST',
         success: function (data) {
@@ -90,8 +90,7 @@ function confirmChangePoints(title, points, id)
  *  title (string): Book title
  *  points (int): Current book points value
  *  id (int): UserBooks id value
- */
-{
+ */ {
     $('#changePointsModalTitle').text(title);
     var newPoints = points;
     if (newPoints == 1)
@@ -101,7 +100,7 @@ function confirmChangePoints(title, points, id)
     $('#changePointsModalNewPoints').val(points);
     $('#changePointsModalPoints').text(newPoints);
 
-    $('#changePointsModalButton').on('click', function() {
+    $('#changePointsModalButton').on('click', function () {
         changePoints($('#changePointsModalNewPoints').val(), id);
 
     });
@@ -109,8 +108,7 @@ function confirmChangePoints(title, points, id)
 }
 
 
-function changePoints(points, id)
-{
+function changePoints(points, id) {
     $.ajax('/change-points', {
         contentType: "application/json",
         data: JSON.stringify({

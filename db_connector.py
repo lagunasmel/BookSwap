@@ -413,6 +413,28 @@ class BookSwapDatabase:
         self.db.commit()
         return
 
+    def user_add_book_to_wishlist_by_id(self, book_id, user_num):
+        """
+        'user_id' lists the book matching 'book_id' on their wishlist
+        """
+        c = self.db.cursor()
+        # Get the wishlist ID
+        c.execute("""SELECT id FROM Wishlists WHERE userId = ?;""", (user_num,))
+        wishlist_id = c.fetchone()['id']
+
+        # If the book is already in the wishlist, don't add it
+        c.execute("""SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?;""", (wishlist_id, book_id))
+        if c.fetchall():
+            flash("Book already in your wishlist", "warning")
+            log.warning(f"Book {book_id} already in " +
+                        f"user {user_num}'s wishlist")
+        # otherwise, add book to the wishlist
+        else:
+            c.execute("""INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?);""", (wishlist_id, book_id))
+            self.db.commit()
+            flash("Book successfully added to your wishlist", "success")
+            log.info(f"Book {book_id} added to wishlist {wishlist_id}")
+
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
         'user_id' user lists the book matching 'isbn' as available to swap.
@@ -927,7 +949,7 @@ class BookSwapDatabase:
                             Books.coverImageUrl AS coverImageUrl,
                             Books.author AS author,
                             Books.ISBN AS ISBN,
-                            COUNT(*) AS numberAvailable,
+                            COUNT(UserBooks.id) AS numberAvailable,
                             min(UserBooks.points) AS minPoints,
                             WishlistsBooks.wishlistId AS wishlistId,
                             Books.id AS bookId
@@ -938,19 +960,21 @@ class BookSwapDatabase:
                                 ON
                                     WishlistsBooks.bookId=Books.id 
                                 INNER JOIN
-                            UserBooks
-                                ON
-                                    Books.id = UserBooks.bookId 
-                                INNER JOIN
                             Wishlists
                                 ON
                                     WishlistsBooks.wishlistId = Wishlists.id
+                                LEFT JOIN
+                            UserBooks
+                                ON
+                                    WishlistsBooks.bookId = UserBooks.bookId 
                         WHERE
                             WishlistsBooks.wishlistId = ? 
                                 AND
-                            UserBooks.userId != Wishlists.userId
+                            (UserBooks.userId != Wishlists.userId
+                                OR
+                            UserBooks.userId IS NULL)
                         GROUP BY
-                            Books.id""",
+                            WishlistsBooks.bookId""",
                       (wishlist_id,))
             rows = c.fetchall()
         except sqlite3.Error as e:
