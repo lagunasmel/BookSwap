@@ -439,7 +439,6 @@ def add_to_wish(isbn=None):
         app.logger.warning(f"Book {bookId} attempted to add to wishlist {wishlist}, but it was already in that list.")
     db.commit()
     db.close()
-
     return redirect('/wishlist')
 
 
@@ -576,9 +575,9 @@ def add_book():
     data = req.get_json()
     if data.get('request') == 'my-books':  # here we list the book as being available for trade
         # isbn = req.get_json()["isbn"]
-        copyquality = req.get_json()["quality"]
-        points = req.get_json()["points"]
-        book_id = req.get_json()["bookId"]
+        copyquality = data["quality"]
+        points = data["points"]
+        book_id = data["bookId"]
         user_num = session["user_num"]
         # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
         bsdb.user_add_book_by_id(book_id, user_num, copyquality, points)
@@ -587,7 +586,10 @@ def add_book():
 
         return redirect('/my-books')
     elif data.get('request') == 'my-wishlist':
-        // TODO
+        book_id = data["bookId"]
+        user_num = session["user_num"]
+        bsdb.user_add_book_to_wishlist_by_id(book_id, user_num)
+        return redirect('/wishlist')
 
 
 @app.route('/_search-book', methods=['POST'])
