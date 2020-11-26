@@ -142,12 +142,14 @@ def browse_books():
         points_available = 0
 
     app.logger.info(f"\n\t recent_books: {recent_books_arr}" +
-                    f"\t book_results: {local_results}" +
+                    f"\t local_results: {local_results}" +
+                    f"\t external_results: {external_results}" +
                     f"\t form: {form}" +
                     f"\t Visiting user has {points_available} points available.")
     return render_template('browse-books.html',
                            recent_books=recent_books_arr,
-                           book_results=local_results,
+                           local_results=local_results,
+                           external_results=external_results,
                            form=form,
                            show_recent=show_recent,
                            show_search=show_search,
