@@ -396,7 +396,8 @@ class BookSwapDatabase:
             results = r.json()['docs'][:num_results]
         out = []
         # Return the book info
-        for result in results:
+        for idx, result in enumerate(results):
+            print(f'Processing search result number {idx}')
             book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
             out.append(book_info)
         return out
@@ -482,8 +483,6 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             log.error(f"Error checking email.  Error was {e}")
             raise Exception
-        return None
-
         return None
 
     def is_username_available(self, username):
@@ -1206,7 +1205,7 @@ class BookSwapDatabase:
                 raise Exception
             owner = rows[0]
             return owner[0] == user_num
-        except sqlite3.Error as e:
+        except sqlite3.Error:
             log.error(f"Wrong book owner for UserBooks number {user_books_id}")
             raise Exception
 
