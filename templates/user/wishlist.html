@@ -37,7 +37,7 @@
                             class="btn btn-primary btn-sm"
                             onclick='seeCopies({{book|tojson}})'
                             {% if book["numberAvailable"] == 0 %}
-                                disabled
+                            disabled
                             {% endif %}
                             > 
                             Show Copies 
@@ -116,28 +116,15 @@
                     </button>
                 </div>
                 <div class="modal-body" id="showCopiesModalBody">
-                    <p>These are the 
-                        <span id="showCopiesModalNumber"> 
-                        </span>
-                        copies our users currently have on offer:
-                    </p>
-                    <table id="showCopiesModalTable" class='table table-hover'>
-                        <thead>
-                            <tr>
-                                <th scope="col">Username</th>
-                                <th scope="col">Copy Quality</th>
-                                <th scope="col">Point Cost</th>
-                                <th scope="col">Request Trade?</th>
-                            </tr>
-                        </thead>
-                        <tbody id='showCopiesModalTableBody'>
-                        </tbody>
-                    </table>
-                </div>
+               </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                       Close 
-                    </button>
+                    <div class="row">
+                        <div class="col-8" id="showCopiesModalFooterLeft">
+                        </div>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            Close 
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

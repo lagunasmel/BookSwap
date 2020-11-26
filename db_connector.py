@@ -897,11 +897,23 @@ class BookSwapDatabase:
                             WishlistsBooks.wishlistId AS wishlistId,
                             Books.id AS bookId
                         FROM 
-                            WishlistsBooks INNER JOIN 
-                            Books ON WishlistsBooks.bookId=Books.id INNER JOIN
-                            UserBooks ON Books.id = UserBooks.bookId
+                            WishlistsBooks 
+                                INNER JOIN 
+                            Books 
+                                ON
+                                    WishlistsBooks.bookId=Books.id 
+                                INNER JOIN
+                            UserBooks
+                                ON
+                                    Books.id = UserBooks.bookId 
+                                INNER JOIN
+                            Wishlists
+                                ON
+                                    WishlistsBooks.wishlistId = Wishlists.id
                         WHERE
-                            WishlistsBooks.wishlistId = ?
+                            WishlistsBooks.wishlistId = ? 
+                                AND
+                            UserBooks.userId != Wishlists.userId
                         GROUP BY
                             Books.id""", 
                          (wishlist_id,))

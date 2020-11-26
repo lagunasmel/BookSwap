@@ -406,6 +406,7 @@ def add_to_wish(isbn=None):
                             f"user {session['user_num']}'s wishlist")
         db.commit()
         db.close()
+        return redirect( url_for('browse_books'))
     data = req.args.get("isbn")
     if data == "":
         return redirect('/wishlist')
