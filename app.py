@@ -108,10 +108,14 @@ def browse_books():
     bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(8)
     recent_books_arr = [dict(book) for book in recent_books]
+    local_results = {}
+    external_results = {}
     if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
-        book_results = book_search.local_book_search(10)
+        # TODO magic numbers here
+        # book_results = book_search.local_book_search(10)
+        local_results, external_results = book_search.combined_book_search(10, 10)
         show_recent = False
         show_search = False
         show_results = True
@@ -138,12 +142,12 @@ def browse_books():
         points_available = 0
 
     app.logger.info(f"\n\t recent_books: {recent_books_arr}" +
-                    f"\t book_results: {book_results}" +
+                    f"\t book_results: {local_results}" +
                     f"\t form: {form}" +
                     f"\t Visiting user has {points_available} points available.")
     return render_template('browse-books.html',
                            recent_books=recent_books_arr,
-                           book_results=book_results,
+                           book_results=local_results,
                            form=form,
                            show_recent=show_recent,
                            show_search=show_search,
