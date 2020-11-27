@@ -18,6 +18,11 @@ def get_db():
     return db
 
 
+class EditionDuplicationError(Exception):
+    """Raised when we are about to insert an entry into the Books table with an OLEditionKey that already exists"""
+    pass
+
+
 class BookSwapDatabase:
     """
     This class is intended to deal with everything-SQL related:
@@ -242,7 +247,7 @@ class BookSwapDatabase:
         To do this a dict called 'search result' corresponding to the JSON search result returned by Open Library is
         required. To clarify: there is currently no way to add details for an Open Library Work, given a Work Key,
         unless we have access to the information from the search result.  
-        :param editions: a list of Open Library keys for Editions corresponding to the given Work
+
         :returns a dict of the attributes for the Books row
         """
         # Get the Work Key from the search result
@@ -252,7 +257,9 @@ class BookSwapDatabase:
         if local is not None:
             return local
         # Get the info of the first printed, english-language, edition, to store
-        d = {'title': search_result['title'], 'author': search_result['author_name'][0], 'OLWorkKey': work_key}
+        d = {'title': search_result['title'] if 'title' in search_result else 'Unknown Title',
+             'author': search_result['author_name'][0] if 'author_name' in search_result else 'Unknown Author',
+             'OLWorkKey': work_key}
         editions = search_result['edition_key']
         # Check the editions 10 at a time
         n = len(editions)
@@ -282,9 +289,16 @@ class BookSwapDatabase:
         d['ISBN'] = isbn
         if edition_key is not None:
             d['coverImageUrl'] = "http://covers.openlibrary.org/b/olid/" + edition_key + "-L.jpg"
+            # Check if we are about to duplicate an edition key
+            local_edition = self.get_ol_edition_details(edition_key)
+            if local_edition is not None:
+                raise EditionDuplicationError()
         else:
             d['coverImageUrl'] = None
         c = self.db.cursor()
+        print(
+            f'About to insert Books row with OLWorkKey value {work_key} and OLEditionKey value {edition_key} - the '
+            f'book is {d["title"]} by {d["author"]}')
         c.execute(
             """INSERT INTO Books (title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl) VALUES (?, ?, ?, ?, ?, 
             ?)""",
@@ -317,7 +331,32 @@ class BookSwapDatabase:
             # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
             return None
 
-    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1):
+    def get_ol_edition_details(self, edition_key):
+        """
+        Returns the Books table attributes for a given Edition, as defined by Open Library. If the volume has not yet
+        been locally stored in the database, None is returned, and 'get_or_add_ol_book_details' must be called instead.
+        :param edition_key: the Open Library Editions Key associated with the volume.
+        :returns a sqlite Row or a dict of the Book's attributes, with the keys: 'id', 'title', 'author', 'isbn',
+        'OLEditionKey', 'OLWorkKey'
+        """
+        c = self.db.cursor()
+        c.execute(
+            """SELECT id, title, author, ISBN, OLWorkKey, OLEditionKey, coverImageUrl FROM Books WHERE 
+            OLEditionKey=?""",
+            (edition_key,))
+        rows = c.fetchall()
+        if len(rows) > 1:
+            # This should not happen!
+            raise LookupError(
+                "Multiple Books found to correspond to a single edition key - this should never "
+                "happen!")
+        elif len(rows) == 1:
+            return rows[0]
+        elif len(rows) == 0:
+            # Book does not exist - must call 'get_or_add_ol_book_details' with a list of Edition keys
+            return None
+
+    def search_books_openlibrary(self, title=None, author=None, isbn=None, num_results=1, book_id_ignorelist=[]):
         """
         Searches for books that match the provided details, and then returns the results. The search is conducted on
         the Open Library API. This method automatically searches for matching books and stores a local copy of the
@@ -336,7 +375,9 @@ class BookSwapDatabase:
         :param author: Search is done for books whose author contains this string
         :param isbn: Must be a STRING
         :param num_results: int, the number of results to return
-        :returns A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
+        :param book_id_ignorelist: a list of book IDs to not include in the results
+
+        :return: A 'num_results' long list of dicts/sqlite.Rows corresponding to search results.
                     Each row has the following keys:
                     'id' - from the Books table
                     'title'
@@ -359,9 +400,11 @@ class BookSwapDatabase:
             results = r.json()['docs'][:num_results]
         out = []
         # Return the book info
-        for result in results:
+        for idx, result in enumerate(results):
+            print(f'Processing search result number {idx}')
             book_info = self.get_or_add_ol_book_details(result)  # This does the heavy lifting
-            out.append(book_info)
+            if book_info['id'] not in book_id_ignorelist:
+                out.append(book_info)
         return out
 
     def user_add_book_by_id(self, book_id, user_num, copyquality, points):
@@ -374,6 +417,28 @@ class BookSwapDatabase:
                   (user_num, book_id, copyquality, points))
         self.db.commit()
         return
+
+    def user_add_book_to_wishlist_by_id(self, book_id, user_num):
+        """
+        'user_id' lists the book matching 'book_id' on their wishlist
+        """
+        c = self.db.cursor()
+        # Get the wishlist ID
+        c.execute("""SELECT id FROM Wishlists WHERE userId = ?;""", (user_num,))
+        wishlist_id = c.fetchone()['id']
+
+        # If the book is already in the wishlist, don't add it
+        c.execute("""SELECT * FROM WishlistsBooks WHERE wishlistId = ? AND bookId = ?;""", (wishlist_id, book_id))
+        if c.fetchall():
+            flash("Book already in your wishlist", "warning")
+            log.warning(f"Book {book_id} already in " +
+                        f"user {user_num}'s wishlist")
+        # otherwise, add book to the wishlist
+        else:
+            c.execute("""INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?);""", (wishlist_id, book_id))
+            self.db.commit()
+            flash("Book successfully added to your wishlist", "success")
+            log.info(f"Book {book_id} added to wishlist {wishlist_id}")
 
     def user_add_book_by_isbn(self, isbn, user_num, copyquality):
         """
@@ -445,8 +510,6 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             log.error(f"Error checking email.  Error was {e}")
             raise Exception
-        return None
-
         return None
 
     def is_username_available(self, username):
@@ -629,6 +692,7 @@ class BookSwapDatabase:
                     UserBooks.points as pointsNeeded,
                     UserBooks.id as userBooksId,
                     UserBooks.userId AS userId,
+                    Books.id AS booksId,
                     IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
                     FROM Books
                     INNER JOIN UserBooks
@@ -676,6 +740,7 @@ class BookSwapDatabase:
                     UserBooks.points as pointsNeeded,
                     UserBooks.id as userBooksId,
                     UserBooks.userId AS userId,
+                    Books.id AS booksId,
                     IFNULL(coverImageUrl, '/static/images/book.png') AS coverImageUrl
                     FROM Books
                     INNER JOIN UserBooks
@@ -726,6 +791,7 @@ class BookSwapDatabase:
                 Users.username as listingUser,
                 UserBooks.userId AS userId,
                 CopyQualities.qualityDescription as copyQuality,
+                Books.id AS booksId,
                 CAST 
                     ((julianday('now') - julianday(UserBooks.dateCreated)) 
                         AS INTEGER) AS timeHere,
@@ -841,14 +907,13 @@ class BookSwapDatabase:
                         UserBooks.available = 1 AND
                         UserBooks.userId != ?
                         """,
-                        (book_id, user_num) )
+                      (book_id, user_num))
             rows = c.fetchall()
             log.info(f"Fetched all available books for Book {book_id} that are not owned by {user_num}")
         except sqlite3.Error as e:
             log.error(f"Error fetching available books for Book {book_id} that are not owned by{user_num} -- {e}")
             raise Exception
         return rows
-
 
     def get_wishlists_by_userid(self, user_id):
         """
@@ -868,8 +933,8 @@ class BookSwapDatabase:
                             Wishlists 
                         WHERE 
                             userId = ?""",
-                        ( user_id,))
-            rows =  c.fetchall()
+                      (user_id,))
+            rows = c.fetchall()
         except sqlite3.Error as e:
             log.error(f"{e}")
             log.error(f"Error getting wishlists for user {user_id}")
@@ -893,7 +958,7 @@ class BookSwapDatabase:
                             Books.coverImageUrl AS coverImageUrl,
                             Books.author AS author,
                             Books.ISBN AS ISBN,
-                            COUNT(*) AS numberAvailable,
+                            COUNT(UserBooks.id) AS numberAvailable,
                             min(UserBooks.points) AS minPoints,
                             WishlistsBooks.wishlistId AS wishlistId,
                             Books.id AS bookId
@@ -904,25 +969,27 @@ class BookSwapDatabase:
                                 ON
                                     WishlistsBooks.bookId=Books.id 
                                 INNER JOIN
-                            UserBooks
-                                ON
-                                    Books.id = UserBooks.bookId 
-                                INNER JOIN
                             Wishlists
                                 ON
                                     WishlistsBooks.wishlistId = Wishlists.id
+                                LEFT JOIN
+                            UserBooks
+                                ON
+                                    WishlistsBooks.bookId = UserBooks.bookId 
                         WHERE
                             WishlistsBooks.wishlistId = ? 
                                 AND
-                            UserBooks.userId != Wishlists.userId
+                            (UserBooks.userId != Wishlists.userId
+                                OR
+                            UserBooks.userId IS NULL)
                         GROUP BY
-                            Books.id""", 
-                         (wishlist_id,))
+                            WishlistsBooks.bookId""",
+                      (wishlist_id,))
             rows = c.fetchall()
         except sqlite3.Error as e:
             log.error(f"Error getting books in wishlist {wishlist_id} -- {e}")
             raise Exception
-        return rows 
+        return rows
 
     def get_current_user_points(self, user_num):
         """
@@ -1173,11 +1240,10 @@ class BookSwapDatabase:
                 raise Exception
             owner = rows[0]
             return owner[0] == user_num
-        except sqlite3.Error as e:
+        except sqlite3.Error:
             log.error(f"Wrong book owner for UserBooks number {user_books_id}")
             raise Exception
 
 
 def get_bsdb() -> BookSwapDatabase:
     return BookSwapDatabase()
-

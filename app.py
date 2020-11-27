@@ -87,10 +87,12 @@ def requestBook():
             points_available = bsdb.request_book(book, session['user_num'])
             success = "True"
             app.logger.info(
-                f"Successfully placed trade request for user {session['user_num']} on UserBooks number {book['userBooksId']}")
+                f"Successfully placed trade request for user {session['user_num']} on UserBooks number "
+                f"{book['userBooksId']}")
         except Exception:
             app.logger.error(
-                f"Unable to place the Trade Request for user {session['user_num']} on UserBooks book number {book['userBooksId']}")
+                f"Unable to place the Trade Request for user {session['user_num']} on UserBooks book number "
+                f"{book['userBooksId']}")
             success = "False"
             flash("There was an error in placing the trade request.  Feel free to try again", "warning")
     return {
@@ -106,10 +108,14 @@ def browse_books():
     bsdb = get_bsdb()
     recent_books = bsdb.get_recent_additions(8)
     recent_books_arr = [dict(book) for book in recent_books]
+    local_results = {}
+    external_results = {}
     if req.method == 'POST':
         book_search_query = (form.ISBN.data, form.author.data, form.title.data)
         book_search = BookSearch(book_search_query, bsdb)
-        book_results = book_search.local_book_search(10)
+        # TODO magic numbers here
+        # book_results = book_search.local_book_search(10)
+        local_results, external_results = book_search.combined_book_search(10, 10)
         show_recent = False
         show_search = False
         show_results = True
@@ -129,18 +135,21 @@ def browse_books():
                 f"APP: Browse_books -- Could not determine number of points for user {session['user_num']}.")
             points_available = 0
             flash(
-                "We could not load your points, so we assume you have 0 points. Feel free to browse for now, but we will need to fix this before you can make trade requests.",
+                "We could not load your points, so we assume you have 0 points. Feel free to browse for now, "
+                "but we will need to fix this before you can make trade requests.",
                 "warning")
     else:
         points_available = 0
 
     app.logger.info(f"\n\t recent_books: {recent_books_arr}" +
-                    f"\t book_results: {book_results}" +
+                    f"\t local_results: {local_results}" +
+                    f"\t external_results: {external_results}" +
                     f"\t form: {form}" +
                     f"\t Visiting user has {points_available} points available.")
     return render_template('browse-books.html',
                            recent_books=recent_books_arr,
-                           book_results=book_results,
+                           local_results=local_results,
+                           external_results=external_results,
                            form=form,
                            show_recent=show_recent,
                            show_search=show_search,
@@ -336,14 +345,14 @@ def signup():
     return render_template('signup.html', form=form)
 
 
-@app.route('/wishlist', methods=['GET','POST'])
+@app.route('/wishlist', methods=['GET', 'POST'])
 @login_required
 def wishlist():
     bsdb = get_bsdb()
     wishlists = Wishlists(session['user_num'], bsdb)
     data = req.get_json()
     # User asks to see copies of a book
-    if req.method=="POST" and data.get("request") == "copiesModal":
+    if req.method == "POST" and data.get("request") == "copiesModal":
         book = eval(data['book'])
         app.logger.info(f"Request incoming for copies of book {book} from user {session['user_num']}")
         try:
@@ -355,11 +364,11 @@ def wishlist():
             flash("Error retrieving copies of the book.  Maybe try again?", "warning")
             return redirect('/wishlist')
         return {
-                "title": copies_arr[0]['title'], 
-                "copies": copies_arr,
-                "count": len(copies_arr),
-                "points_available": g.points
-                }
+            "title": copies_arr[0]['title'],
+            "copies": copies_arr,
+            "count": len(copies_arr),
+            "points_available": g.points
+        }
     # Page load
     try:
         books = wishlists.get_all_wishlist_books_for_user()
@@ -406,7 +415,7 @@ def add_to_wish(isbn=None):
                             f"user {session['user_num']}'s wishlist")
         db.commit()
         db.close()
-        return redirect( url_for('browse_books'))
+        return redirect(url_for('browse_books'))
     data = req.args.get("isbn")
     if data == "":
         return redirect('/wishlist')
@@ -422,7 +431,7 @@ def add_to_wish(isbn=None):
                 WHERE
                     Wishlists.userId = ?
                 """,
-                (session['user_num'], ))
+              (session['user_num'],))
     wishlist = c.fetchone()['id']
     c.execute(get_wishlist_books_query,
               (wishlist, bookId))
@@ -436,7 +445,6 @@ def add_to_wish(isbn=None):
         app.logger.warning(f"Book {bookId} attempted to add to wishlist {wishlist}, but it was already in that list.")
     db.commit()
     db.close()
-
     return redirect('/wishlist')
 
 
@@ -565,16 +573,17 @@ def account():
 @login_required
 def add_book():
     """
-    This method lists a book as available for trade by a user. It involves the following steps:
-    - add the book to the backend DB as being available for trade
+    This method lists a book on one of several lists, by a user. It involves the following steps:
+    - add the book to the backend DB to the relevant table
     - then, reload the page with an updated table
     """
     bsdb = get_bsdb()
-    if req.get_json().get('request') == 'add':
+    data = req.get_json()
+    if data.get('request') == 'my-books':  # here we list the book as being available for trade
         # isbn = req.get_json()["isbn"]
-        copyquality = req.get_json()["quality"]
-        points = req.get_json()["points"]
-        book_id = req.get_json()["bookId"]
+        copyquality = data["quality"]
+        points = data["points"]
+        book_id = data["bookId"]
         user_num = session["user_num"]
         # bsdb.user_add_book_by_isbn(isbn, user_num, copyquality)
         bsdb.user_add_book_by_id(book_id, user_num, copyquality, points)
@@ -582,6 +591,11 @@ def add_book():
         flash("Book successfully added to your BookSwap library.", "success")
 
         return redirect('/my-books')
+    elif data.get('request') == 'my-wishlist':
+        book_id = data["bookId"]
+        user_num = session["user_num"]
+        bsdb.user_add_book_to_wishlist_by_id(book_id, user_num)
+        return redirect('/wishlist')
 
 
 @app.route('/_search-book', methods=['POST'])
@@ -593,15 +607,24 @@ def search_book():
     into the html as appropriate.
     """
     bsdb = get_bsdb()
-    if req.get_json().get('request') == 'search':
-        isbn = req.get_json()["isbn"]
-        author = req.get_json()["author"]
-        title = req.get_json()["title"]
+    data = req.get_json()
+    if data.get('request') == 'my-books':
+        isbn = data["isbn"]
+        author = data["author"]
+        title = data["title"]
         # TODO magic number here - number of search results
         search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=5)
         copyqualities = bsdb.get_book_qualities()
         return render_template("snippets/external_search_results.html", search_results=search_results,
-                               copyqualities=copyqualities)
+                               copyqualities=copyqualities, show_qualities=True, show_points=True)
+    elif data.get('request') == 'my-wishlist':
+        isbn = data["isbn"]
+        author = data["author"]
+        title = data["title"]
+        # TODO magic number here - number of search results
+        search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=5)
+        return render_template("snippets/external_search_results.html", search_results=search_results,
+                               show_qualities=False, show_points=False)
 
 
 @app.route('/remove-from-user-library', methods=['GET'])
