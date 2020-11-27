@@ -257,7 +257,9 @@ class BookSwapDatabase:
         if local is not None:
             return local
         # Get the info of the first printed, english-language, edition, to store
-        d = {'title': search_result['title'], 'author': search_result['author_name'][0], 'OLWorkKey': work_key}
+        d = {'title': search_result['title'] if 'title' in search_result else 'Unknown Title',
+             'author': search_result['author_name'][0] if 'author_name' in search_result else 'Unknown Author',
+             'OLWorkKey': work_key}
         editions = search_result['edition_key']
         # Check the editions 10 at a time
         n = len(editions)
