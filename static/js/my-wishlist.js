@@ -86,7 +86,8 @@ function seeCopies(book)
     //Make table.  We make the entire body via DOM, since we clear it to confirm
     //  trade requests.
     $('#showCopiesModalBody').empty();
-    $('#showCopiesModalFooterLeft').empty();
+    var footer = $('#showCopiesModalFooter');
+    footer.empty();
     var leadText;
     if (book['numberAvailable'] == 1) {
         leadText = "This is the 1 copy ";
@@ -120,32 +121,40 @@ function seeCopies(book)
             $('#showCopiesModalNumber').text(data['count']);
             var copies = data['copies'];
             $('#showCopiesModalCover').attr("src", copies[0]['coverImageUrl']);
-            $.each(copies, function (i) {
-                var row = $('<tr/>').appendTo(tableBody);
-                var col1 = $('<td/>')
-                    .text(copies[i]['username'])
-                    .appendTo(row);
-                var col2 = $('<td/>')
-                    .text(copies[i]['qualityDescription'])
-                    .appendTo(row);
-                var col3 = $('<td/>')
-                    .text(copies[i]['points'])
-                    .appendTo(row);
-                var col4 = $('<td/>')
-                    .appendTo(row);
-                var button = $('<button/>')
+            $.each(copies, function(i)
+                {
+                    var row = $('<tr/>').appendTo(tableBody);
+                    var col1 = $('<td/>')
+                        .text(copies[i]['username'])
+                        .appendTo(row);
+                    var col2 = $('<td/>')
+                        .text(copies[i]['qualityDescription'])
+                        .appendTo(row);
+                    var col3 = $('<td/>')
+                        .text(copies[i]['points'])
+                        .appendTo(row);
+                    var col4 = $('<td/>')
+                        .appendTo(row);
+                    var button = $('<button/>')
+                        .attr("type", "button")
+                        .addClass("btn btn-primary btn-sm")
+                        .on("click", function() {
+                            requestBook(copies[i], data['points_available'], book)
+                        })
+                        .text("Request This Book")
+                        .appendTo(col4);
+                    if (data['points_available'] < copies[i]['points'])
+                    {
+                        button.prop('disabled', true);
+                        button.html("Need More Points");
+                    }
+                });
+            var closeButton = $('<button/>')
                     .attr("type", "button")
-                    .addClass("btn btn-primary btn-sm")
-                    .on("click", function () {
-                        requestBook(copies[i], data['points_available'], book)
-                    })
-                    .text("Request This Book")
-                    .appendTo(col4);
-                if (data['points_available'] < copies[i]['points']) {
-                    button.prop('disabled', true);
-                    button.html("Need More Points");
-                }
-            });
+                    .addClass("btn btn-secondary btn-sm")
+                    .attr("data-dismiss", "modal")
+                    .text("Close")
+                    .appendTo(footer);
 
             $('#showCopiesModal').modal("show");
         }
@@ -166,8 +175,8 @@ function requestBook(book, pointsAvailable, bookTable)
  \****************************************************************************/ {
     var body = $('#showCopiesModalBody');
     body.empty();
-    var leftFooter = $('#showCopiesModalFooterLeft');
-    leftFooter.empty();
+    var footer = $('#showCopiesModalFooter');
+    footer.empty();
     var bodyHeader = $('<h2/>').text("Confirm Trade Request")
         .appendTo(body);
     $('<p/>').text(`You are about to request ${book['title']} by ${book['author']}`)
@@ -190,19 +199,72 @@ function requestBook(book, pointsAvailable, bookTable)
     }
     $('<p/>').text(remainPointsText).appendTo(body);
     var yesButton = $('<button/>')
-        .attr("type", "button")
-        .addClass("btn btn-primary btn-sm")
-        .on("click", function () {
-            requestConfirmed(book);
-        })
-        .text("Yes")
-        .appendTo(leftFooter);
+            .attr("type", "button")
+            .addClass("btn btn-primary btn-sm")
+            .on("click", function() {
+                requestConfirmed(book);
+            })
+            .text("Yes, Request This Trade")
+            .appendTo(footer);
     var noButton = $('<button/>')
-        .attr("type", "button")
-        .addClass("btn btn-secondary btn-sm")
-        .on("click", function () {
-            seeCopies(bookTable);
-        })
-        .text("No")
-        .appendTo(leftFooter);
+            .attr("type", "button")
+            .addClass("btn btn-secondary btn-sm")
+            .on("click", function() {
+                seeCopies(bookTable);
+            })
+            .text("No, Show All Copies")
+            .appendTo(footer);
+    var closeButton = $('<button/>')
+            .attr("type", "button")
+            .addClass("btn btn-secondary btn-sm")
+            .attr("data-dismiss", "modal")
+            .text("Close")
+            .appendTo(footer);
+}
+
+function requestConfirmed(book)
+/*****************************************************************************\
+ * RequestConfirmed sends a trade request order to the App.
+ * Accepts:
+ *  book (object): UsersBooks entry
+ * Returns:
+ *  Null
+ \****************************************************************************/
+{
+    event.preventDefault();
+    book['pointsNeeded'] = book['points'];
+    $.ajax({
+        url: '/request-book',
+        type: 'POST',
+        data: JSON.stringify(book),
+        dataType: 'json',
+        success: function (data) {
+            if (data['success'] == "True") {
+                alert('went through');
+                $('#requestTradeSuccessModalTitle').text(data['book']['title']);
+                $('#requestTradeSuccessModalUsername').text(data['book']['username']);
+                var pointsNeeded = data['book']['pointsNeeded'];
+                if (pointsNeeded != 1)
+                    pointsNeeded += " points"
+                else
+                    pointsNeeded += " point"
+                $('#requestTradeSuccessModalPointsNeeded').text(pointsNeeded);
+                var pointsAvailable = data['points_available'];
+                if (pointsAvailable != 1)
+                    pointsAvailable += " points";
+                else
+                    pointsAvailable += " point";
+                $('#requestTradeSuccessModalPointsAvailable').text(pointsAvailable);
+                $('#requestTradeSuccessModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $('#showCopiesModal').modal("hide");
+                $('#requestTradeSuccessModal').modal("show");
+            } else {
+                location.reload(true);
+            }
+        }
+    });
+
 }

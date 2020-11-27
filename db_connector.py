@@ -884,8 +884,9 @@ class BookSwapDatabase:
         try:
             c.execute("""
                     SELECT
-                        UserBooks.id as userBooksId,
-                        UserBooks.points as points,
+                        UserBooks.id AS userBooksId,
+                        UserBooks.userId AS userId,
+                        UserBooks.points AS points,
                         CAST 
                             ((julianday('now') - 
                                     julianday(UserBooks.dateCreated)) 
@@ -1033,6 +1034,8 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             log.error(f"Error trying to confirm user {user_num} has sufficient points. {e}")
             raise Exception
+        print("IN DB")
+        #TODO: Fix 'POINTSNEEDED"
         if points_available < book['pointsNeeded']:
             log.warning(f"Requesting user does not have sufficient points for the trade.")
             raise Exception
