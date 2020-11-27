@@ -2,18 +2,16 @@
 {% set active_page = 'my-trades' %}
 {% block content %}
     <p></p>
-    <div class="container mt-5 w-75 text-center">
+    <div class="container mt-5 w-75 text-center mb-5">
         <img src="{{ url_for('static', filename='images/book-guide.png') }}"
              alt=""
              class="img-fluid col-2 mx-auto"/>
         <h3 class="mt-5">You have no active trade activity.</h3>
-        <p class="lead">Would you like to <a class="text-info" href="{{ url_for('my_books') }}">list more books</a>
+        <p class="lead"><br>Would you like to <a class="text-info" href="{{ url_for('my_books') }}">list more books</a>
             for trade?
-        <p></p>
-        <small class="mt-5">
-            Icon made by <a href="https://icon54.com/" title="Pixel perfect">Pixel perfect</a> from
-            <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
-        </small>
+        <p class="lead">You can also view your current outgoing trade requests <a href="#" class="text-info">here.</a>
+        </p>
+        <br><br><br><br>
     </div>
 
 {% endblock content %}
