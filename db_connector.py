@@ -979,9 +979,14 @@ class BookSwapDatabase:
                         WHERE
                             WishlistsBooks.wishlistId = ? 
                                 AND
-                            (UserBooks.userId != Wishlists.userId
-                                OR
-                            UserBooks.userId IS NULL)
+                            (
+                                UserBooks.userId IS NULL OR
+                                (
+                                    UserBooks.userId != Wishlists.userId
+                                        AND
+                                    UserBooks.available = 1
+                                )
+                            )
                         GROUP BY
                             WishlistsBooks.bookId""",
                       (wishlist_id,))
