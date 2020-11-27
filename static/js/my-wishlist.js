@@ -240,7 +240,6 @@ function requestConfirmed(book)
         dataType: 'json',
         success: function (data) {
             if (data['success'] == "True") {
-                alert('went through');
                 $('#requestTradeSuccessModalTitle').text(data['book']['title']);
                 $('#requestTradeSuccessModalUsername').text(data['book']['username']);
                 var pointsNeeded = data['book']['pointsNeeded'];
