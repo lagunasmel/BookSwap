@@ -19,7 +19,8 @@ function seeCopies(book)
     //Make table.  We make the entire body via DOM, since we clear it to confirm
     //  trade requests.
     $('#showCopiesModalBody').empty();
-    $('#showCopiesModalFooterLeft').empty();
+    var footer = $('#showCopiesModalFooter');
+    footer.empty();
     var leadText;
     if (book['numberAvailable'] == 1)
     {
@@ -84,7 +85,12 @@ function seeCopies(book)
                         button.html("Need More Points");
                     }
                 });
-
+            var closeButton = $('<button/>')
+                    .attr("type", "button")
+                    .addClass("btn btn-secondary btn-sm")
+                    .attr("data-dismiss", "modal")
+                    .text("Close")
+                    .appendTo(footer);
             $('#showCopiesModal').modal("show");
         }
     });
@@ -105,8 +111,8 @@ function requestBook(book, pointsAvailable, bookTable)
 {
     var body = $('#showCopiesModalBody');
     body.empty();
-    var leftFooter = $('#showCopiesModalFooterLeft');
-    leftFooter.empty();
+    var footer = $('#showCopiesModalFooter');
+    footer.empty();
     var bodyHeader = $('<h2/>').text("Confirm Trade Request")
         .appendTo(body);
     $('<p/>').text(`You are about to request ${book['title']} by ${book['author']}`)
@@ -140,14 +146,66 @@ function requestBook(book, pointsAvailable, bookTable)
             .on("click", function() {
                 requestConfirmed(book);
             })
-            .text("Yes")
-            .appendTo(leftFooter);
+            .text("Yes, Request This Trade")
+            .appendTo(footer);
     var noButton = $('<button/>')
             .attr("type", "button")
             .addClass("btn btn-secondary btn-sm")
             .on("click", function() {
                 seeCopies(bookTable);
             })
-            .text("No")
-            .appendTo(leftFooter);
+            .text("No, Show All Copies")
+            .appendTo(footer);
+    var closeButton = $('<button/>')
+            .attr("type", "button")
+            .addClass("btn btn-secondary btn-sm")
+            .attr("data-dismiss", "modal")
+            .text("Close")
+            .appendTo(footer);
+}
+
+function requestConfirmed(book)
+/*****************************************************************************\
+ * RequestConfirmed sends a trade request order to the App.
+ * Accepts:
+ *  book (object): UsersBooks entry
+ * Returns:
+ *  Null
+ \****************************************************************************/
+{
+    event.preventDefault();
+    book['pointsNeeded'] = book['points'];
+    $.ajax({
+        url: '/request-book',
+        type: 'POST',
+        data: JSON.stringify(book),
+        dataType: 'json',
+        success: function (data) {
+            if (data['success'] == "True") {
+                alert('went through');
+                $('#requestTradeSuccessModalTitle').text(data['book']['title']);
+                $('#requestTradeSuccessModalUsername').text(data['book']['username']);
+                var pointsNeeded = data['book']['pointsNeeded'];
+                if (pointsNeeded != 1)
+                    pointsNeeded += " points"
+                else
+                    pointsNeeded += " point"
+                $('#requestTradeSuccessModalPointsNeeded').text(pointsNeeded);
+                var pointsAvailable = data['points_available'];
+                if (pointsAvailable != 1)
+                    pointsAvailable += " points";
+                else
+                    pointsAvailable += " point";
+                $('#requestTradeSuccessModalPointsAvailable').text(pointsAvailable);
+                $('#requestTradeSuccessModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $('#showCopiesModal').modal("hide");
+                $('#requestTradeSuccessModal').modal("show");
+            } else {
+                location.reload(true);
+            }
+        }
+    });
 }

@@ -117,14 +117,36 @@
                 </div>
                 <div class="modal-body" id="showCopiesModalBody">
                </div>
+                <div class="modal-footer" id="showCopiesModalFooter">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" data-keyboard="false" data-backgrop="static" tabindex="-1" role="dialog"
+         id="requestTradeSuccessModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Book Request Sent!</h5>
+                </div>
+                <div class="modal-body text-left">
+                    <p>
+                        Your request of
+                        <span class="text-info" id="requestTradeSuccessModalTitle"></span>
+                        from <span class='text-info' id="requestTradeSuccessModalUsername"></span>
+                        has been placed.
+                    </p>
+                    <p> This has cost you
+                        <span class='text-info' id="requestTradeSuccessModalPointsNeeded"></span>, leaving you with
+                        <span class='text-info' id='requestTradeSuccessModalPointsAvailable'></span>.
+                    </p>
+                    <p>If your request is rejected, the points will be returned to your balance. A refund can also be
+                        processed if the book is never received.
+                    </p>
+                </div>
                 <div class="modal-footer">
-                    <div class="row">
-                        <div class="col-8" id="showCopiesModalFooterLeft">
-                        </div>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                            Close 
-                        </button>
-                    </div>
+                    <a href="{{ url_for('wishlist') }}" class="btn btn-primary active" role="button"
+                       aria-pressed="true">Back to My Wishlist</a>
                 </div>
             </div>
         </div>
