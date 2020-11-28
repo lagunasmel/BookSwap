@@ -218,6 +218,12 @@ def my_trades():
                                num_trade_reqs=num_trade_reqs)
 
 
+@app.route('/my-requests')
+@login_required
+def my_requests():
+    return render_template('user/my-requests.html')
+
+
 @app.route('/accept-trade/<user_books_id>')
 @login_required
 def accept_trade(user_books_id):
