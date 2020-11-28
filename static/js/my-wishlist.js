@@ -36,6 +36,7 @@ function cancelAddBook() {
     $("#confirmBook").hide();
     $("#searchResults").hide();
     $("#listBook").show();
+    $('#wishlistSearch').show();
 }
 
 function confirmBook(e, btnId) {
