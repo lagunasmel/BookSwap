@@ -51,8 +51,8 @@
         <div class="collapse navbar-collapse" id="navbarColor02">
             <ul class="navbar-nav ml-auto">
                 {% if session.user_num %}
-                    <li class="nav-item {{ 'active' if active_page == 'home' }}">
-                        <a class="nav-link" href="{{ url_for('home') }}"> Home
+                    <li class="nav-item {{ 'active' if active_page == 'home' }} ">
+                        <a class="nav-link" href="{{ url_for('home') }}">Home
                             <span class="sr-only">(current)</span>
                         </a>
                     </li>
@@ -62,23 +62,44 @@
                     <li class="nav-item {{ 'active' if active_page == 'my-books' }}">
                         <a class="nav-link" href="{{ url_for('my_books') }}">My Books</a>
                     </li>
-                    <li class="nav-item {{ 'active' if active_page == 'my-trades' }}">
-                        <a class="nav-link text-center" href="{{ url_for('my_trades') }}">My Trades
-                            <span class="text-success">
-                  {% if g.num_trade_requests > 0 %} <br/> {{ g.num_trade_requests }} to review {% endif %}
-                                {% if g.num_open_trades  > 0 %} <br/> {{ g.num_open_trades }} to complete {% endif %}
-                </span></a>
-                    </li>
                     <li class="nav-item {{ 'active' if active_page == 'wishlist' }}">
                         <a class="nav-link" href="{{ url_for('wishlist') }}">Wishlist</a>
                     <li class="nav-item {{ 'active' if active_page == 'user-home' }}">
                         <a class="nav-link" href="{{ url_for('account') }}">Account Settings</a>
                     </li>
+
+                    <li class="nav-item dropdown {{ 'active' if active_page == 'received-reqs' or active_page == 'my-requests' }}">
+                        <a class="nav-link dropdown-toggle" data-toggle="dropdown"
+                           href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                            {% if g.num_trade_requests > 0 or g.num_open_trades  > 0 %}
+                                <i class="fas fa-bell fa-sm text-warning"></i>&nbsp; {% endif %} My Trades</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{{ url_for('received_requests') }}">Received Requests</a>
+                            <!-- Creates an alert section with info if there is outgoing trade activity -->
+                            {% if g.num_trade_requests > 0 or g.num_open_trades  > 0 %}
+                                <small class="text-success dropdown-item-text">
+                                    {% if g.num_trade_requests > 0 %} {{ g.num_trade_requests }} to review {% endif %}
+                                    {% if g.num_trade_requests == 0 and g.num_open_trades  > 0 %} {% else %}
+                                        <br> {% endif %}
+                                    {% if g.num_open_trades  > 0 %} {{ g.num_open_trades }} to complete {% endif %}
+                                </small>
+                            {% endif %}
+
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{ url_for('my_requests') }}">My Requests</a>
+                        </div>
+                    </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
                     </li>
-                    <li class="nav-item nav-link text-success text-center"> {{ g.username }} <br/> {{ g.points }}
-                        {% if g.points == 1 %} point {% else %} points {% endif %}
+                    <li class="nav-item nav-link text-success text-center">
+                        <small>
+                            {{ g.username }}
+                            <br style="display: block; content:''; margin-top: -5px;">
+                            {{ g.points }}
+                            {% if g.points == 1 %} point {% else %} points {% endif %}
+                        </small>
                     </li>
                 {% else %}
                     <li class="nav-item {{ 'active' if active_page == 'home' }} ">

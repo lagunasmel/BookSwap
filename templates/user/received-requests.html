@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% set active_page = 'my-trades' %}
+{% set active_page = 'received-reqs' %}
 {% block content %}
     <style>
         span {
@@ -8,10 +8,10 @@
     </style>
 
     <p></p>
-    <div class="container m-6 w-75">
+    <div class="container mb-5 w-75">
         <div class="row">
             <div class="col-5 p-4 mx-auto jumbotron m-4">
-                <h2 class="text-center"> Trade Requests Awaiting Your Approval </h2>
+                <h4 class="text-center"> Trade Requests Awaiting Your Approval </h4>
                 {% if num_trade_reqs == 0 %}
                     <p class="lead text-center text-info mt-4">You have no pending trade requests. </p>
                 {% else %}
@@ -43,14 +43,14 @@
                                         </button>
                                     </form>
                                 </div>
-                            </div>
+                            </div> <p></p>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
             </div>
 
             <div class="col-5 p-4 mx-auto jumbotron m-4">
-                <h2 class="text-center"> Accepted Trade Requests Not Yet Received </h2>
+                <h4 class="text-center"> Accepted Trade Requests Not Yet Received By Requesting User </h4>
 
                 {% if num_open_trades == 0 %}
                     <p class="lead text-center text-info mt-4">You have no open trades.</p>
@@ -79,7 +79,7 @@
                                         </button>
                                     </form>
                                 </div>
-                            </div>
+                            </div><p></p>
                         {% endif %}
                     {% endfor %}
                 {% endif %}
