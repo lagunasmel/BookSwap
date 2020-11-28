@@ -307,9 +307,13 @@ def signup():
         elif not form.password.data:
             error = "Password is required."
         elif c.execute('SELECT id FROM Users WHERE username = ?',
-                       (form.email.data,)).fetchone() is not None:
+                       (form.username.data,)).fetchone() is not None:
             error = 'User {} already exists.  Please try again with a different username, or log in.'.format(
                 form.username.data)
+        elif c.execute('SELECT id FROM Users WHERE email = ?',
+                        (form.email.data,)).fetchone() is not None:
+            error = 'User with email {} already exists. Please try again with a different email, or log in.'.format(
+                form.email.data)
         if error is None:
             c.execute("""INSERT INTO Users (
             'username', 
