@@ -197,9 +197,9 @@ def change_points():
     return redirect(url_for('my_books'))
 
 
-@app.route('/my-trades')
+@app.route('/received-requests')
 @login_required
-def my_trades():
+def received_requests():
     bsdb = get_bsdb()
     user = session['user_num']
 
@@ -212,7 +212,7 @@ def my_trades():
     else:
         trade_info = bsdb.get_trade_info(user)
         trade_info_dicts = [dict(row) for row in trade_info]
-        return render_template('user/my-trades.html',
+        return render_template('user/received-requests.html',
                                trade_info=trade_info_dicts,
                                num_open_trades=num_open_trades,
                                num_trade_reqs=num_trade_reqs)
@@ -236,7 +236,7 @@ def accept_trade(user_books_id):
     except Exception:
         app.logger.info(f"There was an error in accepting the trade.")
         flash("There was an error in accepting your trade", "warning")
-    return redirect(url_for('my_trades'))
+    return redirect(url_for('received_requests'))
 
 
 @app.route('/reject-trade/<user_books_id>')
@@ -251,7 +251,7 @@ def reject_trade(user_books_id):
     except Exception:
         app.logger.error(f"There was an error in rejecting the trade.")
         flash("There was an error in deleting your trade", "warning")
-    return redirect(url_for('my_trades'))
+    return redirect(url_for('received_requests'))
 
 
 @app.route('/login', methods=['GET', 'POST'])

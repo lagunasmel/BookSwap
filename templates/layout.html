@@ -68,13 +68,13 @@
                         <a class="nav-link" href="{{ url_for('account') }}">Account Settings</a>
                     </li>
 
-                    <li class="nav-item dropdown {{ 'active' if active_page == 'my-trades' or active_page == 'my-requests' }}">
+                    <li class="nav-item dropdown {{ 'active' if active_page == 'received-reqs' or active_page == 'my-requests' }}">
                         <a class="nav-link dropdown-toggle" data-toggle="dropdown"
                            href="#" role="button" aria-haspopup="true" aria-expanded="false">
                             {% if g.num_trade_requests > 0 or g.num_open_trades  > 0 %}
                                 <i class="fas fa-bell fa-sm text-warning"></i>&nbsp; {% endif %} My Trades</a>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="{{ url_for('my_trades') }}">Received Requests</a>
+                            <a class="dropdown-item" href="{{ url_for('received_requests') }}">Received Requests</a>
                             <!-- Creates an alert section with info if there is outgoing trade activity -->
                             {% if g.num_trade_requests > 0 or g.num_open_trades  > 0 %}
                                 <small class="text-success dropdown-item-text">
