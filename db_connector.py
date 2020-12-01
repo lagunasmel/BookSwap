@@ -415,6 +415,9 @@ class BookSwapDatabase:
         c = self.db.cursor()
         c.execute("""INSERT INTO UserBooks (userId, bookId, copyQualityId, points) VALUES (?, ?, ?, ?)""",
                   (user_num, book_id, copyquality, points))
+        cur_points = c.execute("SELECT points FROM Users WHERE id = ?", (user_num,)).fetchone()['points']
+        cur_points += 0.1
+        c.execute("""UPDATE Users SET points = (?) WHERE id = (?)""", (cur_points, user_num))
         self.db.commit()
         return
 

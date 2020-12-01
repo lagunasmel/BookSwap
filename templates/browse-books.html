@@ -37,7 +37,7 @@
                                     <p></p>
                                     <form>
                                         <button type="submit" class="btn btn-success btn-sm"
-                                                onclick='requestTrade( {{ book | tojson }}, {{ points_available }})'>
+                                                onclick='requestTrade( {{ book | tojson }}, {{ points_available|int }})'>
                                             Request Trade
                                         </button>
                                     </form>
@@ -152,7 +152,7 @@
                                     <input type="hidden" id="requested_book" name="requested_book"
                                            value="{{ book['ISBN'] }}">
                                     <button type="submit" class="btn btn-success btn-sm m-1"
-                                            onclick='requestTrade( {{ book | tojson }}, {{ points_available }})'>
+                                            onclick='requestTrade( {{ book | tojson }}, {{ points_available|int }})'>
                                         Request Trade
                                     </button>
                                 </form>
