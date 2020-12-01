@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS Users
     state         VARCHAR(255) NOT NULL,
     postCode      VARCHAR(255) NOT NULL,
     dateCreated   DATETIME DEFAULT current_timestamp,
-    points        INT      DEFAULT 0
+    points        FLOAT(32, 1) DEFAULT 0.0
 );
 
 -- TradeStatuses

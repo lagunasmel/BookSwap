@@ -648,6 +648,8 @@ def remove_book():
     bookID = req.args.get("bookRem")
     c.execute("DELETE FROM UserBooks WHERE id = ?",
               (bookID,))
+    new_points = c.execute("SELECT points FROM Users WHERE id = (?)", (session['user_num'],)).fetchone()['points'] - 0.1
+    c.execute("""UPDATE Users SET points = (?) WHERE id = (?)""", (new_points, session['user_num']))
     db.commit()
     db.close()
     app.logger.info(f"Book {bookID} removed from user {session['user_num']}")
