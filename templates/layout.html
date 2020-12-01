@@ -98,7 +98,7 @@
                         <small>
                             {{ g.username }}
                             <br style="display: block; content:''; margin-top: -5px;">
-                            {{ g.points|round|int }}
+                            {{ g.points|int }}
                             {% if g.points == 1 %} point {% else %} points {% endif %}
                         </small>
                     </li>
