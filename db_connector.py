@@ -69,6 +69,65 @@ class BookSwapDatabase:
             raise Exception
         return
 
+    def book_received_by_requester(self, user_books_id, user_num):
+        """
+        Book_received_by_requester completes the trade request:
+            changes Trades.statusId to completed (6)
+            awards points to sender 
+        Accepts:
+            user_books_id (int): UserBooks.id
+            user_num (int): Users.id
+        Returns:
+            None
+        """
+        c = self.db.cursor()
+       # award points to sender
+        try:
+            c.execute("""
+                    UPDATE 
+                        Users
+                    SET
+                        points = points + (
+                            SELECT
+                                points
+                            FROM
+                                UserBooks
+                            WHERE
+                                id = ?
+                                )
+                    WHERE
+                        id = (
+                            SELECT
+                                userId
+                            From
+                                UserBooks
+                            WHERE
+                                id = ?
+                                )
+                    """,
+                    ( user_books_id, user_books_id) )
+            self.db.commit()
+        except sqlite3.Error as e:
+            log.error(f"Awarding points to sending user for book {user_books_id} -- {e}")
+            raise Exception
+        # Change Trade to complted (6)
+        try:
+            c.execute("""
+                    UPDATE
+                        Trades
+                    SET
+                        statusId = 6
+                    WHERE
+                        userBookId = ?
+                    """, 
+                    ( user_books_id, ))
+            self.db.commit()
+        except sqlite3.Error as e:
+            log.error("Changing trade status on book {user_books_id} -- {e}")
+            raise Exception
+         # job's done
+        return
+
     def cancel_trade_by_requester(self, user_books_id, user_num):
         """
         Cancel_trade_by_requester cancels the trade request:
