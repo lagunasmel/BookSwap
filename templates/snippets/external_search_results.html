@@ -1,6 +1,6 @@
 {% block body %}
     {% if search_results|length > 0 %}
-        <h2 class="text-center">Search Results</h2>
+        <h3 class="text-center">Search Results</h3>
         <table class="table table-hover">
             <thead>
             <tr class="text-left">
@@ -21,8 +21,13 @@
                         by {{ result.author }}</td>
                     <td>
                         {% if result.coverImageUrl %}
-                            <img src="{{ result.coverImageUrl }}" alt="Book Cover Image" class="img-thumbnail"
-                                 style="max-width: 75%; max-height: 75%">
+                            {% if show_wishlist_results %}
+                                <img src="{{ result.coverImageUrl }}" alt="Book Cover Image" class="img-thumbnail"
+                                     style="max-width: 50%; max-height: 50%">
+                            {% else %}
+                                <img src="{{ result.coverImageUrl }}" alt="Book Cover Image" class="img-thumbnail"
+                                     style="max-width: 75%; max-height: 75%">
+                            {% endif %}
                         {% else %}
                             NO IMAGE AVAILABLE
                         {% endif %}
@@ -54,7 +59,7 @@
                     <td>
                         <button type="button" class="btn btn-primary btn-sm ml-2 mb-1 add-book-button"
                                 id="{{ "addBtnBookId" ~ result.id }}" data-bookid="{{ result.id }}">
-                            Add Book
+                            Add Book {% if show_wishlist_results %} to Wishlist {% endif %}
                         </button>
                         <br>
                         <button type="button" class="btn btn-primary btn-sm ml-2 mb-1 confirm-book-button"
@@ -74,6 +79,10 @@
     {% else %}
         <div class="w-100 p-3 mx-auto">
             <h3 class="p1-2 text-center">Sorry, no matches found!</h3>
+            {% if show_wishlist_results %}
+                <!-- Adds extra spacing at bottom of page to avoid the floating footer -->
+                <div class="mb-5 container"><br><br><br></div>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}

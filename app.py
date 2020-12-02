@@ -230,7 +230,7 @@ def my_requests():
     except Exception:
         app.logger.error("Couldn't fill my-requests")
         requests = []
-    return render_template('user/my-requests.html', requests = requests)
+    return render_template('user/my-requests.html', requests=requests)
 
 
 @app.route('/accept-trade/<user_books_id>')
@@ -323,7 +323,7 @@ def signup():
             error = 'User {} already exists.  Please try again with a different username, or log in.'.format(
                 form.username.data)
         elif c.execute('SELECT id FROM Users WHERE email = ?',
-                        (form.email.data,)).fetchone() is not None:
+                       (form.email.data,)).fetchone() is not None:
             error = 'User with email {} already exists. Please try again with a different email, or log in.'.format(
                 form.email.data)
         if error is None:
@@ -640,7 +640,7 @@ def search_book():
         # TODO magic number here - number of search results
         search_results = bsdb.search_books_openlibrary(title=title, author=author, isbn=isbn, num_results=5)
         return render_template("snippets/external_search_results.html", search_results=search_results,
-                               show_qualities=False, show_points=False)
+                               show_qualities=False, show_points=False, show_wishlist_results=True)
 
 
 @app.route('/remove-from-user-library', methods=['GET'])
