@@ -200,7 +200,7 @@ class BookSwapDatabase:
                     ORDER BY
                         dateInitiated ASC
                         """,
-                        (user_num, ))
+                      (user_num,))
             rows = c.fetchall()
         except sqlite3.Error as e:
             log.error(f"Receiving open trades from database -- {e}")
@@ -445,7 +445,7 @@ class BookSwapDatabase:
                     languages = details['languages']
                     if len(languages) == 1 and languages[0]['key'] == '/languages/eng':
                         edition_key = candidate
-                        isbn = int(details['isbn_13'][0])
+                        isbn = int(details['isbn_13'][0].replace('-', '').replace(' ', ''))
                         break
             i += 10
         # Note that edition_key could still be None if we didn't find a suitable one, that's fine
@@ -551,7 +551,7 @@ class BookSwapDatabase:
                     'author'
                     'coverImageUrl'
         """
-        # Get the search results
+        # Clean inputs and get the search results
         url = "http://openlibrary.org/search.json"
         if title == '':
             title = None

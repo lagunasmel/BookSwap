@@ -6,10 +6,11 @@
         <img src="{{ url_for('static', filename='images/book-guide.png') }}"
              alt=""
              class="img-fluid col-2 mx-auto"/>
-        <h3 class="mt-5">You have no active trade activity.</h3>
+        <h4 class="mt-5">You have not received any trade requests.</h4>
         <p class="lead"><br>Would you like to <a class="text-info" href="{{ url_for('my_books') }}">list more books</a>
             for trade?
-        <p class="lead">You can also view your current outgoing trade requests <a href="#" class="text-info">here.</a>
+        <p class="lead">You can also view the status of the trade requests <br>you have sent to others on your
+            <a href="{{ url_for('my_requests') }}" class="text-info">requests page</a>.
         </p>
         <br><br><br><br>
     </div>
