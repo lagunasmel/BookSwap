@@ -82,57 +82,55 @@ class BookSwapDatabase:
             None
         """
         c = self.db.cursor()
-       # return points to requester
-        try:
-            c.execute("""
-                    UPDATE 
-                        Users
-                    SET
-                        points = points + (
-                            SELECT
-                                points
-                            FROM
-                                UserBooks
-                            WHERE
-                                id = ?
-                                )
-                    WHERE
-                        id = ?
-                    """,
-                    ( user_books_id, user_num) )
-            self.db.commit()
-        except sqlite3.Error as e:
-            log.error(f"Returning points to User {user_num} for book {user_books_id} -- {e}")
-            raise Exception
-        # Mark book as available
-        try:
-            c.execute("""
-                    UPDATE
-                        UserBooks
-                    SET
-                        available = 1
-                    WHERE
-                        id = ?
-                    """,
-                    (user_books_id, ))
-            self.db.commit()
-        except sqlite3.Error as e:
-            log.error(f"Setting book {user_books_id} as available -- {e}")
-            raise Exception
         # Delete trade entry
         try:
             c.execute("""
                     DELETE FROM 
                         Trades 
                     WHERE
-                        Trades.userBookId = ?
+                        Trades.userBooksId = ?
                     """, 
                     ( user_books_id, ))
             self.db.commit()
         except sqlite3.Error as e:
             log.error("Deleting trade on book {user_books_id} -- {e}")
             raise Exception
-         # job's done
+        # return points to requester
+        try:
+            c.execute("""
+                    UPDATE 
+                        Users
+                    SET
+                        Users.points = Users.points + (
+                            SELECT
+                                UserBooks.points
+                            WHERE
+                                UserBooks.id = ?
+                                )
+                    WHERE
+                        Users.id = ?
+                    """,
+                    ( user_books_id, user_num) )
+            self.db.commit()
+        except sqlite3.Error as e:
+            log.error(f"Returning points to User {user_num} for book {user_books_id}")
+            raise Exception
+        # Mark book as available
+        try:
+            c.execut("""
+                    UPDATE
+                        UserBooks
+                    SET
+                        UserBooks.available = 1
+                    WHERE
+                        UserBooks.id = ?
+                    """,
+                    (user_books_id, ))
+            self.db.commit()
+        except sqlite3.Error as e:
+            log.error(f"Setting book {user_books_id} as available.")
+            raise Exception
+        # job's done
         return
                         
 
@@ -383,7 +381,8 @@ class BookSwapDatabase:
         Returns:
             Trades.requestedId (int)
         """
-        c = self.db.cursor()
+        print("GET TRADE REQUESTER")
+        c=self.db.cursor()
         try:
             c.execute("""
                     SELECT
@@ -1207,6 +1206,7 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             log.error(f"Error trying to confirm user {user_num} has sufficient points. {e}")
             raise Exception
+        print("IN DB")
         #TODO: Fix 'POINTSNEEDED"
         if points_available < book['pointsNeeded']:
             log.warning(f"Requesting user does not have sufficient points for the trade.")

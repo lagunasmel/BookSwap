@@ -56,7 +56,12 @@ span {
                     Request Sent
                 </td>
                 <td>
-                    <button type="button" class="btn btn-primary btn-sm">Cancel Trade Request</button>
+                    <button 
+                             type="button" 
+                             class="btn btn-primary btn-sm"
+                             onclick='cancelTradeRequest( {{ book | tojson }})'>
+                        Cancel Trade Request
+                    </button>
                 </td>
                 {% elif book['statusId'] == 3 %}
                 <td class="text-success">Accepted <br>(Or Shipped)</td>
@@ -64,18 +69,59 @@ span {
                     <button type="button" class="btn btn-primary btn-sm">Mark as Received</button>
                     <button type="button" class="btn btn-primary btn-sm" disabled>You can mark as Not Received one month after request</button>
                 </td>
-                <!--
-                {% elif book['statusId'] == 4 or book['statusId'] == 5 %}
-                <td class="text-danger">Declined</td>
-                <td>
-                    <button type="button" class="btn btn-primary btn-sm">Remove</button>
-                </td>
-                -->
-                 {% endif %}
+                {% endif %}
             </tr>
             {% endif %}
             {% endfor %}
         </tbody>
     </table>
+    <div class="modal" tabindex="-1" role="dialog" id="cancelModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Trade Request Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="col-12 mb-4">
+                    <div class="row">
+                        <div class="modal-body col-4">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 id="cancelModalCover"
+                                 style="max-width: 75%">
+                        </div>
+                        <div class="modal-body col-8 text-left">
+                            <p> You have previously initiated a trade request for
+                            <span class="text-info" id="cancelModalTitle"> </span>
+                            by <span class='text-info' id="cancelModalAuthor"> </span>
+                            (ISBN: <span class='text-info' id="cancelModalISBN"> </span>).
+                            This book is being offered by user <span class='text-info'
+                                                                    id='cancelModalUsername'> </span>.
+                            </p>
+                            <p> Do you really want to cancel this trade request and get back your 
+                            <span class='text-info' id="cancelModalPoints"></span>?
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="cancelModalConfirmForm">
+                            <div class="form-group">
+                                <button id='cancelTradeModalConfirmationButton' type="submit"
+                                                                                class="btn btn-primary">
+                                    Cancel Trade Request
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                    Keep Trade Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/my-requests.js') }}">
+</script>
 {% endblock content %}
