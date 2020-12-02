@@ -66,8 +66,14 @@ span {
                 {% elif book['statusId'] == 3 %}
                 <td class="text-success">Accepted <br>(Or Shipped)</td>
                 <td>
-                    <button type="button" class="btn btn-primary btn-sm">Mark as Received</button>
-                    <button type="button" class="btn btn-primary btn-sm" disabled>You can mark as Not Received one month after request</button>
+                    <button 
+                        type="button" 
+                        class="btn btn-primary btn-sm"
+                        onclick='receivedTradeRequest( {{ book | tojson }})'>
+                        Mark as Received
+                    </button>
+                    <br />
+                    <button type="button" class="mt-3 btn btn-primary btn-sm" disabled>You can mark as Not Received one month after request</button>
                 </td>
                 {% endif %}
             </tr>
@@ -75,6 +81,7 @@ span {
             {% endfor %}
         </tbody>
     </table>
+
     <div class="modal" tabindex="-1" role="dialog" id="cancelModal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -113,6 +120,55 @@ span {
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
                                     Keep Trade Request
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="receivedModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Received Book Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="col-12 mb-4">
+                    <div class="row">
+                        <div class="modal-body col-4">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 id="receivedModalCover"
+                                 style="max-width: 75%">
+                        </div>
+                        <div class="modal-body col-8 text-left">
+                            <p> Did you get your book?  Wonderful!</p>
+                            <span class="text-info" id="receivedModalTitle"> </span>
+                            by <span class='text-info' id="receivedModalAuthor"> </span>
+                            (ISBN: <span class='text-info' id="receivedModalISBN"> </span>).
+                            </p>
+                            <p>
+                                                           This book was offered by user <span class='text-info'
+                                                                    id='receivedModalUsername'> </span>.
+                            </p>
+                            <p> Please confirm that you received the book, so they can get their
+                            <span class='text-info' id="receivedModalPoints"></span>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="receivedModalConfirmForm">
+                            <div class="form-group">
+                                <button id='receivedTradeModalConfirmationButton' type="submit"
+                                                                                class="btn btn-primary">
+                                    Mark Book As Received
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                    Not Yet
                                 </button>
                             </div>
                         </form>

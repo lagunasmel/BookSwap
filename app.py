@@ -5,6 +5,7 @@ from wishlists import Wishlists
 from my_requests import MyRequests
 from account import AccountSettings
 from cancel_request import CancelTradeRequest
+from book_received import BookReceived
 from flask import Flask, render_template, url_for, flash, redirect, session, g, json
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
@@ -69,10 +70,24 @@ def faq():
     return render_template('faq.html')
 
 
+@app.route('/book-received/<user_books_id>')
+@login_required
+def book_received(user_books_id):
+    app.logger.info(f"Incoming book received confirmation from {session['user_num']} for book {user_books_id}")
+    bsdb = get_bsdb()
+    book_received = BookReceived(session['user_num'], user_books_id, bsdb)
+    try:
+        book_received.book_received()
+        app.logger.info(f"Successful trade completion confirmation from user {session['user_num']} for book {user_books_id}")
+        flash("Trade marked as completed", "success")
+    except Exception:
+        app.logger.error(f"Unsuccessful trade request confirmation from user {session['user_num']} for book {user_books_id}")
+    return redirect(url_for("my_requests"))
+
 @app.route('/cancel-request/<user_books_id>')
 @login_required
 def cancel_request(user_books_id):
-    app.logger.info(f"Incoming trade request canellation from {session['user_num']} for book {user_books_id}")
+    app.logger.info(f"Incoming trade request cancellation from {session['user_num']} for book {user_books_id}")
     bsdb = get_bsdb()
     cancel_trade_request = CancelTradeRequest(session['user_num'], user_books_id, bsdb)
     try:
