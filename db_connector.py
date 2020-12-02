@@ -101,6 +101,44 @@ class BookSwapDatabase:
             raise KeyError("User ID did not return only one row")
         return rows[0]
 
+    def get_all_open_requests(self, user_num):
+        """
+        Returns a list of all of a user's open requests.
+        Accepts:
+            user_num (int): Users.id
+        Returns:
+            list of Row objects
+        """
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                    SELECT
+                        Trades.statusId AS statusId,
+                        Books.title AS title,
+                        Books.author AS author,
+                        UserBooks.points AS points,
+                        Users.username AS username,
+                        Books.coverImageUrl AS coverImageUrl,
+                        Trades.dateInitiated AS dateInitiated,
+                        Books.isbn AS isbn
+                    FROM
+                        Trades INNER JOIN 
+                        UserBooks on Trades.userBookId = UserBooks.id INNER JOIN
+                        Books on UserBooks.bookId = Books.id INNER JOIN
+                        Users on UserBooks.userId = Users.id
+                    WHERE
+                        Trades.statusId IN (2, 3, 4, 5) AND
+                        Trades.userRequestedId = ?
+                    ORDER BY
+                        dateInitiated ASC
+                        """,
+                        (user_num, ))
+            rows = c.fetchall()
+        except sqlite3.Error as e:
+            log.error(f"Receiving open trades from database -- {e}")
+            raise Exception
+        return rows
+
     def get_book_qualities(self):
         """
         Returns a list of tuples containing (quality ID, copy quality description)

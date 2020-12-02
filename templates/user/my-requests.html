@@ -1,119 +1,82 @@
 {% extends "layout.html" %}
 {% set active_page = 'my-requests' %}
 {% block content %}
-    <style>
-        span {
-            font-weight: bold;
-        }
-    </style>
-    <div class="container m-5 mx-auto" style="max-width:85%;">
-        <h4 class="text-center">My Requests</h4>
-        <p class="lead text-center">
-            <br>You have requested the following books.
-            <br>Mark the book as received or cancel your request using the actions below.
-            <br> <span class="text-muted">Note - this is temporary placeholder info</span>
-        </p>
-        <p></p>
-        <table class="table table-hover">
-            <thead>
+<style>
+span {
+    font-weight: bold;
+}
+</style>
+<div class="container m-5 mx-auto" style="max-width:85%;">
+    <h4 class="text-center">My Requests</h4>
+    <p class="lead text-center">
+    <br>You have requested the following books.
+    <br>Mark the book as received or cancel your request using the actions below.
+    <br> <span class="text-muted">Note - this is temporary placeholder info</span>
+    </p>
+    <p></p>
+    <table class="table table-hover">
+        <thead>
             <tr>
                 <th scope="col">Date Request Sent</th>
                 <th scope="col" style="text-align:center;">Book Details</th>
                 <th scope="col">Status</th>
                 <th scope="col">Actions</th>
             </tr>
-            </thead>
-            <tbody>
+        </thead>
+        <tbody>
             <!-- Table Row after book request is sent -->
+            {% for book in requests  %}
             <tr class="table-light">
-                <!--Date Sent -->
-                <th scope="row">11/11/11</th>
-                <!-- Book Details -->
+                <th scope="row">
+                    {{ book['dateInitiated'] }}
+                </th>
                 <td>
                     <div class="row">
                         <div class="col-3 mx-auto text-center">
-                            <img src="http://covers.openlibrary.org/b/olid/OL3479964M-L.jpg" alt=""
-                                 class="img-thumbnail float-left" style="max-width: 80%;">
+                            <img src="{{book['coverImageUrl']}}" 
+                                 alt="Book Cover Image"
+                                 class="img-thumbnail float-left"
+                                 style="max-width: 80%;"/>
                         </div>
                         <div class="col-9 py-2">
-                            <span>Title</span>: Harry Potter and the Half Blood Prince
-                            <br><span>Author</span>: JK Rowling
-                            <br><span>Point Value:</span> 1
-                            <br><span>Listing User:</span> Username
+                            <span>Title:</span> {{ book['title']}}
+                            <br />
+                            <span>Author:</span> {{ book['author']}}
+                            <br />
+                            <span>ISBN:</span> {{ book['isbn']}}
+                            <br />
+                            <span>Point Value:</span> {{ book['points']}}
+                            <br />
+                            <span>Listing User:</span> {{ book['username']}}
                         </div>
                     </div>
-
                 </td>
-                <!--Trade Status-->
-                <td>Request Sent</td>
-                <!-- Actions -->
+                {% if book['statusId'] == 2 %}
                 <td>
-                    <!-- Will only show up before book request is accepted-->
+                    Request Sent
+                </td>
+                <td>
                     <button type="button" class="btn btn-primary btn-sm">Cancel Trade Request</button>
                 </td>
-            </tr>
-
-            <!--Table row if book request is approved/shipped -->
-            <tr class="table-light">
-                <!--Date Request Sent -->
-                <th scope="row">11/11/11</th>
-                <!-- Book Details -->
-                <td>
-                    <div class="row">
-                        <div class="col-3 mx-auto text-center">
-                            <img src="http://covers.openlibrary.org/b/olid/OL3479964M-L.jpg" alt=""
-                                 class="img-thumbnail float-left" style="max-width: 80%;">
-                        </div>
-                        <div class="col-9 py-2">
-                            <span>Title</span>: Harry Potter and the Half Blood Prince
-                            <br><span>Author</span>: JK Rowling
-                            <br><span>Point Value:</span> 1
-                            <br><span>Listing User:</span> Username
-                        </div>
-                    </div>
-
-                </td>
-                <!--Trade Status-->
+                {% elif book['statusId'] == 3 %}
                 <td class="text-success">Accepted <br>(Or Shipped)</td>
                 <!-- Actions -->
                 <td>
                     <!-- Will show up if request is accepted/shipped -->
                     <button type="button" class="btn btn-primary btn-sm">Mark as Received</button>
+                    <button type="button" class="btn btn-primary btn-sm" disabled>You can mark as Not Received one month after request</button>
                 </td>
-            </tr>
-
-            <!-- Table row if request is declined by the listing user -->
-            <tr class="table-light">
-                <!--Date Sent -->
-                <th scope="row">11/11/11</th>
-                <!-- Book Details -->
-                <td>
-                    <div class="row">
-                        <div class="col-3 mx-auto text-center">
-                            <img src="http://covers.openlibrary.org/b/olid/OL3479964M-L.jpg" alt=""
-                                 class="img-thumbnail float-left" style="max-width: 80%;">
-                        </div>
-                        <div class="col-9 py-2">
-                            <span>Title</span>: Harry Potter and the Half Blood Prince
-                            <br><span>Author</span>: JK Rowling
-                            <br><span>Point Value:</span> 1
-                            <br><span>Listing User:</span> Username
-                        </div>
-                    </div>
-
-                </td>
-                <!--Trade Status-->
+                {% elif book['statusId'] == 4 or book['statusId'] == 5 %}
                 <td class="text-danger">Declined</td>
                 <!-- Actions -->
                 <td>
                     <!-- Will only show up is request is declined by listing user -->
                     <button type="button" class="btn btn-primary btn-sm">Remove</button>
                 </td>
+                 {% endif %}
             </tr>
-
-
-            </tbody>
-        </table>
-
-    </div>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock content %}
