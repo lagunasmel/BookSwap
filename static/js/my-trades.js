@@ -52,7 +52,7 @@ function acceptTradeRequest(book)
     $('#acceptModal').modal('show');
 }
 
-// event handler for "accept request" button
+// event handler for "cancel request" button
 function cancelTradeRequest(book)
 /*
  * CancelTradeRequest displays the modal asking for confirmation that the

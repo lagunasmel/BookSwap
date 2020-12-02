@@ -1,5 +1,5 @@
 # Created by team 5++
-DatabaseSpecs/test-db.db
+*.db
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/flask,python,macos,jetbrains,vscode

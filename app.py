@@ -4,6 +4,7 @@ from book_search import BookSearch
 from wishlists import Wishlists
 from my_requests import MyRequests
 from account import AccountSettings
+from cancel_request import CancelTradeRequest
 from flask import Flask, render_template, url_for, flash, redirect, session, g, json
 from flask import request as req
 from db_connector import get_db, BookSwapDatabase, get_bsdb
@@ -66,6 +67,21 @@ def learn_how():
 @app.route('/faq')
 def faq():
     return render_template('faq.html')
+
+
+@app.route('/cancel-request/<user_books_id>')
+@login_required
+def cancel_request(user_books_id):
+    app.logger.info(f"Incoming trade request canellation from {session['user_num']} for book {user_books_id}")
+    bsdb = get_bsdb()
+    cancel_trade_request = CancelTradeRequest(session['user_num'], user_books_id, bsdb)
+    try:
+        cancel_trade_request.cancel_request()
+        app.logger.info(f"Successful trade request cancellation from user {session['user_num']} for book {user_books_id}")
+        flash("Trade request canceled", "success")
+    except Exception:
+        app.logger.error(f"Unsuccessful trade request cancellation from user {session['user_num']} for book {user_books_id}")
+    return redirect(url_for("my_requests"))
 
 
 @app.route('/request-book', methods=['GET', 'POST'])
@@ -203,13 +219,10 @@ def change_points():
 def received_requests():
     bsdb = get_bsdb()
     user = session['user_num']
-
     num_trade_reqs = bsdb.get_num_trade_requests(user)
     num_open_trades = bsdb.get_num_open_trades(user)
-
     if num_trade_reqs == 0 and num_open_trades == 0:
         return render_template('user/no-trades.html')
-
     else:
         trade_info = bsdb.get_trade_info(user)
         trade_info_dicts = [dict(row) for row in trade_info]
@@ -227,10 +240,11 @@ def my_requests():
     my_request = MyRequests(user, bsdb)
     try:
         requests = my_request.get_all_open_requests()
+        requests_dicts = [dict(row) for row in requests]
     except Exception:
         app.logger.error("Couldn't fill my-requests")
         requests = []
-    return render_template('user/my-requests.html', requests=requests)
+    return render_template('user/my-requests.html', requests = requests_dicts)
 
 
 @app.route('/accept-trade/<user_books_id>')
