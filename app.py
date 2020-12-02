@@ -2,6 +2,7 @@ import sys
 import sqlite3
 from book_search import BookSearch
 from wishlists import Wishlists
+from my_requests import MyRequests
 from account import AccountSettings
 from flask import Flask, render_template, url_for, flash, redirect, session, g, json
 from flask import request as req
@@ -221,7 +222,15 @@ def received_requests():
 @app.route('/my-requests')
 @login_required
 def my_requests():
-    return render_template('user/my-requests.html')
+    bsdb = get_bsdb()
+    user = session['user_num']
+    my_request = MyRequests(user, bsdb)
+    try:
+        requests = my_request.get_all_open_requests()
+    except Exception:
+        app.logger.error("Couldn't fill my-requests")
+        requests = []
+    return render_template('user/my-requests.html', requests = requests)
 
 
 @app.route('/accept-trade/<user_books_id>')
@@ -285,16 +294,13 @@ def login():
             except Exception:
                 app.logger.error(f"Error checking password for {username}.")
                 error = "We hada n error checking your password.  Please try again."
-
         # No errors, login proceeds
         if error is None:
             session.clear()
             session['user_num'] = id
             app.logger.info(f"User {username} successfully logged in.")
             return redirect(url_for('home'))
-
         flash(error, 'warning')
-
     return render_template('login.html', form=form)
 
 
@@ -662,7 +668,6 @@ def my_books():
     # Get the data of books currently listed
     rows = bsdb.get_listed_books(session['user_num'])
     copyqualities = bsdb.get_book_qualities()
-
     # Build the data to be passed to Jinja
     headers = ["Title", "Author", "Quality", "Points", "ISBN", "ID", "Cover"]
     table_content = [[row[header] for header in headers] for row in rows]
@@ -671,7 +676,6 @@ def my_books():
             "caption": "",
             "copyqualities": copyqualities
             }
-
     return render_template('user/my-books.html', data=data)
 
 

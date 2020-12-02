@@ -202,7 +202,10 @@ VALUES (1, 1, 2, 1),
        (3, 1, 1, 3),
        (1, 1, 1, 10),
        (3, 2, 2, 10),
-       (2, 3, 3, 10);
+       (2, 3, 3, 10),
+       (4, 1, 1, 5),
+       (4, 2, 2, 4),
+       (4, 3, 3, 3);
 
 -- TradeStatus values
 INSERT INTO TradeStatuses (statusDescription)
@@ -219,4 +222,8 @@ VALUES ("No Current Trade"),
 INSERT INTO Trades (userRequestedId, userBookId, statusId)
 VALUES (2, 7, 2),
        (3, 8, 2),
-       (4, 9, 3);
+       (4, 9, 3),
+       (1, 4, 2),
+       (1, 5, 3),
+       (1, 10, 4),
+       (1, 11, 5);
