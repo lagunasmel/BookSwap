@@ -245,7 +245,7 @@ def my_requests():
         requests_dicts = [dict(row) for row in requests]
     except Exception:
         app.logger.error("Couldn't fill my-requests")
-        requests = []
+        requests_dicts = []
 
     if len(requests_dicts) == 0:
         return render_template('user/no-trades.html', no_sent_requests=True)
