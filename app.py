@@ -77,10 +77,12 @@ def cancel_request(user_books_id):
     cancel_trade_request = CancelTradeRequest(session['user_num'], user_books_id, bsdb)
     try:
         cancel_trade_request.cancel_request()
-        app.logger.info(f"Successful trade request cancellation from user {session['user_num']} for book {user_books_id}")
+        app.logger.info(
+            f"Successful trade request cancellation from user {session['user_num']} for book {user_books_id}")
         flash("Trade request canceled", "success")
     except Exception:
-        app.logger.error(f"Unsuccessful trade request cancellation from user {session['user_num']} for book {user_books_id}")
+        app.logger.error(
+            f"Unsuccessful trade request cancellation from user {session['user_num']} for book {user_books_id}")
     return redirect(url_for("my_requests"))
 
 
@@ -244,7 +246,11 @@ def my_requests():
     except Exception:
         app.logger.error("Couldn't fill my-requests")
         requests = []
-    return render_template('user/my-requests.html', requests = requests_dicts)
+
+    if len(requests_dicts) == 0:
+        return render_template('user/no-trades.html', no_sent_requests=True)
+    else:
+        return render_template('user/my-requests.html', requests=requests_dicts)
 
 
 @app.route('/accept-trade/<user_books_id>')

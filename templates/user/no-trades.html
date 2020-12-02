@@ -6,13 +6,25 @@
         <img src="{{ url_for('static', filename='images/book-guide.png') }}"
              alt=""
              class="img-fluid col-2 mx-auto"/>
-        <h4 class="mt-5">You have not received any trade requests.</h4>
-        <p class="lead"><br>Would you like to <a class="text-info" href="{{ url_for('my_books') }}">list more books</a>
-            for trade?
-        <p class="lead">You can also view the status of the trade requests <br>you have sent to others on your
-            <a href="{{ url_for('my_requests') }}" class="text-info">requests page</a>.
-        </p>
-        <br><br><br><br>
+
+        {% if no_sent_requests %}
+            <h4 class="mt-5">You have not sent any trade requests.</h4>
+            <p class="lead"><br>Would you like to <a class="text-info" href="{{ url_for('browse_books') }}">search for
+                books</a> currently available for trade?
+            <p class="lead">You can also view the
+                <a href="{{ url_for('received_requests') }}" class="text-info">status of your received requests</a>.
+            </p>
+            <br><br><br><br>
+        {% else %}
+            <h4 class="mt-5">You have not received any trade requests.</h4>
+            <p class="lead"><br>Would you like to <a class="text-info" href="{{ url_for('my_books') }}">list more
+                books</a>
+                for trade?
+            <p class="lead">You can also view the status of the trade requests <br>you have sent to others on your
+                <a href="{{ url_for('my_requests') }}" class="text-info">requests page</a>.
+            </p>
+            <br><br><br><br>
+        {% endif %}
     </div>
 
 {% endblock content %}
