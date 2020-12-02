@@ -11,7 +11,6 @@ span {
     <p class="lead text-center">
     <br>You have requested the following books.
     <br>Mark the book as received or cancel your request using the actions below.
-    <br> <span class="text-muted">Note - this is temporary placeholder info</span>
     </p>
     <p></p>
     <table class="table table-hover">
@@ -26,6 +25,7 @@ span {
         <tbody>
             <!-- Table Row after book request is sent -->
             {% for book in requests  %}
+            {% if book['statusId'] in [2,3] %}
             <tr class="table-light">
                 <th scope="row">
                     {{ book['dateInitiated'] }}
@@ -60,21 +60,20 @@ span {
                 </td>
                 {% elif book['statusId'] == 3 %}
                 <td class="text-success">Accepted <br>(Or Shipped)</td>
-                <!-- Actions -->
                 <td>
-                    <!-- Will show up if request is accepted/shipped -->
                     <button type="button" class="btn btn-primary btn-sm">Mark as Received</button>
                     <button type="button" class="btn btn-primary btn-sm" disabled>You can mark as Not Received one month after request</button>
                 </td>
+                <!--
                 {% elif book['statusId'] == 4 or book['statusId'] == 5 %}
                 <td class="text-danger">Declined</td>
-                <!-- Actions -->
                 <td>
-                    <!-- Will only show up is request is declined by listing user -->
                     <button type="button" class="btn btn-primary btn-sm">Remove</button>
                 </td>
+                -->
                  {% endif %}
             </tr>
+            {% endif %}
             {% endfor %}
         </tbody>
     </table>
