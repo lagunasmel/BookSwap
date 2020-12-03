@@ -60,6 +60,18 @@ def home():
     return render_template('home.html')
 
 
+# error handler for 500
+@app.errorhandler(500)
+def error_five_hundred(e):
+    return render_template('500.html'), 500
+
+
+# error handler for 404
+@app.errorhandler(404)
+def error_four_oh_four(e):
+    return render_template('404.html'), 404
+
+
 @app.route('/learn-how')
 def learn_how():
     return render_template('learn-how.html')

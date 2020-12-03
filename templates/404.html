@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% set active_page='error-404' %}
+{% block content %}
+<div class='container w-100 text-center'>
+  <h1> Page Not Found </h1>
+    <h4>Something's Missing</h4>
+    <br />
+    <p>
+    We know you were just getting to the good stuff, but your puppy ate the
+    next part of the plot.  Now you'll never know how the heroine saves the day
+    by blowing up the spaceship to save her home planet...
+    <br />
+    <p> 
+    <a href='{{ url_for('home') }}'>
+      You'll probably want to start reading all over (go to our homepage) 
+    </a>
+    </p>
+</div>
+{% endblock content %}
