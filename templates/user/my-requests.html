@@ -1,438 +1,443 @@
 {% extends "layout.html" %}
 {% set active_page = 'my-requests' %}
 {% block content %}
-<style>
-span {
-    font-weight: bold;
-}
-</style>
-<div class="container mx-5 auto" style="max-width:85%;">
-    <h2 class='text-center'>All My Requested Books</h2>
-    <ul class="nav nav-tabs mb-3">
-        <li class='nav-item'>
-            <a class='nav-link active' data-toggle='tab' href='#active'>
-                Active
-            </a>
-        </li>
-        <li class='nav-item'>
-            <a class='nav-link' data-toggle='tab' href='#rejected'>
-                Rejected
-            </a>
-        </li>
-        <li class='nav-item'>
-            <a class='nav-link' data-toggle='tab' href='#completed'>
-                Completed
-            </a>
-        </li>
-        <li class='nav-item'>
-            <a class='nav-link' data-toggle='tab' href='#failed'>
-                Failed
-            </a>
-        </li>
-    </ul>
+    <style>
+        span {
+            font-weight: bold;
+        }
+    </style>
+    <div class="container mx-auto m-5" style="max-width:85%;">
+        <h2 class='text-center'>All Books Requested By Me</h2>
+        <br>
+        <ul class="nav nav-tabs mb-3">
+            <li class='nav-item'>
+                <a class='nav-link active' data-toggle='tab' href='#active'>
+                    Active
+                </a>
+            </li>
+            <li class='nav-item'>
+                <a class='nav-link' data-toggle='tab' href='#rejected'>
+                    Rejected
+                </a>
+            </li>
+            <li class='nav-item'>
+                <a class='nav-link' data-toggle='tab' href='#completed'>
+                    Completed
+                </a>
+            </li>
+            <li class='nav-item'>
+                <a class='nav-link' data-toggle='tab' href='#failed'>
+                    Failed
+                </a>
+            </li>
+        </ul>
 
-    <div class='tab-content'>
-        <div id='active' class='tab-pane fade in active show'>
-            <h4 class="text-center">My Active Requests</h4>
-            <p class="lead text-center">
-            <br>You have requested the following books, but we don't think you have received them yet.
-            <br>Mark the book as received or cancel your request using the actions below.
-            </p>
-            <p></p>
-            <table class="table table-hover">
-                <thead>
+        <div class='tab-content'>
+            <div id='active' class='tab-pane fade in active show'>
+                <h4 class="text-center">My Active Requests</h4>
+                <p class="lead text-center">
+                    <br>You have requested the following books, but we don't think you have received them yet.
+                    <br>Mark the book as received or cancel your request using the actions below.
+                </p>
+                <p></p>
+                <table class="table table-hover">
+                    <thead>
                     <tr>
                         <th scope="col">Date Request Sent</th>
                         <th scope="col" style="text-align:center;">Book Details</th>
                         <th scope="col">Status</th>
                         <th scope="col">Actions</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <!-- Table Row after book request is sent -->
-                    {% for book in requests  %}
-                    {% if book['statusId'] in [2,3] %}
-                    <tr class="table-light">
-                        <th scope="row">
-                            {{ book['dateInitiated'] }}
-                        </th>
-                        <td>
-                            <div class="row">
-                                <div class="col-3 mx-auto text-center">
-                                    <img src="{{book['coverImageUrl']}}" 
-                                         alt="Book Cover Image"
-                                         class="img-thumbnail float-left"
-                                         style="max-width: 80%;"/>
-                                </div>
-                                <div class="col-9 py-2">
-                                    <span>Title:</span> {{ book['title']}}
-                                    <br />
-                                    <span>Author:</span> {{ book['author']}}
-                                    <br />
-                                    <span>ISBN:</span> {{ book['isbn']}}
-                                    <br />
-                                    <span>Point Value:</span> {{ book['points']}}
-                                    <br />
-                                    <span>Listing User:</span> {{ book['username']}}
-                                </div>
-                            </div>
-                        </td>
-                        {% if book['statusId'] == 2 %}
-                        <td>
-                            Request Sent
-                        </td>
-                        <td>
-                            <button 
-                                     type="button" 
-                                     class="btn btn-primary btn-sm"
-                                     onclick='cancelTradeRequest( {{ book | tojson }})'>
-                                Cancel Trade Request
-                            </button>
-                        </td>
-                        {% elif book['statusId'] == 3 %}
-                        <td class="text-success">Accepted <br>(Or Shipped)</td>
-                        <td>
-                            <button 
-                            type="button" 
-                            class="btn btn-primary btn-sm"
-                            onclick='receivedTradeRequest( {{ book | tojson }})'>
-                                Mark as Received
-                            </button>
-                            <br />
-                            <button 
-                            type="button" 
-                            class="mt-3 btn btn-primary btn-sm" 
-                            {% if book['tradeAge'] <= 28 %} 
-                            disabled
-                            >
-                            You can mark as Not Received four weeks after request
-                            {% else %}
-                            onclick='notReceivedTradeRequest( {{book | tojson }})'
-                            >
-                            Mark As Not Received
-                            {% endif %}
-                            </button>
-                        </td>
+                    {% for book in requests %}
+                        {% if book['statusId'] in [2,3] %}
+                            <tr class="table-light">
+                                <th scope="row">
+                                    {{ book['dateInitiated'] }}
+                                </th>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-3 mx-auto text-center">
+                                            <img src="{{ book['coverImageUrl'] }}"
+                                                 alt="Book Cover Image"
+                                                 class="img-thumbnail float-left"
+                                                 style="max-width: 80%;"/>
+                                        </div>
+                                        <div class="col-9 py-2">
+                                            <span>Title:</span> {{ book['title'] }}
+                                            <br/>
+                                            <span>Author:</span> {{ book['author'] }}
+                                            <br/>
+                                            <span>ISBN:</span> {{ book['isbn'] }}
+                                            <br/>
+                                            <span>Point Value:</span> {{ book['points'] }}
+                                            <br/>
+                                            <span>Listing User:</span> {{ book['username'] }}
+                                        </div>
+                                    </div>
+                                </td>
+                                {% if book['statusId'] == 2 %}
+                                    <td>
+                                        Request Sent
+                                    </td>
+                                    <td>
+                                        <button
+                                                type="button"
+                                                class="btn btn-primary btn-sm"
+                                                onclick='cancelTradeRequest( {{ book | tojson }})'>
+                                            Cancel Trade Request
+                                        </button>
+                                    </td>
+                                {% elif book['statusId'] == 3 %}
+                                    <td class="text-success">Accepted <br>(Or Shipped)</td>
+                                    <td>
+                                        <button
+                                                type="button"
+                                                class="btn btn-primary btn-sm"
+                                                onclick='receivedTradeRequest( {{ book | tojson }})'>
+                                            Mark as Received
+                                        </button>
+                                        <br/>
+                                        <button
+                                                type="button"
+                                                class="mt-3 btn btn-primary btn-sm"
+                                                {% if book['tradeAge'] <= 28 %}
+                                                disabled
+                                                    >
+                                                    You can mark as Not Received four weeks after request
+                                                {% else %}
+                                                    onclick='notReceivedTradeRequest( {{ book | tojson }})'
+                                                    >
+                                                    Mark As Not Received
+                                                {% endif %}
+                                        </button>
+                                    </td>
+                                {% endif %}
+                            </tr>
                         {% endif %}
-                    </tr>
-                    {% endif %}
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+                <br><br><br>
+            </div>
 
-        <div id='rejected' class="tab-pane fade">
-            <h4 class="text-center">My Rejected Requests</h4>
-            <p class="lead text-center">
-            <br>
-            These are the books you requested, but the book owner rejected the 
-            trade, either through active rejection or by not accepting the
-            trade request within two weeks.  If you sent a trade request out,
-            but never heard back about it, you might find it here.
-            </p>
-            <p></p>
-            <table class="table table-hover">
-                <thead>
+            <div id='rejected' class="tab-pane fade">
+                <h4 class="text-center">My Rejected Requests</h4>
+                <p class="lead text-center">
+                    <br>
+                    These are the books you requested, but the book owner rejected the
+                    trade, either through active rejection or by not accepting the
+                    trade request within two weeks. If you sent a trade request out,
+                    but never heard back about it, you might find it here.
+                </p>
+                <p></p>
+                <table class="table table-hover">
+                    <thead>
                     <tr>
                         <th scope="col">Date Request Sent</th>
                         <th scope="col" style="text-align:center;">Book Details</th>
                         <th scope="col">Status</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <!-- Table Row after book request is sent -->
-                    {% for book in requests  %}
-                    {% if book['statusId'] in [4, 5] %}
-                    <tr class="table-light">
-                        <th scope="row">
-                            {{ book['dateInitiated'] }}
-                        </th>
-                        <td>
-                            <div class="row">
-                                <div class="col-3 mx-auto text-center">
-                                    <img src="{{book['coverImageUrl']}}" 
-                                         alt="Book Cover Image"
-                                         class="img-thumbnail float-left"
-                                         style="max-width: 80%;"/>
-                                </div>
-                                <div class="col-9 py-2">
-                                    <span>Title:</span> {{ book['title']}}
-                                    <br />
-                                    <span>Author:</span> {{ book['author']}}
-                                    <br />
-                                    <span>ISBN:</span> {{ book['isbn']}}
-                                    <br />
-                                    <span>Point Value:</span> {{ book['points']}}
-                                    <br />
-                                    <span>Listing User:</span> {{ book['username']}}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            Trade Rejected
-                        </td>
-                    </tr>
-                    {% endif %}
+                    {% for book in requests %}
+                        {% if book['statusId'] in [4, 5] %}
+                            <tr class="table-light">
+                                <th scope="row">
+                                    {{ book['dateInitiated'] }}
+                                </th>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-3 mx-auto text-center">
+                                            <img src="{{ book['coverImageUrl'] }}"
+                                                 alt="Book Cover Image"
+                                                 class="img-thumbnail float-left"
+                                                 style="max-width: 80%;"/>
+                                        </div>
+                                        <div class="col-9 py-2">
+                                            <span>Title:</span> {{ book['title'] }}
+                                            <br/>
+                                            <span>Author:</span> {{ book['author'] }}
+                                            <br/>
+                                            <span>ISBN:</span> {{ book['isbn'] }}
+                                            <br/>
+                                            <span>Point Value:</span> {{ book['points'] }}
+                                            <br/>
+                                            <span>Listing User:</span> {{ book['username'] }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    Trade Rejected
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+                <br><br>
+            </div>
 
-        <div id='completed' class="tab-pane fade">
-            <h4 class="text-center">Completed Trade Requests</h4>
-            <p class="lead text-center">
-            <br>
-            These are the trades you have requested, and have been completed.
-            </p>
-            <p></p>
-            <table class="table table-hover">
-                <thead>
+            <div id='completed' class="tab-pane fade">
+                <h4 class="text-center">Completed Trade Requests</h4>
+                <p class="lead text-center">
+                    <br>
+                    These are the trades you have requested, and have been completed.
+                </p>
+                <p></p>
+                <table class="table table-hover">
+                    <thead>
                     <tr>
                         <th scope="col">Date Request Sent</th>
                         <th scope="col" style="text-align:center;">Book Details</th>
                         <th scope="col">Status</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <!-- Table Row after book request is sent -->
-                    {% for book in requests  %}
-                    {% if book['statusId'] == 6 %}
-                    <tr class="table-light">
-                        <th scope="row">
-                            {{ book['dateInitiated'] }}
-                        </th>
-                        <td>
-                            <div class="row">
-                                <div class="col-3 mx-auto text-center">
-                                    <img src="{{book['coverImageUrl']}}" 
-                                         alt="Book Cover Image"
-                                         class="img-thumbnail float-left"
-                                         style="max-width: 80%;"/>
-                                </div>
-                                <div class="col-9 py-2">
-                                    <span>Title:</span> {{ book['title']}}
-                                    <br />
-                                    <span>Author:</span> {{ book['author']}}
-                                    <br />
-                                    <span>ISBN:</span> {{ book['isbn']}}
-                                    <br />
-                                    <span>Point Value:</span> {{ book['points']}}
-                                    <br />
-                                    <span>Listing User:</span> {{ book['username']}}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            Trade Completed
-                        </td>
-                    </tr>
-                    {% endif %}
+                    {% for book in requests %}
+                        {% if book['statusId'] == 6 %}
+                            <tr class="table-light">
+                                <th scope="row">
+                                    {{ book['dateInitiated'] }}
+                                </th>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-3 mx-auto text-center">
+                                            <img src="{{ book['coverImageUrl'] }}"
+                                                 alt="Book Cover Image"
+                                                 class="img-thumbnail float-left"
+                                                 style="max-width: 80%;"/>
+                                        </div>
+                                        <div class="col-9 py-2">
+                                            <span>Title:</span> {{ book['title'] }}
+                                            <br/>
+                                            <span>Author:</span> {{ book['author'] }}
+                                            <br/>
+                                            <span>ISBN:</span> {{ book['isbn'] }}
+                                            <br/>
+                                            <span>Point Value:</span> {{ book['points'] }}
+                                            <br/>
+                                            <span>Listing User:</span> {{ book['username'] }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    Trade Completed
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                    </tbody>
+                </table>
+                <br><br>
+            </div>
 
-        <div id='failed' class="tab-pane fade">
-            <h4 class="text-center">Failed Trade Requests</h4>
-            <p class="lead text-center">
-            <br>
-            These are the trades that were requested and accepted, but the book
-            never showed up.  That is, these are the trades where the book was
-            lost in the mail or "lost in the mail."
-            </p>
-            <p></p>
-            <table class="table table-hover">
-                <thead>
+            <div id='failed' class="tab-pane fade">
+                <h4 class="text-center">Failed Trade Requests</h4>
+                <p class="lead text-center">
+                    <br>
+                    These are the trades that were requested and accepted, but the book
+                    never showed up. That is, these are the trades where the book was
+                    lost in the mail or "lost in the mail."
+                </p>
+                <p></p>
+                <table class="table table-hover">
+                    <thead>
                     <tr>
                         <th scope="col">Date Request Sent</th>
                         <th scope="col" style="text-align:center;">Book Details</th>
                         <th scope="col">Status</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <!-- Table Row after book request is sent -->
-                    {% for book in requests  %}
-                    {% if book['statusId'] == 7 %}
-                    <tr class="table-light">
-                        <th scope="row">
-                            {{ book['dateInitiated'] }}
-                        </th>
-                        <td>
-                            <div class="row">
-                                <div class="col-3 mx-auto text-center">
-                                    <img src="{{book['coverImageUrl']}}" 
-                                         alt="Book Cover Image"
-                                         class="img-thumbnail float-left"
-                                         style="max-width: 80%;"/>
-                                </div>
-                                <div class="col-9 py-2">
-                                    <span>Title:</span> {{ book['title']}}
-                                    <br />
-                                    <span>Author:</span> {{ book['author']}}
-                                    <br />
-                                    <span>ISBN:</span> {{ book['isbn']}}
-                                    <br />
-                                    <span>Point Value:</span> {{ book['points']}}
-                                    <br />
-                                    <span>Listing User:</span> {{ book['username']}}
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            Trade Failed 
-                        </td>
-                    </tr>
-                    {% endif %}
+                    {% for book in requests %}
+                        {% if book['statusId'] == 7 %}
+                            <tr class="table-light">
+                                <th scope="row">
+                                    {{ book['dateInitiated'] }}
+                                </th>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-3 mx-auto text-center">
+                                            <img src="{{ book['coverImageUrl'] }}"
+                                                 alt="Book Cover Image"
+                                                 class="img-thumbnail float-left"
+                                                 style="max-width: 80%;"/>
+                                        </div>
+                                        <div class="col-9 py-2">
+                                            <span>Title:</span> {{ book['title'] }}
+                                            <br/>
+                                            <span>Author:</span> {{ book['author'] }}
+                                            <br/>
+                                            <span>ISBN:</span> {{ book['isbn'] }}
+                                            <br/>
+                                            <span>Point Value:</span> {{ book['points'] }}
+                                            <br/>
+                                            <span>Listing User:</span> {{ book['username'] }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    Trade Failed
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
+            <br><br><br>
         </div>
-      </div>
 
-    <div class="modal" tabindex="-1" role="dialog" id="cancelModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Cancel Trade Request Confirmation</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="col-12 mb-4">
-                    <div class="row">
-                        <div class="modal-body col-4">
-                            <img class="card-img-top img-fluid mx-auto"
-                                 id="cancelModalCover"
-                                 style="max-width: 75%">
-                        </div>
-                        <div class="modal-body col-8 text-left">
-                            <p> You have previously initiated a trade request for
-                            <span class="text-info" id="cancelModalTitle"> </span>
-                            by <span class='text-info' id="cancelModalAuthor"> </span>
-                            (ISBN: <span class='text-info' id="cancelModalISBN"> </span>).
-                            This book is being offered by user <span class='text-info'
-                                                                     id='cancelModalUsername'> </span>.
-                            </p>
-                            <p> Do you really want to cancel this trade request and get back your 
-                            <span class='text-info' id="cancelModalPoints"></span>?
-                            </p>
-                        </div>
+        <div class="modal" tabindex="-1" role="dialog" id="cancelModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cancel Trade Request Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
-                    <div class="modal-footer">
-                        <form id="cancelModalConfirmForm">
-                            <div class="form-group">
-                                <button id='cancelTradeModalConfirmationButton' type="submit"
-                                                                                class="btn btn-primary">
-                                    Cancel Trade Request
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                                    Keep Trade Request
-                                </button>
+                    <div class="col-12 mb-4">
+                        <div class="row">
+                            <div class="modal-body col-4">
+                                <img class="card-img-top img-fluid mx-auto"
+                                     id="cancelModalCover"
+                                     style="max-width: 75%">
                             </div>
-                        </form>
+                            <div class="modal-body col-8 text-left">
+                                <p> You have previously initiated a trade request for
+                                    <span class="text-info" id="cancelModalTitle"> </span>
+                                    by <span class='text-info' id="cancelModalAuthor"> </span>
+                                    (ISBN: <span class='text-info' id="cancelModalISBN"> </span>).
+                                    This book is being offered by user <span class='text-info'
+                                                                             id='cancelModalUsername'> </span>.
+                                </p>
+                                <p> Do you really want to cancel this trade request and get back your
+                                    <span class='text-info' id="cancelModalPoints"></span>?
+                                </p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <form id="cancelModalConfirmForm">
+                                <div class="form-group">
+                                    <button id='cancelTradeModalConfirmationButton' type="submit"
+                                            class="btn btn-primary">
+                                        Cancel Trade Request
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                        Keep Trade Request
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="modal" tabindex="-1" role="dialog" id="receivedModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Received Book Confirmation</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="col-12 mb-4">
-                    <div class="row">
-                        <div class="modal-body col-4">
-                            <img class="card-img-top img-fluid mx-auto"
-                                 id="receivedModalCover"
-                                 style="max-width: 75%">
+        <div class="modal" tabindex="-1" role="dialog" id="receivedModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Received Book Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <div class="row">
+                            <div class="modal-body col-4">
+                                <img class="card-img-top img-fluid mx-auto"
+                                     id="receivedModalCover"
+                                     style="max-width: 75%">
+                            </div>
+                            <div class="modal-body col-8 text-left">
+                                <p> Did you get your book? Wonderful!</p>
+                                <span class="text-info" id="receivedModalTitle"> </span>
+                                by <span class='text-info' id="receivedModalAuthor"> </span>
+                                (ISBN: <span class='text-info' id="receivedModalISBN"> </span>).
+                                </p>
+                                <p>
+                                    This book was offered by user <span class='text-info'
+                                                                        id='receivedModalUsername'> </span>.
+                                </p>
+                                <p> Please confirm that you received the book, so they can get their
+                                    <span class='text-info' id="receivedModalPoints"></span>.
+                                </p>
+                            </div>
                         </div>
-                        <div class="modal-body col-8 text-left">
-                            <p> Did you get your book?  Wonderful!</p>
-                            <span class="text-info" id="receivedModalTitle"> </span>
-                            by <span class='text-info' id="receivedModalAuthor"> </span>
-                            (ISBN: <span class='text-info' id="receivedModalISBN"> </span>).
-                            </p>
-                            <p>
-                            This book was offered by user <span class='text-info'
-                                                                id='receivedModalUsername'> </span>.
-                            </p>
-                            <p> Please confirm that you received the book, so they can get their
-                            <span class='text-info' id="receivedModalPoints"></span>.
-                            </p>
+                        <div class="modal-footer">
+                            <form id="receivedModalConfirmForm">
+                                <div class="form-group">
+                                    <button id='receivedTradeModalConfirmationButton' type="submit"
+                                            class="btn btn-primary">
+                                        Mark Book As Received
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                        Not Yet
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <form id="receivedModalConfirmForm">
-                            <div class="form-group">
-                                <button id='receivedTradeModalConfirmationButton' type="submit"
-                                                                                  class="btn btn-primary">
-                                    Mark Book As Received
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                                    Not Yet
-                                </button>
+                </div>
+            </div>
+        </div>
+        <div class="modal" tabindex="-1" role="dialog" id="notReceivedModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Not Received Book Confirmation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="col-12 mb-4">
+                        <div class="row">
+                            <div class="modal-body col-4">
+                                <img class="card-img-top img-fluid mx-auto"
+                                     id="notReceivedModalCover"
+                                     style="max-width: 75%">
                             </div>
-                        </form>
+                            <div class="modal-body col-8 text-left">
+                                <p> The Book Never Came? </p>
+                                <span class="text-info" id="notReceivedModalTitle"> </span>
+                                by <span class='text-info' id="notReceivedModalAuthor"> </span>
+                                (ISBN: <span class='text-info' id="notReceivedModalISBN"> </span>).
+                                </p>
+                                <p>
+                                    This book was offered by user <span class='text-info'
+                                                                        id='notReceivedModalUsername'> </span>.
+                                </p>
+                                <p> If you would like to mark that the book was never received, you can get your
+                                    <span class='text-info' id="notReceivedModalPoints"></span> back.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <form id="notReceivedModalConfirmForm">
+                                <div class="form-group">
+                                    <button id='notReceivedTradeModalConfirmationButton' type="submit"
+                                            class="btn btn-primary">
+                                        Mark Book As Not Received
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                        Not Yet
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal" tabindex="-1" role="dialog" id="notReceivedModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Not Received Book Confirmation</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="col-12 mb-4">
-                    <div class="row">
-                        <div class="modal-body col-4">
-                            <img class="card-img-top img-fluid mx-auto"
-                                 id="notReceivedModalCover"
-                                 style="max-width: 75%">
-                        </div>
-                        <div class="modal-body col-8 text-left">
-                            <p> The Book Never Came? </p> 
-                            <span class="text-info" id="notReceivedModalTitle"> </span>
-                            by <span class='text-info' id="notReceivedModalAuthor"> </span>
-                            (ISBN: <span class='text-info' id="notReceivedModalISBN"> </span>).
-                            </p>
-                            <p>
-                            This book was offered by user <span class='text-info'
-                                                                id='notReceivedModalUsername'> </span>.
-                            </p>
-                            <p> If you would like to mark that the book was never received, you can get your
-                            <span class='text-info' id="notReceivedModalPoints"></span> back.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <form id="notReceivedModalConfirmForm">
-                            <div class="form-group">
-                                <button id='notReceivedTradeModalConfirmationButton' type="submit"
-                                                                                     class="btn btn-primary">
-                                    Mark Book As Not Received
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
-                                    Not Yet
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script type="text/javascript" src="{{ url_for('static', filename='js/my-requests.js') }}">
-</script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/my-requests.js') }}">
+    </script>
 {% endblock content %}
