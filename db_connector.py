@@ -69,6 +69,58 @@ class BookSwapDatabase:
             raise Exception
         return
 
+    def book_not_received_by_requester(self, user_books_id, user_num):
+        """
+        Book_not_received_by_requester completes the trade request:
+            changes Trades.statusId to not completed (7)
+            awards points to requester 
+        Accepts:
+            user_books_id (int): UserBooks.id
+            user_num (int): Users.id
+        Returns:
+            None
+        """
+        c = self.db.cursor()
+       # award points to requester
+        try:
+            c.execute("""
+                    UPDATE 
+                        Users
+                    SET
+                        points = points + (
+                            SELECT
+                                points
+                            FROM
+                                UserBooks
+                            WHERE
+                                id = ?
+                                )
+                    WHERE
+                        id = ?
+                    """,
+                    ( user_books_id, user_num) )
+            self.db.commit()
+        except sqlite3.Error as e:
+            log.error(f"Awarding points to receiving user for book {user_books_id} -- {e}")
+            raise Exception
+        # Change Trade to failed (7)
+        try:
+            c.execute("""
+                    UPDATE
+                        Trades
+                    SET
+                        statusId = 7
+                    WHERE
+                        userBookId = ?
+                    """, 
+                    ( user_books_id, ))
+            self.db.commit()
+        except sqlite3.Error as e:
+            log.error("Changing trade status on book {user_books_id} -- {e}")
+            raise Exception
+         # job's done
+        return
+
     def book_received_by_requester(self, user_books_id, user_num):
         """
         Book_received_by_requester completes the trade request:
@@ -247,7 +299,8 @@ class BookSwapDatabase:
                         Books.coverImageUrl AS coverImageUrl,
                         Trades.dateInitiated AS dateInitiated,
                         Books.isbn AS isbn,
-                        UserBooks.id AS userBooksId
+                        UserBooks.id AS userBooksId,
+                        CAST ((julianday('now') - julianday(Trades.dateInitiated)) AS INTEGER) AS tradeAge
                     FROM
                         Trades INNER JOIN 
                         UserBooks on Trades.userBookId = UserBooks.id INNER JOIN
@@ -366,6 +419,35 @@ class BookSwapDatabase:
         except sqlite3.Error as e:
             log.error(f"database error {e}")
             raise Exception
+
+    def get_trade_age(self, user_books_id):
+        """
+        Get_trade_age gets the age of the trade.
+        Accepts:
+            user_books_id (int): UserBooks.id
+        Returns:
+            Row object with 'tradeAge' key
+        """
+        try:
+            c = self.db.cursor()
+            c.execute("""
+                    SELECT
+                        CAST ((julianday('now') - julianday(Trades.dateInitiated)) AS INTEGER) AS tradeAge
+                    FROM
+                        Trades
+                    WHERE
+                        Trades.userBookId = ?
+                    """,
+                    (user_books_id, ))
+            print("GET TRADE AGE")
+            rows = c.fetchall()
+        except sqlite3.Error as e:
+                log.error(f"Getting trade age -- {e}")
+                raise Exception
+        if len(rows) != 1:
+            log.error("Wrong number of responses for trade age")
+            raise Exception
+        return rows[0]
 
     def get_userBooksID(self, user_num):
         """

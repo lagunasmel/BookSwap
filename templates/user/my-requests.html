@@ -73,7 +73,19 @@ span {
                         Mark as Received
                     </button>
                     <br />
-                    <button type="button" class="mt-3 btn btn-primary btn-sm" disabled>You can mark as Not Received one month after request</button>
+                    <button 
+                        type="button" 
+                        class="mt-3 btn btn-primary btn-sm" 
+                        {% if book['tradeAge'] <= 28 %} 
+                        disabled
+                        >
+                        You can mark as Not Received four weeks after request
+                        {% else %}
+                        onclick='notReceivedTradeRequest( {{book | tojson }})'
+                        >
+                        Mark As Not Received
+                        {% endif %}
+                    </button>
                 </td>
                 {% endif %}
             </tr>
@@ -166,6 +178,54 @@ span {
                                 <button id='receivedTradeModalConfirmationButton' type="submit"
                                                                                 class="btn btn-primary">
                                     Mark Book As Received
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
+                                    Not Yet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog" id="notReceivedModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Not Received Book Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="col-12 mb-4">
+                    <div class="row">
+                        <div class="modal-body col-4">
+                            <img class="card-img-top img-fluid mx-auto"
+                                 id="notReceivedModalCover"
+                                 style="max-width: 75%">
+                        </div>
+                        <div class="modal-body col-8 text-left">
+                            <p> The Book Never Came? </p> 
+                            <span class="text-info" id="notReceivedModalTitle"> </span>
+                            by <span class='text-info' id="notReceivedModalAuthor"> </span>
+                            (ISBN: <span class='text-info' id="notReceivedModalISBN"> </span>).
+                            </p>
+                            <p>
+                                                           This book was offered by user <span class='text-info'
+                                                                    id='notReceivedModalUsername'> </span>.
+                            </p>
+                            <p> If you would like to mark that the book was never received, you can get your
+                            <span class='text-info' id="notReceivedModalPoints"></span> back.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <form id="notReceivedModalConfirmForm">
+                            <div class="form-group">
+                                <button id='notReceivedTradeModalConfirmationButton' type="submit"
+                                                                                class="btn btn-primary">
+                                    Mark Book As Not Received
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">
                                     Not Yet

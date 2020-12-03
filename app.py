@@ -70,6 +70,20 @@ def faq():
     return render_template('faq.html')
 
 
+@app.route('/book-not-received/<user_books_id>')
+@login_required
+def book_not_received(user_books_id):
+    app.logger.info(f"Incoming book NOT received confirmation from {session['user_num']} for book {user_books_id}")
+    bsdb = get_bsdb()
+    book_not_received = BookReceived(session['user_num'], user_books_id, bsdb)
+    try:
+        book_not_received.book_not_received()
+        app.logger.info(f"Trade failure confirmation from user {session['user_num']} for book {user_books_id}")
+        flash("Trade marked as never completed", "success")
+    except Exception:
+        app.logger.error(f"Unsuccessful trade failure confirmation from user {session['user_num']} for book {user_books_id}")
+    return redirect(url_for("my_requests"))
+
 @app.route('/book-received/<user_books_id>')
 @login_required
 def book_received(user_books_id):
@@ -258,6 +272,8 @@ def my_requests():
     try:
         requests = my_request.get_all_open_requests()
         requests_dicts = [dict(row) for row in requests]
+        for trade in requests_dicts:
+            print (trade['tradeAge'])
     except Exception:
         app.logger.error("Couldn't fill my-requests")
         requests_dicts = []
