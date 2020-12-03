@@ -227,3 +227,7 @@ VALUES (2, 7, 2),
        (1, 5, 3),
        (1, 10, 4),
        (1, 11, 5);
+
+-- Insert a trade that is a bit older
+INSERT INTO Trades (userRequestedId, userBookId, statusId, dateInitiated)
+VALUES (1, 12, 3, "2019-12-02 23:18:04");

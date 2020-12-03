@@ -28,8 +28,8 @@ function cancelTradeRequest(book)
 // event handler for "mark as received" button
 function receivedTradeRequest(book)
 /*
- * CancelTradeRequest displays the modal asking for confirmation that the
- *  user wants to cancel the trade.
+ * ReceivedTradeRequest displays the modal asking for confirmation that the
+ *  user wants mark the trade as completed.
  * acepts:
  *  book (object):  userbooks book in question
  * returns:
@@ -52,5 +52,30 @@ function receivedTradeRequest(book)
     $('#receivedModal').modal('show');
 }
 
-
+// event handler for "mark as received" button
+function notReceivedTradeRequest(book)
+/*
+ * NotReceivedTradeRequest displays the modal asking for confirmation that the
+ *  user wants to mark the trade as unfulfilled.
+ * acepts:
+ *  book (object):  userbooks book in question
+ * returns:
+ *  null
+ */
+{
+    event.preventDefault();
+    $('#notReceivedModalTitle').text(book['title']);
+    $('#notReceivedModalAuthor').text(book['author']);
+    $('#notReceivedModalISBN').text(book['isbn']);
+    $('#notReceivedModalUsername').text(book['username']);
+    points = book['points'];
+    if (points == 1)
+        points += " point";
+    else
+        points += ' points';
+    $('#notReceivedModalPoints').text(points);
+    $('#notReceivedModalCover').attr('src', book['coverImageUrl']);
+    $('#notReceivedModalConfirmForm').attr('action', '/book-not-received/' + book['userBooksId']);
+    $('#notReceivedModal').modal('show');
+}
 
