@@ -93,7 +93,8 @@ def book_not_received(user_books_id):
         app.logger.info(f"Trade failure confirmation from user {session['user_num']} for book {user_books_id}")
         flash("Trade marked as never completed", "success")
     except Exception:
-        app.logger.error(f"Unsuccessful trade failure confirmation from user {session['user_num']} for book {user_books_id}")
+        app.logger.error(
+            f"Unsuccessful trade failure confirmation from user {session['user_num']} for book {user_books_id}")
     return redirect(url_for("my_requests"))
 
 
@@ -105,10 +106,12 @@ def book_received(user_books_id):
     book_received = BookReceived(session['user_num'], user_books_id, bsdb)
     try:
         book_received.book_received()
-        app.logger.info(f"Successful trade completion confirmation from user {session['user_num']} for book {user_books_id}")
+        app.logger.info(
+            f"Successful trade completion confirmation from user {session['user_num']} for book {user_books_id}")
         flash("Trade marked as completed", "success")
     except Exception:
-        app.logger.error(f"Unsuccessful trade request confirmation from user {session['user_num']} for book {user_books_id}")
+        app.logger.error(
+            f"Unsuccessful trade request confirmation from user {session['user_num']} for book {user_books_id}")
     return redirect(url_for("my_requests"))
 
 
@@ -287,7 +290,7 @@ def my_requests():
         requests = my_request.get_all_open_requests()
         requests_dicts = [dict(row) for row in requests]
         for trade in requests_dicts:
-            print (trade['tradeAge'])
+            print(trade['tradeAge'])
     except Exception:
         app.logger.error("Couldn't fill my-requests")
         requests_dicts = []
@@ -461,10 +464,11 @@ def wishlist():
     return render_template('user/wishlist.html', books=books)
 
 
-@app.route('/add-to-wishlist/<isbn>', methods=['GET'])
+@app.route('/add-to-wishlist/<bookid>', methods=['GET'])
 @app.route('/add-to-wishlist', methods=['GET'])
 @login_required
-def add_to_wish(isbn=None):
+def add_to_wish(bookid=None):
+    bsdb = get_bsdb()
     db = get_db()
     db.row_factory = sqlite3.Row
 
@@ -474,25 +478,22 @@ def add_to_wish(isbn=None):
     insert_wishlist_query = 'INSERT INTO WishlistsBooks (wishlistId, bookId) VALUES (?, ?)'
 
     # Special path for browse-books route
-    if isbn:
+    if bookid is not None:
         c = db.cursor()
-        c.execute(get_books_isbn_query, (isbn,))
-        bookId = c.fetchall()[0]['id']
-
         c.execute(get_wishlist_books_query,
-                  (session['user_num'], bookId))
+                  (session['user_num'], bookid))
 
         # if the book was already in the wishlist, don't add it
         if c.fetchall():
             flash("Book already in your wishlist", "warning")
-            app.logger.warning(f"Book {isbn} already in " +
+            app.logger.warning(f"Book {bookid} already in " +
                                f"user {session['user_num']}'s wishlist")
         # otherwise, add book to the wishlist
         else:
             c.execute(insert_wishlist_query,
-                      (session['user_num'], bookId))
+                      (session['user_num'], bookid))
             flash("Book added to your wishlist", "success")
-            app.logger.info(f"Book {isbn} successfully added to " +
+            app.logger.info(f"Book {id} successfully added to " +
                             f"user {session['user_num']}'s wishlist")
         db.commit()
         db.close()
