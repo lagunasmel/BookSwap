@@ -193,19 +193,19 @@ VALUES ((SELECT id FROM Wishlists WHERE userId = 3),
 
 -- Some sample books in UserBooks
 -- First user Has 3 books, second uesr has 1 book, third user has 2 books
-INSERT INTO UserBooks (userId, bookId, copyQualityId, points)
-VALUES (1, 1, 2, 1),
-       (1, 3, 4, 2),
-       (1, 2, 3, 3),
-       (2, 3, 4, 4),
-       (3, 1, 3, 2),
-       (3, 1, 1, 3),
-       (1, 1, 1, 10),
-       (3, 2, 2, 10),
-       (2, 3, 3, 10),
-       (4, 1, 1, 5),
-       (4, 2, 2, 4),
-       (4, 3, 3, 3);
+INSERT INTO UserBooks (userId, bookId, copyQualityId, points, Available)
+VALUES (1, 1, 2, 1, 1),
+       (1, 3, 4, 2, 1),
+       (1, 2, 3, 3, 1),
+       (2, 3, 4, 4, 0),
+       (3, 1, 3, 2, 0),
+       (3, 1, 1, 3, 1),
+       (1, 1, 1, 10, 0),
+       (3, 2, 2, 10, 0),
+       (2, 3, 3, 10, 0),
+       (4, 1, 1, 5, 0),
+       (4, 2, 2, 4, 0),
+       (4, 3, 3, 3, 1);
 
 -- TradeStatus values
 INSERT INTO TradeStatuses (statusDescription)
