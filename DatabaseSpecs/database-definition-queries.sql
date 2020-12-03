@@ -129,104 +129,109 @@ Inserting sample data
 -- Sample Books
 INSERT INTO Books ('title', 'author', 'ISBN', 'coverImageUrl')
 VALUES ("Harry Potter and the Sorcerer's Stone", 'J. K. Rowling', '9781338596700',
-        'https://covers.openlibrary.org/b/id/10447552-L.jpg'),
-       ('Sula', 'Toni Morrison', '0394480449', 'https://covers.openlibrary.org/b/id/8384008-L.jpg'),
-       ('Six of Crows', 'Leigh Bardugo', '9781627795227', 'https://covers.openlibrary.org/b/id/8736828-L.jpg');
+    'https://covers.openlibrary.org/b/id/10447552-L.jpg'),
+('Sula', 'Toni Morrison', '0394480449', 'https://covers.openlibrary.org/b/id/8384008-L.jpg'),
+('Six of Crows', 'Leigh Bardugo', '9781627795227', 'https://covers.openlibrary.org/b/id/8736828-L.jpg');
 
 -- Sample Copy Qualities
 INSERT INTO CopyQualities ('qualityDescription')
 VALUES ('New'),
-       ('Like New'),
-       ('Very Good'),
-       ('Good'),
-       ('Fair'),
-       ('Poor');
+('Like New'),
+('Very Good'),
+('Good'),
+('Fair'),
+('Poor');
 
 -- Sample "admin" user, for easy login check
 INSERT INTO Users('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
-                  'city', 'state', 'postCode', 'points')
+    'city', 'state', 'postCode', 'points')
 VALUES ('admin', 'password', 'admin@bookswap.com', 'Admin', 'Istrator', '123 Main Street', 'Springfield',
-        'Oregon', '97475', 10),
-       ('csearl2', 'nAvtnI', 'csearl2@cdc.gov', 'Cassey', 'Searl', '44681 Pearson Alley',
-        'Saint Louis', 'Missouri', '63131', 10);
+    'Oregon', '97475', 10),
+('csearl2', 'nAvtnI', 'csearl2@cdc.gov', 'Cassey', 'Searl', '44681 Pearson Alley',
+    'Saint Louis', 'Missouri', '63131', 10);
 
 -- Sample User data from mockaroo.com
 INSERT INTO Users ('username', 'password', 'email', 'fName', 'lName', 'streetAddress',
-                   'city', 'state', 'postCode')
+    'city', 'state', 'postCode')
 VALUES ('fpringle0', '5o6RPSL', 'fpringle0@archive.org', 'Filmore', 'Pringle', '99 Ruskin Court',
-        'Knoxville', 'Tennessee', '37924'),
-       ('khildrup1', 'IuYdId', 'khildrup1@pen.io', 'Kit', 'Hildrup', '82567 Onsgard Road',
-        'Richmond', 'Virginia', '23203'),
-       ('esabates3', 'kydXrZxzz9Va', 'esabates3@samsung.com', 'Edward', 'Sabates', '63 Welch Court',
-        'Spokane', 'Washington', '99215'),
-       ('jextal4', 'DUwvKPx81Iji', 'jextal4@reference.com', 'Jason', 'Extal', '98 Sugar Alley',
-        'Nashville', 'Tennessee', '37215');
+    'Knoxville', 'Tennessee', '37924'),
+('khildrup1', 'IuYdId', 'khildrup1@pen.io', 'Kit', 'Hildrup', '82567 Onsgard Road',
+    'Richmond', 'Virginia', '23203'),
+('esabates3', 'kydXrZxzz9Va', 'esabates3@samsung.com', 'Edward', 'Sabates', '63 Welch Court',
+    'Spokane', 'Washington', '99215'),
+('jextal4', 'DUwvKPx81Iji', 'jextal4@reference.com', 'Jason', 'Extal', '98 Sugar Alley',
+    'Nashville', 'Tennessee', '37215');
 
 -- Sample Wishlists
 INSERT INTO Wishlists (userId)
 VALUES (1),
-       (2),
-       (3),
-       (4),
-       (5),
-       (6)
+(2),
+(3),
+(4),
+(5),
+(6)
 ;
 
 -- Sample Wishlist Books
 -- First user wants "Yellow River"
 INSERT INTO WishlistsBooks (wishlistId, bookId)
 VALUES ((SELECT id
-         FROM Wishlists
-         WHERE userId = 1
-        ),
-        (SELECT id FROM Books WHERE ISBN = '99999'));
+        FROM Wishlists
+        WHERE userId = 1
+    ),
+    (SELECT id FROM Books WHERE ISBN = '99999'));
 
 -- SEcond uesr has no books in their wishlist
 
 -- Third user wants "Forever A Loan" and "Six of Crows"
 INSERT Into WishlistsBooks (wishlistId, bookId)
 VALUES ((SELECT id FROM Wishlists WHERE userId = 3),
-        (SELECT id FROM Books WHERE ISBN = '1111111111111')),
-       ((SELECT id FROM Wishlists WHERE userId = 3),
-        (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227'))
+    (SELECT id FROM Books WHERE ISBN = '1111111111111')),
+((SELECT id FROM Wishlists WHERE userId = 3),
+    (SELECT ID FROM BOOKS WHERE ISBN = '9781627795227'))
 ;
 
 -- Some sample books in UserBooks
 -- First user Has 3 books, second uesr has 1 book, third user has 2 books
 INSERT INTO UserBooks (userId, bookId, copyQualityId, points, Available)
 VALUES (1, 1, 2, 1, 1),
-       (1, 3, 4, 2, 1),
-       (1, 2, 3, 3, 1),
-       (2, 3, 4, 4, 0),
-       (3, 1, 3, 2, 0),
-       (3, 1, 1, 3, 1),
-       (1, 1, 1, 10, 0),
-       (3, 2, 2, 10, 0),
-       (2, 3, 3, 10, 0),
-       (4, 1, 1, 5, 0),
-       (4, 2, 2, 4, 0),
-       (4, 3, 3, 3, 1);
+(1, 3, 4, 2, 1),
+(1, 2, 3, 3, 1),
+(2, 3, 4, 4, 0),
+(3, 1, 3, 2, 0),
+(3, 1, 1, 3, 1),
+(1, 1, 1, 10, 0),
+(3, 2, 2, 10, 0),
+(2, 3, 3, 10, 0),
+(4, 1, 1, 5, 0),
+(4, 2, 2, 4, 0),
+(4, 3, 3, 3, 1),
+(4, 1, 2, 1, 0),
+(3, 1, 1, 2, 0),
+(2, 2, 3, 1, 0);
 
 -- TradeStatus values
 INSERT INTO TradeStatuses (statusDescription)
 VALUES ("No Current Trade"),
-       ("Trade Requested"),
-       ("Trade Accepted -- In Progress"),
-       ("Trade Rejected: Rejected By Book Owner"),
-       ("Trade Rejected: Rejected By Inaction"),
-       ("Trade Completed"),
-       ("Trade Marked As Failed");
+("Trade Requested"),
+("Trade Accepted -- In Progress"),
+("Trade Rejected: Rejected By Book Owner"),
+("Trade Rejected: Rejected By Inaction"),
+("Trade Completed"),
+("Trade Marked As Failed");
 
 -- Sample Trades
 -- First user has three trades going:  2 pending and 1 accepts:
 INSERT INTO Trades (userRequestedId, userBookId, statusId)
 VALUES (2, 7, 2),
-       (3, 8, 2),
-       (4, 9, 3),
-       (1, 4, 2),
-       (1, 5, 3),
-       (1, 10, 4),
-       (1, 11, 5);
+(3, 8, 2),
+(4, 9, 3),
+(1, 4, 2),
+(1, 5, 3),
+(1, 10, 4),
+(1, 11, 5),
+(1, 13, 6),
+(1, 14, 7);
 
 -- Insert a trade that is a bit older
 INSERT INTO Trades (userRequestedId, userBookId, statusId, dateInitiated)

@@ -307,7 +307,7 @@ class BookSwapDatabase:
                         Books on UserBooks.bookId = Books.id INNER JOIN
                         Users on UserBooks.userId = Users.id
                     WHERE
-                        Trades.statusId IN (2, 3, 4, 5) AND
+                        Trades.statusId IN (2, 3, 4, 5, 6, 7) AND
                         Trades.userRequestedId = ?
                     ORDER BY
                         dateInitiated ASC
