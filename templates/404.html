@@ -1,19 +1,22 @@
 {% extends "layout.html" %}
 {% set active_page='error-404' %}
 {% block content %}
-<div class='container w-100 text-center'>
-  <h1> Page Not Found </h1>
-    <h4>Something's Missing</h4>
-    <br />
-    <p>
-    We know you were just getting to the good stuff, but your puppy ate the
-    next part of the plot.  Now you'll never know how the heroine saves the day
-    by blowing up the spaceship to save her home planet...
-    <br />
-    <p> 
-    <a href='{{ url_for('home') }}'>
-      You'll probably want to start reading all over (go to our homepage) 
-    </a>
-    </p>
-</div>
+    <div class='container w-100 text-center m-5'>
+        <img src="{{ url_for('static', filename='images/warning.png') }}" alt="warning"
+             class="img-fluid col-2 mx-auto"/>
+        <p>
+        <h1> Oops! Page Not Found. </h1>
+        <h4>Something's Missing</h4>
+        <p class="lead">
+            We know you were just getting to the good stuff, but your puppy ate the
+            <br>next part of the plot. Now you'll never know how the heroine saves the day
+            <br>by blowing up the spaceship to save her home planet...
+            <br>
+        <p> Want to start reading?
+            <a href='{{ url_for('home') }}' class="text-info">
+                Check out the homepage.
+            </a>
+            <br><br><br>
+        </p>
+    </div>
 {% endblock content %}
