@@ -181,8 +181,12 @@
                         </div>
                         <div class="row">
                             <div class="card-body col-4">
-                                <img class="card-img-top img-fluid mx-auto" src="{{ book['coverImageUrl'] }}"
-                                     style="max-width: 75%">
+                                {% if book.coverImageUrl %}
+                                    <img class="card-img-top img-fluid mx-auto" src="{{ book['coverImageUrl'] }}"
+                                         style="max-width: 75%">
+                                {% else %}
+                                    NO IMAGE AVAILABLE
+                                {% endif %}
                             </div>
                             <div class="col-8">
                                 <ul class="mb-1 mt-3">
