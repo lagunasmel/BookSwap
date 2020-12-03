@@ -65,8 +65,8 @@ function addToWishlist(book)
     $('#addToWishlistModal').modal("show");
 
     // craete event handler attribute for "Confirm Button"
-    var ISBN = book["ISBN"];
-    $("#addToWishlistModalConfirmAddToWishlist").attr('action', '/add-to-wishlist/' + ISBN);
+    var id = book["id"];
+    $("#addToWishlistModalConfirmAddToWishlist").attr('action', '/add-to-wishlist/' + id);
 }
 
 
