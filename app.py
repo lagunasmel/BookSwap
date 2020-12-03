@@ -84,6 +84,7 @@ def book_not_received(user_books_id):
         app.logger.error(f"Unsuccessful trade failure confirmation from user {session['user_num']} for book {user_books_id}")
     return redirect(url_for("my_requests"))
 
+
 @app.route('/book-received/<user_books_id>')
 @login_required
 def book_received(user_books_id):
@@ -97,6 +98,7 @@ def book_received(user_books_id):
     except Exception:
         app.logger.error(f"Unsuccessful trade request confirmation from user {session['user_num']} for book {user_books_id}")
     return redirect(url_for("my_requests"))
+
 
 @app.route('/cancel-request/<user_books_id>')
 @login_required

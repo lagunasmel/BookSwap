@@ -9,79 +9,194 @@ span {
 
 <p></p>
 <div class="container mb-5 w-75">
-    <div class="row">
-        <div class="col-5 p-4 mx-auto jumbotron m-4">
+    <h2 class='text-center'>
+        Trade Requests People Have Made For My Books
+    </h2>
+    <br />
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class='nav-link active' data-toggle='tab' href='#awaitingApproval'>
+                Awaiting Approval
+                <br />
+                <span class='text-info'>
+                    Approve or Reject Me!
+                </span>
+            </a>
+        </li>
+        <li class='nav-item'>
+            <a class='nav-link' data-toggle='tab' href='#accepted'>
+                Accepted Requests
+                <br />
+                <span class='text-info'>
+                    Ship Me!
+                </span>
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id='awaitingApproval' class='tab-pane fade in active show'>
             <h4 class="text-center"> Trade Requests Awaiting Your Approval </h4>
             {% if num_trade_reqs == 0 %}
             <p class="lead text-center text-info mt-4">You have no pending trade requests. </p>
             {% else %}
-            {% for trade in trade_info %}
-            <!-- "Requested Trades" -->
-            {% if trade["StatusId"] == 2 %}
-            <p></p>
-            <div class="card pt-2 pl-2">
-                <h5>  {{ trade["Title"] }} </h5>
-                <div class="row">
-                    <div class="card-body col-4">
-                        <img class="card-img-top img-fluid mx-auto"
-                             src="{{ trade['coverImageUrl'] }}">
-                    </div>
-                    <div class="card-body col-8">
-                        <p><span>Book Quality:</span> {{ trade["Quality"] }}</p>
-                        <p><span>Points for Trade:</span> {{ trade["Points"] }}</p>
-                        <p><span>Requesting User:</span> {{ trade["Requester"] }}</p>
-                        <p><span>Requesting User Stats:</span></p>
-                    </div>
-                </div>
-                <div class="pb-2 text-center">
-                    <form>
-                        <button type="submit" class="btn btn-primary btn-sm"
-                                              onclick='acceptTradeRequest( {{ trade | tojson }})'>Accept
-                        </button>
-                        <button type="submit" class="btn btn-danger btn-sm"
-                                              onclick='rejectTradeRequest( {{ trade | tojson }})'>Reject
-                        </button>
-                    </form>
-                </div>
-            </div> <p></p>
-            {% endif %}
-            {% endfor %}
+            <p class='lead text-center'>
+            The following books of yours have been requested.  
+            <br/>
+            Please accept the
+            requests you would like to fulfill, and reject the requests you do
+            not want to fulfill.
+            </p>
+            <table class='table table-hover'>
+                <thead>
+                    <tr>
+                        <th scope='col'>
+                            Date Request Sent
+                        </th>
+                        <th scope='col' style='text-align:center;'>
+                            Book Details
+                        </th>
+                        <th scope='col'>
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trade in trade_info %}
+                    <!-- "Requested Trades" -->
+                    {% if trade["StatusId"] == 2 %}
+                    <tr class='table-light'>
+                        <th scope='row'>
+                            {{ trade['StartDate'] }}
+                        </th>
+                        <td>
+                            <div class='row'>
+                                <div class='col-3 mx-auto text-center'>
+                                    <img src='{{trade['coverImageUrl']}}'
+                                         alt='Book Cover Image'
+                                         class='img-thumbnail float-left'
+                                         style='max-width: 80%;'/>
+                                </div>
+                                <div class='col-9 py-2'>
+                                    <span> Title:</span> 
+                                    {{ trade['Title'] }}
+                                    <br />
+                                    <span> Author:</span> 
+                                    {{ trade['Author'] }}
+                                    <br />
+                                    <span> ISBN:</span> 
+                                    {{ trade['ISBN'] }}
+                                    <br />
+                                    <span> Book Quality:</span> 
+                                    {{trade['Quality']}}
+                                    <br />
+                                    <span> Point Value:</span> 
+                                    {{trade['Points']}}
+                                    <br />
+                                    <span> Requesting User:</span> 
+                                    {{trade['Requester']}}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <button
+                                type="submit" 
+                                class="btn btn-primary btn-sm"
+                                onclick='acceptTradeRequest( {{ trade | tojson }})'>
+                                Accept
+                            </button>
+                            <button 
+                                type="submit" 
+                                class="btn btn-danger btn-sm"
+                                onclick='rejectTradeRequest( {{ trade | tojson }})'>
+                                Reject
+                            </button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br /> <br /> <br />
             {% endif %}
         </div>
 
-        <div class="col-5 p-4 mx-auto jumbotron m-4">
-            <h4 class="text-center"> Accepted Trade Requests Not Yet Received By Requesting User </h4>
-
+        <div id='accepted' class='tab-pane fade'>
+            <h4 class="text-center"> Trades You Have Approved </h4> 
             {% if num_open_trades == 0 %}
-            <p class="lead text-center text-info mt-4">You have no open trades.</p>
+            <p class="lead text-center text-info mt-4">
+            You have no open trades.
+            </p>
             {% else %}
-            <!-- "Open Trades" -->
-            {% for trade in trade_info %}
-            {% if trade["StatusId"] == 3 %}
-            <div class="card pt-2 pl-2">
-                <h5> {{ trade["Title"] }} </h5>
-                <div class="row">
-                    <div class="card-body col-4">
-                        <img class="card-img-top img-fluid mx-auto"
-                             src='{{ trade["coverImageUrl"] }}'>
-                    </div>
-                    <div class="card-body col-8">
-                        <p><span>Book Quality:</span> {{ trade["Quality"] }}</p>
-                        <p><span>Points for Trade:</span> {{ trade["Points"] }}</p>
-                        <p><span>Requesting User:</span> {{ trade["Requester"] }}</p>
-                        <p><span>Requesting User Stats:</span></p>
-                    </div>
-                </div>
-                <div class="pb-2 text-center">
-                    <form>
-                        <button type="submit" class="btn btn-primary btn-sm"
-                                              onclick='cancelTradeRequest( {{ trade | tojson }})'>Cancel
-                        </button>
-                    </form>
-                </div>
-            </div><p></p>
-            {% endif %}
-            {% endfor %}
+            <p class='lead'>
+            You have agreed to the following trades.
+            <br/>
+            If you have not already done so, please mail off the following
+            books, so the requester can start reading.  
+            <br />
+            If you need to cancel the trade, you can also do that here.
+            </p>
+            <table class='table table-hover'>
+                <thead>
+                    <tr>
+                        <th scope='col'>
+                            Date Request Sent
+                        </th>
+                        <th scope='col' style='text-align:center;'>
+                            Book Details
+                        </th>
+                        <th scope='col'>
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trade in trade_info %}
+                    <!-- "Requested Trades" -->
+                    {% if trade["StatusId"] == 3 %}
+                    <tr class='table-light'>
+                        <th scope='row'>
+                            {{ trade['StartDate'] }}
+                        </th>
+                        <td>
+                            <div class='row'>
+                                <div class='col-3 mx-auto text-center'>
+                                    <img src='{{trade['coverImageUrl']}}'
+                                         alt='Book Cover Image'
+                                         class='img-thumbnail float-left'
+                                         style='max-width: 80%;'/>
+                                </div>
+                                <div class='col-9 py-2'>
+                                    <span> Title:</span> 
+                                    {{ trade['Title'] }}
+                                    <br />
+                                    <span> Author:</span> 
+                                    {{ trade['Author'] }}
+                                    <br />
+                                    <span> ISBN:</span> 
+                                    {{ trade['ISBN'] }}
+                                    <br />
+                                    <span> Book Quality:</span> 
+                                    {{trade['Quality']}}
+                                    <br />
+                                    <span> Point Value:</span> 
+                                    {{trade['Points']}}
+                                    <br />
+                                    <span> Requesting User:</span> 
+                                    {{trade['Requester']}}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                                  onclick='cancelTradeRequest( {{ trade | tojson }})'>Cancel
+                            </button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br /> <br /> <br />
             {% endif %}
         </div>
     </div>
@@ -229,8 +344,6 @@ span {
         </div>
     </div>
 </div>
-
-
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/my-trades.js') }}">
 </script>
