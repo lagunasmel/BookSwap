@@ -1,6 +1,20 @@
-# ReadMe - BookSwap
+# BookSwap
 
-**BookSwap** is an upcoming web app where users will be able to trade copies of used books with each other, accumulating points for sending books and spending them to request books. BookSwap is a work in progress, and is currently being developed using Python, Flask, Jinja, and SQLite.
+**BookSwap** is a web app where users are able to trade copies of used books with each other, accumulating points for sending books and spending them to request books. BookSwap was developed using Python, Flask, Jinja, and SQLite and submitted as part of a large project for the CS 361 course (Software Engineering) at Oregon State University.
+
+
+## User Stories
+The following user stories have been implemented as of December 2020: 
+
+- [X] User can sign up. 
+- [X] User can login or logout. 
+- [X] User can search for a book to list, and list the book for trade.
+- [X] User can create a wishlist for their desired books.
+- [X] User can search the site's database for any listed books from other users.
+- [X] User can request, accept, or decline a trade from other users.
+- [X] User can see the selection of currently available books. 
+- [X] User can earn points for listing a book. 
+- [X] User can use points to trade for a book.
 
 ## Installation
 
@@ -24,10 +38,10 @@ Password: `password`
 
 ## Live demo
 
-As an alternative to installating the latest build, you can use the app at [bookswap.benwichser.com].
+As an alternative to installating the latest build, you can use the app at [melissalagunas.com/bookswap].
 
 
-[bookswap.benwichser.com]: https://bookswap.benwichser.com
+[melissalagunas.com/bookswap]: http://melissalagunas.com/bookswap
 
 
 
