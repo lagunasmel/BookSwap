@@ -28,14 +28,6 @@ Follow these steps to get BookSwap running locally:
 6. **Create the database locally**: before using the app, you must navigate to the `/reset-db` route appended to the homepage. For example, `http://0.0.0.0:5000/reset-db`
 7. Go back to the home page and play around! 
 
-To simulate a successful login, use the following information.
-
-Username: `admin@bookswap.com`
-
-Password: `password`
-
-
-
 ## Live demo
 
 As an alternative to installating the latest build, you can use the app at [melissalagunas.com/bookswap].
@@ -44,7 +36,11 @@ As an alternative to installating the latest build, you can use the app at [meli
 [melissalagunas.com/bookswap]: http://melissalagunas.com/bookswap
 
 
+To simulate a successful login, use the following information.
 
+Username: `admin`
+
+Password: `password`
 
 
 
