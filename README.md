@@ -2,6 +2,9 @@
 
 **BookSwap** is a web app where users are able to trade copies of used books with each other, accumulating points for sending books and spending them to request books. BookSwap was developed using Python, Flask, Jinja, and SQLite and submitted as part of a large project for the CS 361 course (Software Engineering) at Oregon State University.
 
+**Authors**: 
+Ben Wichser, Melissa Lagunas, Ryan McKenzie, Alexa Langen, Nishant Tharani, Phoenix Harris
+
 
 ## User Stories
 The following user stories have been implemented as of December 2020: 
