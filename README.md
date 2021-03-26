@@ -30,10 +30,10 @@ Follow these steps to get BookSwap running locally:
 
 ## Live demo
 
-As an alternative to installating the latest build, you can use the app at [melissalagunas.com/bookswap].
+As an alternative to installating the latest build, you can use the app [here].
 
 
-[melissalagunas.com/bookswap]: http://melissalagunas.com/bookswap
+[https://bookswap.benwichser.com/]: https://bookswap.benwichser.com/
 
 
 To simulate a successful login, use the following information.
@@ -41,6 +41,12 @@ To simulate a successful login, use the following information.
 Username: `admin`
 
 Password: `password`
+
+To interact with multiple users, you can also use the following login info:
+
+Username: `csearl2`
+
+Password: `nAvtnI`
 
 
 
